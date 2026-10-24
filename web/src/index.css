@@ -1,5 +1,6 @@
 :root {
   --psu-navy: #1e407c;
+  --psu-gold: #d9b879;
   --bg: #ffffff;
   --surface: #f4f5f8;
   --text: #111827;
@@ -132,9 +133,41 @@ fieldset {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  height: 100dvh;
+  min-height: 100dvh;
   padding: 16px;
   text-align: center;
+}
+
+.auth-screen {
+  background:
+    radial-gradient(circle at top, rgba(217, 184, 121, 0.25), transparent 30%),
+    linear-gradient(180deg, #f7f8fb 0%, #edf2ff 100%);
+}
+
+.auth-card {
+  width: min(100%, 420px);
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid rgba(30, 64, 124, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.auth-eyebrow {
+  color: var(--psu-navy);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.auth-note {
+  font-size: 14px;
+}
+
+.onboarding {
+  width: min(100%, 560px);
+  margin: 0 auto;
 }
 
 .input {
@@ -145,7 +178,7 @@ fieldset {
   background: var(--surface);
   color: inherit;
   font: inherit;
-  font-size: 16px; /* below 16px iOS zooms the page on focus */
+  font-size: 16px;
 }
 
 .button {

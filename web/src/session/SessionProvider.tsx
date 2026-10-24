@@ -1,12 +1,12 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { createPlayer, getPlayer } from '../lib/api'
-import { auth0Config } from '../lib/auth0'
+import { auth0Config, safeReturnTo } from '../lib/auth0'
 import type { PlayerRow } from '../lib/database.types'
 import { setAuth0IdTokenGetter, supabase } from '../lib/supabase'
 import { SessionContext, type Session } from './session'
 
-type PlayerState = { status: 'loading' } | { status: 'error'; message: string } | { status: 'loaded'; player: PlayerRow | null }
+type PlayerState = { status: 'loading' } | { status: 'error'; authId: string; message: string } | { status: 'loaded'; authId: string; player: PlayerRow | null }
 
 function usePlayer(authId: string | null) {
   const [state, setState] = useState<PlayerState>({ status: 'loading' })
@@ -14,20 +14,23 @@ function usePlayer(authId: string | null) {
     if (!authId) return
     let cancelled = false
     getPlayer(authId).then(
-      (player) => !cancelled && setState({ status: 'loaded', player }),
-      (e: Error) => !cancelled && setState({ status: 'error', message: e.message }),
+      (player) => !cancelled && setState({ status: 'loaded', authId, player }),
+      (e: Error) => !cancelled && setState({ status: 'error', authId, message: e.message }),
     )
     return () => {
       cancelled = true
     }
   }, [authId])
-  const setPlayer = useCallback((player: PlayerRow | null) => setState({ status: 'loaded', player }), [])
-  return [state, setPlayer] as const
+  const setPlayer = useCallback((player: PlayerRow | null) => {
+    setState(player ? { status: 'loaded', authId: player.auth_id, player } : { status: 'loading' })
+  }, [])
+  const current: PlayerState = state.status !== 'loading' && state.authId === authId ? state : { status: 'loading' }
+  return [current, setPlayer] as const
 }
 
 function toSession(
   state: PlayerState,
-  opts: { isAdminClaim: boolean; setPlayer: (p: PlayerRow) => void; join: (name: string, teamId: string) => Promise<void>; signOut: () => void },
+  opts: { isAdminClaim: boolean; setPlayer: (p: PlayerRow) => void; join: (name: string, teamId: string) => Promise<void>; signOut: () => Promise<void> },
 ): Session {
   if (state.status !== 'loaded') return state
   if (!state.player) return { status: 'joining', join: opts.join, signOut: opts.signOut }
@@ -43,28 +46,63 @@ function toSession(
 function Auth0Session({ children }: { children: ReactNode }) {
   const { isLoading, isAuthenticated, user, error, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0()
   const authId = isAuthenticated ? (user?.sub ?? null) : null
-  const [tokenReady, setTokenReady] = useState(false)
+  const [tokenState, setTokenState] = useState<
+    { authId: string; status: 'ready' } | { authId: string; status: 'error'; message: string } | null
+  >(null)
 
   useEffect(() => {
     if (!authId) return
-    // Supabase verifies the Auth0 ID token; detailedResponse refreshes it when expired.
-    setAuth0IdTokenGetter(async () => (await getAccessTokenSilently({ detailedResponse: true }))?.id_token ?? null)
-    supabase.realtime.setAuth().then(() => setTokenReady(true))
+    let cancelled = false
+    const getToken = async () => {
+      const response = await getAccessTokenSilently({ detailedResponse: true })
+      if (!response?.id_token) throw new Error('No identity token received. Please log out and log in again.')
+      return response.id_token
+    }
+    setAuth0IdTokenGetter(getToken)
+    async function initialize() {
+      try {
+        const token = await getToken()
+        if (cancelled) return
+        await supabase.realtime.setAuth(token)
+        if (!cancelled) setTokenState({ authId: authId!, status: 'ready' })
+      } catch (cause) {
+        if (!cancelled) setTokenState({
+          authId: authId!, status: 'error',
+          message: cause instanceof Error ? cause.message : 'Could not initialize your session.',
+        })
+      }
+    }
+    void initialize()
+    return () => {
+      cancelled = true
+      setAuth0IdTokenGetter(null)
+    }
   }, [authId, getAccessTokenSilently])
 
+  const tokenReady = tokenState?.authId === authId && tokenState?.status === 'ready'
   const [playerState, setPlayer] = usePlayer(tokenReady ? authId : null)
   const join = useCallback(async (name: string, teamId: string) => setPlayer(await createPlayer(name, teamId)), [setPlayer])
-  const signOut = useCallback(() => logout({ logoutParams: { returnTo: window.location.origin } }), [logout])
+  const signOut = useCallback(async () => {
+    await logout({ logoutParams: { returnTo: window.location.origin } })
+  }, [logout])
 
   let session: Session
-  if (error) session = { status: 'error', message: error.message }
+  if (error) session = { status: 'error', message: error.message, signOut }
   else if (isLoading) session = { status: 'loading' }
   else if (!authId) {
-    // Keep the current path (e.g. a scanned /claim QR link) through the Auth0 redirect.
-    const returnTo = window.location.pathname + window.location.search
-    session = { status: 'signed-out', signIn: () => loginWithRedirect({ appState: { returnTo } }) }
+    const returnTo = safeReturnTo(window.location.pathname + window.location.search + window.location.hash)
+    session = {
+      status: 'signed-out',
+      signIn: () => loginWithRedirect({ appState: { returnTo } }),
+      signUp: () => loginWithRedirect({ appState: { returnTo }, authorizationParams: { screen_hint: 'signup' } }),
+    }
+  } else if (tokenState?.authId === authId && tokenState.status === 'error') {
+    session = { status: 'error', message: tokenState.message, signOut }
+  } else if (!tokenReady) session = { status: 'loading' }
+  else {
+    session = toSession(playerState, { isAdminClaim: user?.app_role === 'admin', setPlayer, join, signOut })
+    if (session.status === 'error') session = { ...session, signOut }
   }
-  else session = toSession(playerState, { isAdminClaim: user?.app_role === 'admin', setPlayer, join, signOut })
 
   return <SessionContext.Provider value={session}>{children}</SessionContext.Provider>
 }
@@ -86,7 +124,6 @@ function AnonymousSession({ children }: { children: ReactNode }) {
         if (error || !data.user) throw new Error(error?.message ?? 'Sign-in failed')
         id = data.user.id
       }
-      // Create the row before publishing authId so usePlayer's fetch can't race it back to "joining".
       setPlayer(await createPlayer(name, teamId))
       setAuthId(id)
     },

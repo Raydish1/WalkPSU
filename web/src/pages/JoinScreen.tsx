@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type FormEvent } from 'react'
+import { auth0Config } from '../lib/auth0'
 import { useTeams } from '../lib/hooks'
 import { useSession } from '../session/session'
 
@@ -10,16 +11,45 @@ function JoinScreen() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  if (session.status === 'loading') return <div className="center-screen">Loading…</div>
-  if (session.status === 'error') return <div className="center-screen">Something went wrong: {session.message}</div>
+  async function runAuth(action: (() => void) | (() => Promise<void>)) {
+    setBusy(true)
+    setError(null)
+    try {
+      await action()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Authentication failed. Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (session.status === 'loading') return <div className="center-screen" role="status">Loading your session…</div>
+  if (session.status === 'error') return (
+    <div className="center-screen">
+      <h1>Could not finish signing in</h1>
+      <p className="error" role="alert">{session.message}</p>
+      {error && <p className="error" role="alert">{error}</p>}
+      <button className="button primary" onClick={() => window.location.reload()}>Try again</button>
+      {session.signOut && <button className="button" disabled={busy} onClick={() => void runAuth(session.signOut)}>Log out</button>}
+    </div>
+  )
   if (session.status === 'signed-out') {
     return (
-      <div className="center-screen">
-        <h1>WalkPSU</h1>
-        <p className="muted">Race your team across campus to claim drops.</p>
-        <button className="button primary" onClick={session.signIn}>
-          Log in
-        </button>
+      <div className="center-screen auth-screen">
+        <div className="auth-card stack">
+          <span className="auth-eyebrow">EXPLORE · COMPETE · CONNECT</span>
+          <h1>Welcome to WalkPSU</h1>
+          <p className="muted">Find campus adventures. Join a team. Make your mark.</p>
+          <button className="button primary" disabled={busy} onClick={() => void runAuth(session.signUp ?? session.signIn)}>
+            Create an account
+          </button>
+          <button className="button" disabled={busy} onClick={() => void runAuth(session.signIn)}>
+            Log in
+          </button>
+          {busy && <p className="muted" role="status">Opening secure sign-in…</p>}
+          {error && <p className="error" role="alert">{error}</p>}
+          <p className="auth-note muted">Secure sign-in with Auth0. Choose your name and team after signing in.</p>
+        </div>
       </div>
     )
   }
@@ -40,11 +70,14 @@ function JoinScreen() {
   }
 
   return (
-    <form className="page stack" onSubmit={submit}>
-      <h1>Join the game</h1>
+    <form className="page stack onboarding" onSubmit={submit}>
+      <h1>{auth0Config ? 'Choose your team' : 'Join the guest demo'}</h1>
+      <p className="muted">{auth0Config
+        ? 'You are signed in. Pick a display name and team to start exploring.'
+        : 'Guest progress belongs to this browser session. Account login and signup become available when Auth0 is configured.'}</p>
       <label className="stack-sm">
         Your name
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={32} required />
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} minLength={1} maxLength={32} autoComplete="nickname" required disabled={busy} />
       </label>
       <fieldset className="stack-sm">
         <legend>Pick your team</legend>
@@ -52,6 +85,7 @@ function JoinScreen() {
           {teams.map((team) => (
             <button
               type="button"
+              disabled={busy}
               key={team.id}
               className="team-option"
               aria-pressed={teamId === team.id}
@@ -63,9 +97,12 @@ function JoinScreen() {
           ))}
         </div>
       </fieldset>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
       <button className="button primary" disabled={busy || !teamId || !name.trim()}>
         {busy ? 'Joining…' : 'Start playing'}
+      </button>
+      <button type="button" className="button" disabled={busy} onClick={() => void runAuth(session.signOut)}>
+        {auth0Config ? 'Log out / use another account' : 'Reset guest session'}
       </button>
     </form>
   )
