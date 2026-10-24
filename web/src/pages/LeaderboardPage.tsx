@@ -21,6 +21,7 @@ function LeaderboardPage() {
             <span className="score">
               {team.points}
               <span className="muted"> pts</span>
+              <span className="territory">🏛️ {team.buildings}</span>
             </span>
           </li>
         ))}

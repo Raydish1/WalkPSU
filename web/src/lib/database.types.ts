@@ -24,6 +24,7 @@ type Drop = {
   points: number
   status: DropStatus
   hint_photo_url: string | null
+  building_num: string | null
   created_by: string | null
   created_at: string
   expires_at: string | null
@@ -31,7 +32,11 @@ type Drop = {
 
 type Claim = { id: string; drop_id: string; player_id: string; team_id: string; created_at: string }
 
-type TeamScore = { team_id: string; name: string; color: string; points: number; claims: number }
+type BuildingControl = { building_num: string; team_id: string; claim_id: string; captured_at: string }
+
+type DropSecret = { drop_id: string; claim_code: string }
+
+type TeamScore = { team_id: string; name: string; color: string; points: number; claims: number; buildings: number }
 
 export type Database = {
   public: {
@@ -46,17 +51,19 @@ export type Database = {
       drops: {
         Row: Drop
         Insert: Pick<Drop, 'title' | 'type' | 'lat' | 'lng'> &
-          Partial<Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'created_by' | 'expires_at'>>
+          Partial<Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at'>>
         Update: Partial<Omit<Drop, 'id' | 'created_at'>>
         Relationships: []
       }
       claims: { Row: Claim; Insert: never; Update: never; Relationships: [] }
+      building_control: { Row: BuildingControl; Insert: never; Update: never; Relationships: [] }
+      drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
     }
     Views: {
       team_scores: { Row: TeamScore; Relationships: [] }
     }
     Functions: {
-      claim_drop: { Args: { p_drop_id: string; p_lat: number; p_lng: number }; Returns: Claim }
+      claim_drop: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: Claim }
       is_admin: { Args: Record<string, never>; Returns: boolean }
     }
     Enums: { drop_type: DropType; drop_status: DropStatus }
@@ -70,4 +77,5 @@ export type PlayerRow = PublicTables['players']['Row']
 export type DropRow = PublicTables['drops']['Row']
 export type NewDrop = PublicTables['drops']['Insert']
 export type ClaimRow = PublicTables['claims']['Row']
+export type BuildingControlRow = PublicTables['building_control']['Row']
 export type TeamScoreRow = Database['public']['Views']['team_scores']['Row']

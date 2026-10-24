@@ -1,18 +1,23 @@
 import { useState } from 'react'
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet'
+import BuildingsLayer from '../components/BuildingsLayer'
 import { claimDrop } from '../lib/api'
 import { CAMPUS_CENTER, DROP_TYPES, OSM_TILES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
-import { useDrops, usePosition } from '../lib/hooks'
+import { useBuildingControl, useBuildings, useDrops, usePosition, useTeams } from '../lib/hooks'
 
 function MapPage() {
-  const { data: drops, error } = useDrops()
+  const { data: drops, error, refresh: refreshDrops } = useDrops()
+  const { data: control, refresh: refreshControl } = useBuildingControl()
+  const buildings = useBuildings()
+  const teams = useTeams()
   const position = usePosition()
 
   return (
     <div className="map-wrap">
-      <MapContainer center={CAMPUS_CENTER} zoom={16} className="map">
+      <MapContainer center={CAMPUS_CENTER} zoom={16} className="map" preferCanvas>
         <TileLayer {...OSM_TILES} />
+        <BuildingsLayer buildings={buildings} control={control} teams={teams} />
         {drops.map((drop) => (
           <CircleMarker
             key={drop.id}
@@ -21,7 +26,14 @@ function MapPage() {
             pathOptions={{ color: 'white', weight: 3, fillColor: DROP_TYPES[drop.type].color, fillOpacity: 0.9 }}
           >
             <Popup>
-              <DropPopup drop={drop} position={position} />
+              <DropPopup
+                drop={drop}
+                position={position}
+                onClaimed={() => {
+                  refreshDrops()
+                  refreshControl()
+                }}
+              />
             </Popup>
           </CircleMarker>
         ))}
@@ -38,19 +50,22 @@ function MapPage() {
   )
 }
 
-function DropPopup({ drop, position }: { drop: DropRow; position: GeolocationPosition | null }) {
+type DropPopupProps = { drop: DropRow; position: GeolocationPosition | null; onClaimed: () => void }
+
+function DropPopup({ drop, position, onClaimed }: DropPopupProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   async function claim() {
     if (!position) {
-      setMessage('Waiting for your location…')
+      setMessage('No GPS fix yet. Scan the drop’s QR code to claim it.')
       return
     }
     setBusy(true)
     try {
-      await claimDrop(drop.id, position.coords.latitude, position.coords.longitude)
+      await claimDrop(drop.id, { lat: position.coords.latitude, lng: position.coords.longitude })
       setMessage(`Claimed! +${drop.points} for your team`)
+      onClaimed()
     } catch (e) {
       setMessage((e as Error).message)
     } finally {

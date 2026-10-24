@@ -1,20 +1,36 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
+import BuildingPicker from '../components/BuildingPicker'
+import BuildingsLayer from '../components/BuildingsLayer'
+import DropQrList from '../components/DropQrList'
 import { createDrop, uploadHintPhoto } from '../lib/api'
+import { findBuildingAt, type Building } from '../lib/buildings'
 import { CAMPUS_CENTER, DROP_TYPES, OSM_TILES } from '../lib/campus'
-import type { DropType } from '../lib/database.types'
-import { useDrops } from '../lib/hooks'
+import type { DropType, NewDrop } from '../lib/database.types'
+import { useBuildingControl, useBuildings, useDrops, useTeams } from '../lib/hooks'
 import { useReadySession } from '../session/session'
 
-function PickLocation({ onPick }: { onPick: (latlng: [number, number]) => void }) {
-  useMapEvents({ click: (e) => onPick([e.latlng.lat, e.latlng.lng]) })
+type Target = { lat: number; lng: number; building: Building | null }
+
+function TapToPick({ onPick }: { onPick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click: (e) => onPick(e.latlng.lat, e.latlng.lng) })
   return null
+}
+
+function currentPosition() {
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    if (!navigator.geolocation) reject(new Error('This device has no GPS'))
+    else navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10_000 })
+  })
 }
 
 function AdminPage() {
   const { player, isAdmin } = useReadySession()
-  const { data: drops } = useDrops()
-  const [location, setLocation] = useState<[number, number] | null>(null)
+  const { data: drops, refresh: refreshDrops } = useDrops()
+  const { data: control } = useBuildingControl()
+  const buildings = useBuildings()
+  const teams = useTeams()
+  const [target, setTarget] = useState<Target | null>(null)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<DropType>('minigame')
   const [points, setPoints] = useState(10)
@@ -22,6 +38,8 @@ function AdminPage() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [status, setStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+
+  const namesByNum = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
 
   if (!isAdmin) {
     return (
@@ -32,46 +50,98 @@ function AdminPage() {
     )
   }
 
-  async function submit(e: FormEvent) {
-    e.preventDefault()
-    if (!location) return
+  function pickBuilding(building: Building) {
+    setTarget({ lat: building.properties.lat, lng: building.properties.lng, building })
+    if (!title.trim()) setTitle(building.properties.name)
+  }
+
+  function pickPoint(lat: number, lng: number) {
+    const building = findBuildingAt(buildings, lat, lng) ?? null
+    setTarget({ lat, lng, building })
+    if (building && !title.trim()) setTitle(building.properties.name)
+  }
+
+  async function drop(fields: () => Promise<NewDrop> | NewDrop, label: string) {
     setBusy(true)
     setStatus(null)
     try {
-      const hint_photo_url = photo ? await uploadHintPhoto(photo) : null
-      await createDrop({
-        title: title.trim(),
-        type,
-        points,
-        lat: location[0],
-        lng: location[1],
-        hint_photo_url,
-        created_by: player.id,
-        expires_at: minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : null,
-      })
-      setStatus(`Dropped "${title.trim()}"`)
-      setTitle('')
-      setPhoto(null)
-      setLocation(null)
+      await createDrop({ ...(await fields()), created_by: player.id })
+      setStatus(`Dropped "${label}"`)
+      refreshDrops()
+      return true
     } catch (err) {
       setStatus((err as Error).message)
+      return false
     } finally {
       setBusy(false)
     }
   }
 
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!target) return
+    const ok = await drop(
+      async () => ({
+        title: title.trim(),
+        type,
+        points,
+        lat: target.lat,
+        lng: target.lng,
+        building_num: target.building?.properties.num ?? null,
+        hint_photo_url: photo ? await uploadHintPhoto(photo) : null,
+        expires_at: minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : null,
+      }),
+      title.trim(),
+    )
+    if (ok) {
+      setTitle('')
+      setPhoto(null)
+      setTarget(null)
+    }
+  }
+
+  async function demoDropHere() {
+    setStatus('Getting your location…')
+    let position: GeolocationPosition
+    try {
+      position = await currentPosition()
+    } catch (err) {
+      setStatus(`Location failed: ${(err as GeolocationPositionError | Error).message}`)
+      return
+    }
+    const { latitude: lat, longitude: lng } = position.coords
+    const building = findBuildingAt(buildings, lat, lng)
+    const label = building ? `Demo: ${building.properties.name}` : 'Demo drop'
+    await drop(() => ({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null }), label)
+  }
+
   return (
     <section className="page stack">
-      <h1>Drop an event</h1>
-      <p className="muted">Tap the map to place it.</p>
-      <MapContainer center={CAMPUS_CENTER} zoom={16} className="admin-map">
+      <h1>Admin</h1>
+
+      <button type="button" className="button primary" onClick={demoDropHere} disabled={busy}>
+        📍 Demo drop here
+      </button>
+      {status && <p>{status}</p>}
+
+      <h2>New drop</h2>
+      <BuildingPicker buildings={buildings} onPick={pickBuilding} />
+      <p className="muted">
+        {target
+          ? target.building
+            ? `At ${target.building.properties.name} (captures it)`
+            : 'Open-ground drop (no building)'
+          : 'Search a building above or tap the map.'}
+      </p>
+      <MapContainer center={CAMPUS_CENTER} zoom={16} className="admin-map" preferCanvas>
         <TileLayer {...OSM_TILES} />
-        <PickLocation onPick={setLocation} />
+        <BuildingsLayer buildings={buildings} control={control} teams={teams} interactive={false} />
+        <TapToPick onPick={pickPoint} />
         {drops.map((d) => (
           <CircleMarker key={d.id} center={[d.lat, d.lng]} radius={8} pathOptions={{ color: DROP_TYPES[d.type].color }} />
         ))}
-        {location && (
-          <CircleMarker center={location} radius={12} pathOptions={{ color: '#111', fillColor: '#facc15', fillOpacity: 1 }} />
+        {target && (
+          <CircleMarker center={[target.lat, target.lng]} radius={12} pathOptions={{ color: '#111', fillColor: '#facc15', fillOpacity: 1 }} />
         )}
       </MapContainer>
       <form className="stack" onSubmit={submit}>
@@ -103,11 +173,13 @@ function AdminPage() {
           Hint photo (optional)
           <input className="input" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
         </label>
-        {status && <p>{status}</p>}
-        <button className="button primary" disabled={busy || !location || !title.trim()}>
-          {busy ? 'Dropping…' : location ? 'Drop it' : 'Tap the map first'}
+        <button className="button primary" disabled={busy || !target || !title.trim()}>
+          {busy ? 'Dropping…' : target ? 'Drop it' : 'Pick a spot first'}
         </button>
       </form>
+
+      <h2>QR codes</h2>
+      <DropQrList drops={drops} buildingName={(num) => namesByNum.get(num)} />
     </section>
   )
 }

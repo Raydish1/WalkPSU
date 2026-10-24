@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import BottomNav from './components/BottomNav'
 import AdminPage from './pages/AdminPage'
+import ClaimPage from './pages/ClaimPage'
 import JoinScreen from './pages/JoinScreen'
 import LeaderboardPage from './pages/LeaderboardPage'
 import MapPage from './pages/MapPage'
@@ -20,6 +21,7 @@ function Screens() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/claim/:dropId" element={<ClaimPage />} />
         </Routes>
       </main>
       <BottomNav />

@@ -59,7 +59,11 @@ function Auth0Session({ children }: { children: ReactNode }) {
   let session: Session
   if (error) session = { status: 'error', message: error.message }
   else if (isLoading) session = { status: 'loading' }
-  else if (!authId) session = { status: 'signed-out', signIn: () => loginWithRedirect() }
+  else if (!authId) {
+    // Keep the current path (e.g. a scanned /claim QR link) through the Auth0 redirect.
+    const returnTo = window.location.pathname + window.location.search
+    session = { status: 'signed-out', signIn: () => loginWithRedirect({ appState: { returnTo } }) }
+  }
   else session = toSession(playerState, { isAdminClaim: user?.app_role === 'admin', setPlayer, join, signOut })
 
   return <SessionContext.Provider value={session}>{children}</SessionContext.Provider>

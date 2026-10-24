@@ -11,3 +11,10 @@ export const DROP_TYPES = {
   photo_hunt: { label: 'Photo hunt', color: '#db2777' },
   checkin: { label: 'Check-in', color: '#0891b2' },
 } as const
+
+/** Extra search terms for buildings whose official PASDA names don't match what students call them. */
+export const BUILDING_NICKNAMES: Record<string, string> = {
+  '0005000': 'HUB-Robeson Center',
+  '0045000': 'Bryce Jordan Center BJC',
+  '0039000': 'IST Building',
+}

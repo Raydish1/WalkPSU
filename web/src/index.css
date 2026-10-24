@@ -267,3 +267,61 @@ fieldset {
   width: 180px;
   border-radius: 8px;
 }
+
+.territory {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+h2 {
+  margin: 8px 0 0;
+  font-size: 18px;
+}
+
+.picker-list,
+.qr-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.picker-option,
+.qr-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.picker-list li:last-child .picker-option,
+.qr-row:last-child .qr-toggle {
+  border-bottom: 0;
+}
+
+.qr-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  color: #111827;
+}

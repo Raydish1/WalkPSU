@@ -22,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
         authorizationParams={{ redirect_uri: window.location.origin, audience: auth0Config.audience }}
         cacheLocation="localstorage"
         useRefreshTokens
+        onRedirectCallback={(appState) => window.location.replace(appState?.returnTo ?? '/')}
       >
         {app}
       </Auth0Provider>
