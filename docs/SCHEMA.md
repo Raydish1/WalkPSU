@@ -51,11 +51,11 @@ Only admins can insert, update, or delete. Everyone signed in can read.
 | column | type | notes |
 | --- | --- | --- |
 | `id` | uuid | |
-| `drop_id` | uuid → `drops` | **unique**: one claim per drop |
+| `drop_id` | uuid → `drops` | unique together with `player_id` |
 | `player_id` | uuid → `players` | who claimed it |
 | `created_at` | timestamptz | |
 
-Read-only for clients. Rows are created only by `claim_drop`.
+Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary drop: it locks the drop and flips it to `claimed`) and `finish_game` (one claim per winner of a Shake-Off).
 
 ### `building_control`
 
@@ -77,6 +77,29 @@ Read-only for clients. `claim_drop` upserts the row, so a later claim at the sam
 
 Created automatically by a trigger when a drop is inserted. **Only admins can read it**; players never see codes except by scanning. The QR encodes `https://<app>/claim/<drop_id>?key=<claim_code>`.
 
+### `games` (Shake-Off)
+
+One per `minigame` drop, created by the first `join_game`.
+
+| column | type | notes |
+| --- | --- | --- |
+| `drop_id` | uuid → `drops` | primary key |
+| `seed` | text | random; decides sides and tie-breaks. Hidden from `get_game_state` |
+| `created_at` | timestamptz | |
+| `started_at` | timestamptz | null until scheduled. The future time the game begins; the lobby closes then |
+| `finished_at` | timestamptz | set by `finish_game` |
+| `winner_side` | `blue` \| `white` | |
+
+### `game_players`
+
+| column | type | notes |
+| --- | --- | --- |
+| `drop_id`, `player_id` | uuid | primary key |
+| `joined_at` | timestamptz | |
+| `shakes` | integer | the server-capped count from `submit_shakes` |
+
+Both are read-only for clients and in the Realtime publication. Sides aren't stored: `game_sides(drop_id)` deals them from the seed once `started_at` is set, so every caller sees the same balanced split. Teams exist only inside one game.
+
 ### `player_scores` (view)
 
 `player_id, display_name, color, points, claims, buildings` for every player. `points` is the sum of their claimed drops' points; `buildings` is how many buildings they currently hold. Runs with the caller's permissions. The leaderboard orders by points, then buildings, then name.
@@ -91,6 +114,14 @@ Created automatically by a trigger when a drop is inserted. **Only admins can re
   - there's no code and the caller is too far away.
 
   Client: `claimDrop(dropId, { lat, lng })` or `claimDrop(dropId, { code })`.
+- **Shake-Off functions** (all keyed by the drop id; phases come from timestamps, so there's no server timer):
+  - `get_game_state(drop) → { server_now, settings, game, players[] }`. One call per screen. `server_now` lets phones correct skewed clocks.
+  - `join_game(drop, lat?, lng?, code?)`. Same proof as claiming. Rejoining is a no-op. Joining closes at `started_at`. The 4th player schedules the start `auto_start_delay_seconds` out.
+  - `start_game(drop)`. Admin only, needs 2+ players. Pulls the start in to `admin_start_delay_seconds` from now.
+  - `submit_shakes(drop, count)`. Running total during and just after the game. Stored as `greatest(previous, min(count, floor(elapsed_seconds × max_shakes_per_second)))`, so a client can't report more than a human could shake.
+  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds`. The higher **average shakes per player** wins (fair for uneven sides). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, the drop is marked claimed, and if it sits on a building the winning side's top shaker captures it.
+  - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. The client reads them from `get_game_state`; don't copy them into client code.
+  - `claim_drop` refuses `minigame` drops, so the game can't be skipped.
 - **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
 - **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine on a 6,371 km sphere. `web/src/lib/geo.ts` `distanceM` uses the identical formula, so the client's "in range" matches the server.
 - **`next_player_color() → text`**. Default for `players.color`.
@@ -99,6 +130,10 @@ Created automatically by a trigger when a drop is inserted. **Only admins can re
 ## Realtime
 
 `drops`, `claims`, and `building_control` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh the map and the leaderboard.
+
+### Broadcast: live Shake-Off counts
+
+Channel `shakeoff:<drop_id>`, event `shakes`, payload `{ playerId, count }`. Each participant sends about every 500 ms. It only drives the tug-of-war bar on phones and `/battle/:dropId`. The winner is decided solely from the capped counts stored by `submit_shakes`.
 
 ### Presence: live player locations
 

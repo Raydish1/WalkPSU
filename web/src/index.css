@@ -353,3 +353,233 @@ h2 {
   background: white;
   color: #111827;
 }
+
+/* Shake-Off */
+
+.game-eyebrow,
+.battle-eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.game-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background: var(--side);
+  color: var(--side-ink);
+  text-align: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.game-huge {
+  margin: 0;
+  font-size: clamp(56px, 18vw, 120px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.game-big {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.game-timer,
+.game-countdown {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-count {
+  margin: 0;
+  font-size: 72px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-tap {
+  width: 100%;
+  min-height: 120px;
+  font-size: 22px;
+}
+
+.game-lobby .game-countdown {
+  color: var(--psu-navy);
+}
+
+.roster,
+.battle-roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roster li,
+.battle-roster li {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.roster .color-dot,
+.battle-roster .color-dot {
+  background: var(--player);
+}
+
+.tug {
+  width: 100%;
+  max-width: 640px;
+}
+
+.tug-track {
+  position: relative;
+  height: 28px;
+  overflow: hidden;
+  border: 3px solid #0f172a;
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.tug-blue {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--blue-share);
+  transition: width 400ms ease-out;
+}
+
+.tug-knot {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: var(--blue-share);
+  width: 6px;
+  margin-left: -3px;
+  background: #facc15;
+  transition: left 400ms ease-out;
+}
+
+.tug-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tug-big {
+  max-width: none;
+}
+
+.tug-big .tug-track {
+  height: 72px;
+  border-width: 5px;
+}
+
+.tug-big .tug-labels {
+  font-size: 28px;
+}
+
+.battle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  min-height: 100dvh;
+  padding: 40px clamp(16px, 5vw, 80px);
+  background: #0f172a;
+  color: #f8fafc;
+  text-align: center;
+}
+
+.battle-title {
+  margin: 0;
+  font-size: clamp(32px, 5vw, 64px);
+}
+
+.battle-huge {
+  margin: 0;
+  font-size: clamp(64px, 12vw, 180px);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-sub {
+  margin: 0;
+  font-size: clamp(18px, 2vw, 28px);
+  opacity: 0.8;
+}
+
+.battle-lobby {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.battle-roster {
+  max-width: 720px;
+  justify-content: center;
+  font-size: clamp(18px, 2vw, 28px);
+}
+
+.battle-roster li {
+  background: #1e293b;
+}
+
+.battle-start {
+  min-height: 64px;
+  font-size: 24px;
+}
+
+.battle-result {
+  background: var(--side);
+  color: var(--side-ink);
+}
+
+.battle-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+.battle-side {
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--side);
+  color: var(--side-ink);
+  font-size: clamp(18px, 2vw, 28px);
+}
+
+.battle-side h2 {
+  margin: 0 0 12px;
+  font-size: 1.4em;
+}
+
+.battle-side ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.battle-side-won {
+  outline: 6px solid #facc15;
+}

@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react'
 import { Circle, CircleMarker, Popup } from 'react-leaflet'
+import { Link } from 'react-router'
 import BuildingsLayer from '../components/BuildingsLayer'
 import CampusMap from '../components/CampusMap'
 import { claimDrop } from '../lib/api'
@@ -123,12 +124,24 @@ function DropPopup({ drop, distance, radius, position, onClaimed }: DropPopupPro
         {DROP_TYPES[drop.type].label} · {drop.points} pts
       </span>
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
-      <button className="button primary" onClick={claim} disabled={busy || !inRange}>
-        {busy ? 'Claiming…' : 'Claim'}
-      </button>
-      <span className="muted">{hint}</span>
-      <span className="muted">Indoors? Scan the drop’s QR code to claim from anywhere.</span>
-      {message && <span>{message}</span>}
+      {drop.type === 'minigame' ? (
+        <>
+          <span>Shake-Off: two random teams, 15 seconds of shaking. Every winner gets the points.</span>
+          <Link className="button primary" to={`/game/${drop.id}`}>
+            Open the lobby
+          </Link>
+          <span className="muted">{inRange ? 'You’re in range to join!' : hint.replace('to claim', 'to join')}</span>
+        </>
+      ) : (
+        <>
+          <button className="button primary" onClick={claim} disabled={busy || !inRange}>
+            {busy ? 'Claiming…' : 'Claim'}
+          </button>
+          <span className="muted">{hint}</span>
+          <span className="muted">Indoors? Scan the drop’s QR code to claim from anywhere.</span>
+          {message && <span>{message}</span>}
+        </>
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { claimUrl } from '../lib/api'
 import type { DropRow } from '../lib/database.types'
 import { useClaimCodes } from '../lib/hooks'
@@ -25,10 +26,15 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
           const open = openId === drop.id
           return (
             <li key={drop.id} className="qr-row">
-              <button type="button" className="qr-toggle" onClick={() => {
+              <button
+                type="button"
+                className="qr-toggle"
+                onClick={() => {
                   if (!open && !code) refresh()
                   setOpenId(open ? null : drop.id)
-                }} aria-expanded={open}>
+                }}
+                aria-expanded={open}
+              >
                 <span>
                   <strong>{drop.title}</strong>
                   <span className="muted">
@@ -41,7 +47,14 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
                 (code ? (
                   <div className="qr-code">
                     <QRCodeSVG value={claimUrl(drop.id, code)} size={240} marginSize={2} />
-                    <span className="muted">Scan with your phone camera to claim</span>
+                    <span className="muted">
+                      {drop.type === 'minigame' ? 'Scan to join the Shake-Off lobby' : 'Scan with your phone camera to claim'}
+                    </span>
+                    {drop.type === 'minigame' && (
+                      <Link className="button" to={`/battle/${drop.id}`}>
+                        Open big screen
+                      </Link>
+                    )}
                   </div>
                 ) : (
                   <p className="muted">Loading code…</p>

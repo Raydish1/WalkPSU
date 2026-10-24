@@ -35,6 +35,27 @@ type BuildingControl = { building_num: string; player_id: string; claim_id: stri
 
 type DropSecret = { drop_id: string; claim_code: string }
 
+export type Side = 'blue' | 'white'
+
+type Game = { drop_id: string; created_at: string; started_at: string | null; finished_at: string | null; winner_side: Side | null }
+
+type GamePlayerRow = { drop_id: string; player_id: string; joined_at: string; shakes: number }
+
+/** Mirrors SQL shake_off_settings(); the server is the only source of these numbers. */
+export type ShakeOffSettings = {
+  game_seconds: number
+  auto_start_players: number
+  auto_start_delay_seconds: number
+  admin_start_delay_seconds: number
+  max_shakes_per_second: number
+  submit_grace_seconds: number
+}
+
+export type GamePlayer = { player_id: string; display_name: string; color: string; side: Side | null; shakes: number; joined_at: string }
+
+/** Returned by get_game_state() and finish_game(). `game` is null until someone joins. */
+export type GameState = { server_now: string; settings: ShakeOffSettings; game: Game | null; players: GamePlayer[] }
+
 type PlayerScore = { player_id: string; display_name: string; color: string; points: number; claims: number; buildings: number }
 
 export type Database = {
@@ -56,6 +77,8 @@ export type Database = {
       claims: { Row: Claim; Insert: never; Update: never; Relationships: [] }
       building_control: { Row: BuildingControl; Insert: never; Update: never; Relationships: [] }
       drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
+      games: { Row: Game & { seed: string }; Insert: never; Update: never; Relationships: [] }
+      game_players: { Row: GamePlayerRow; Insert: never; Update: never; Relationships: [] }
     }
     Views: {
       player_scores: { Row: PlayerScore; Relationships: [] }
@@ -63,6 +86,11 @@ export type Database = {
     Functions: {
       claim_drop: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: Claim }
       claim_radius_m: { Args: Record<string, never>; Returns: number }
+      get_game_state: { Args: { p_drop_id: string }; Returns: GameState }
+      join_game: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: undefined }
+      start_game: { Args: { p_drop_id: string }; Returns: undefined }
+      submit_shakes: { Args: { p_drop_id: string; p_count: number }; Returns: number }
+      finish_game: { Args: { p_drop_id: string }; Returns: GameState }
       is_admin: { Args: Record<string, never>; Returns: boolean }
     }
     Enums: { drop_type: DropType; drop_status: DropStatus }

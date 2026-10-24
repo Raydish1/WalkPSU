@@ -49,12 +49,41 @@ export async function uploadHintPhoto(file: File) {
   return supabase.storage.from('drop-hints').getPublicUrl(path).data.publicUrl
 }
 
+export async function getDrop(id: string) {
+  return unwrap(await supabase.from('drops').select('*').eq('id', id).maybeSingle())
+}
+
 export type ClaimProof = { lat: number; lng: number } | { code: string }
+
+const proofArgs = (proof: ClaimProof) => ('code' in proof ? { p_code: proof.code } : { p_lat: proof.lat, p_lng: proof.lng })
 
 /** Server checks the drop is active and unexpired, and that the player is within claim_radius_m() or has its QR code. */
 export async function claimDrop(dropId: string, proof: ClaimProof) {
-  const args = 'code' in proof ? { p_code: proof.code } : { p_lat: proof.lat, p_lng: proof.lng }
-  return unwrap(await supabase.rpc('claim_drop', { p_drop_id: dropId, ...args }))
+  return unwrap(await supabase.rpc('claim_drop', { p_drop_id: dropId, ...proofArgs(proof) }))
+}
+
+export async function getGameState(dropId: string) {
+  return unwrap(await supabase.rpc('get_game_state', { p_drop_id: dropId }))
+}
+
+/** Same proof as claiming. Rejoining is a no-op; joining closes when the game starts. */
+export async function joinGame(dropId: string, proof: ClaimProof) {
+  unwrap(await supabase.rpc('join_game', { p_drop_id: dropId, ...proofArgs(proof) }))
+}
+
+/** Admin only. Starts the countdown (needs 2+ players). */
+export async function startGame(dropId: string) {
+  unwrap(await supabase.rpc('start_game', { p_drop_id: dropId }))
+}
+
+/** Reports a running shake total; the server caps it to a human rate and returns the stored value. */
+export async function submitShakes(dropId: string, count: number) {
+  return unwrap(await supabase.rpc('submit_shakes', { p_drop_id: dropId, p_count: count }))
+}
+
+/** Idempotent; any participant may call it once the submit grace period has passed. */
+export async function finishGame(dropId: string) {
+  return unwrap(await supabase.rpc('finish_game', { p_drop_id: dropId }))
 }
 
 /** Admin only (enforced by RLS). Maps drop id to its QR claim code. */
@@ -87,17 +116,18 @@ export async function getClaimRadius() {
   return unwrap(await supabase.rpc('claim_radius_m'))
 }
 
-type RealtimeTable = 'drops' | 'claims' | 'building_control'
+type RealtimeTable = 'drops' | 'claims' | 'building_control' | 'games' | 'game_players'
 type RowOf<T extends RealtimeTable> = Database['public']['Tables'][T]['Row']
 
 /** Calls onChange for every insert/update/delete on a Realtime-enabled table. Returns an unsubscribe fn. */
 export function subscribeToTable<T extends RealtimeTable>(
   table: T,
   onChange: (row: RowOf<T>, event: 'INSERT' | 'UPDATE' | 'DELETE') => void,
+  filter?: string,
 ) {
   const channel = supabase
     .channel(`${table}-${crypto.randomUUID()}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+    .on('postgres_changes', { event: '*', schema: 'public', table, filter }, (payload) => {
       onChange((payload.eventType === 'DELETE' ? payload.old : payload.new) as RowOf<T>, payload.eventType)
     })
     .subscribe()

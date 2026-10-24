@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router'
-import { claimDrop } from '../lib/api'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { claimDrop, getDrop } from '../lib/api'
 
 type Result = { status: 'claiming' } | { status: 'claimed' } | { status: 'failed'; message: string }
 
@@ -13,16 +13,20 @@ function ClaimPage() {
     dropId && key ? { status: 'claiming' } : { status: 'failed', message: 'This QR link is incomplete.' },
   )
   const attempted = useRef(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     // StrictMode runs effects twice; a second claim would fail and overwrite the success.
     if (!dropId || !key || attempted.current) return
     attempted.current = true
-    claimDrop(dropId, { code: key }).then(
-      () => setResult({ status: 'claimed' }),
-      (e: Error) => setResult({ status: 'failed', message: e.message }),
-    )
-  }, [dropId, key])
+    getDrop(dropId)
+      .then((drop) => {
+        // A mini-game drop's QR code is a lobby pass, not a claim.
+        if (drop?.type === 'minigame') return navigate(`/game/${dropId}?key=${encodeURIComponent(key)}`, { replace: true })
+        return claimDrop(dropId, { code: key }).then(() => setResult({ status: 'claimed' }))
+      })
+      .catch((e: Error) => setResult({ status: 'failed', message: e.message }))
+  }, [dropId, key, navigate])
 
   return (
     <section className="center-screen">
