@@ -11,17 +11,17 @@ function LeaderboardPage() {
       <h1>Leaderboard</h1>
       {error && <p className="error">{error}</p>}
       <ol className="leaderboard">
-        {scores.map((team, i) => (
-          <li key={team.team_id} className="leaderboard-row" style={{ '--team': team.color } as CSSProperties}>
+        {scores.map((row, i) => (
+          <li key={row.player_id} className="leaderboard-row" style={{ '--player': row.color } as CSSProperties}>
             <span className="rank">{i + 1}</span>
-            <span className="team-name">
-              {team.name}
-              {team.team_id === player.team_id && <span className="muted"> (you)</span>}
+            <span className="player-name">
+              {row.display_name}
+              {row.player_id === player.id && <span className="muted"> (you)</span>}
             </span>
             <span className="score">
-              {team.points}
+              {row.points}
               <span className="muted"> pts</span>
-              <span className="territory">🏛️ {team.buildings}</span>
+              <span className="territory">🏛️ {row.buildings}</span>
             </span>
           </li>
         ))}

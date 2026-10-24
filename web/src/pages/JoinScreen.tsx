@@ -1,12 +1,9 @@
-import { useState, type CSSProperties, type FormEvent } from 'react'
-import { useTeams } from '../lib/hooks'
+import { useState, type FormEvent } from 'react'
 import { useSession } from '../session/session'
 
 function JoinScreen() {
   const session = useSession()
-  const teams = useTeams()
   const [name, setName] = useState('')
-  const [teamId, setTeamId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -16,7 +13,7 @@ function JoinScreen() {
     return (
       <div className="center-screen">
         <h1>WalkPSU</h1>
-        <p className="muted">Race your team across campus to claim drops.</p>
+        <p className="muted">Race across campus to claim drops and capture buildings.</p>
         <button className="button primary" onClick={session.signIn}>
           Log in
         </button>
@@ -28,11 +25,10 @@ function JoinScreen() {
 
   async function submit(e: FormEvent) {
     e.preventDefault()
-    if (!teamId) return
     setBusy(true)
     setError(null)
     try {
-      await join(name.trim(), teamId)
+      await join(name.trim())
     } catch (err) {
       setError((err as Error).message)
       setBusy(false)
@@ -42,29 +38,13 @@ function JoinScreen() {
   return (
     <form className="page stack" onSubmit={submit}>
       <h1>Join the game</h1>
+      <p className="muted">Race across campus to claim drops and capture buildings. You’ll get your own map color.</p>
       <label className="stack-sm">
         Your name
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={32} required />
       </label>
-      <fieldset className="stack-sm">
-        <legend>Pick your team</legend>
-        <div className="team-grid">
-          {teams.map((team) => (
-            <button
-              type="button"
-              key={team.id}
-              className="team-option"
-              aria-pressed={teamId === team.id}
-              style={{ '--team': team.color } as CSSProperties}
-              onClick={() => setTeamId(team.id)}
-            >
-              {team.name}
-            </button>
-          ))}
-        </div>
-      </fieldset>
       {error && <p className="error">{error}</p>}
-      <button className="button primary" disabled={busy || !teamId || !name.trim()}>
+      <button className="button primary" disabled={busy || !name.trim()}>
         {busy ? 'Joining…' : 'Start playing'}
       </button>
     </form>

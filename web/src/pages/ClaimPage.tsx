@@ -30,7 +30,7 @@ function ClaimPage() {
       {result.status === 'claimed' && (
         <>
           <h1>Claimed! 🎉</h1>
-          <p className="muted">Points and any building go to your team.</p>
+          <p className="muted">The points are yours, and so is the building if it was at one.</p>
         </>
       )}
       {result.status === 'failed' && (

@@ -1,40 +1,70 @@
-import { useState } from 'react'
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet'
+import { Fragment, useState } from 'react'
+import { Circle, CircleMarker, Popup } from 'react-leaflet'
 import BuildingsLayer from '../components/BuildingsLayer'
+import CampusMap from '../components/CampusMap'
 import { claimDrop } from '../lib/api'
-import { CAMPUS_CENTER, DROP_TYPES, OSM_TILES } from '../lib/campus'
+import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
-import { useBuildingControl, useBuildings, useDrops, usePosition, useTeams } from '../lib/hooks'
+import { distanceM } from '../lib/geo'
+import { useBuildingControl, useBuildings, useClaimRadius, useDrops, usePlayers } from '../lib/hooks'
+import { usePresence } from '../session/presence'
 
 function MapPage() {
   const { data: drops, error, refresh: refreshDrops } = useDrops()
   const { data: control, refresh: refreshControl } = useBuildingControl()
+  const { data: players, refresh: refreshPlayers } = usePlayers()
   const buildings = useBuildings()
-  const teams = useTeams()
-  const position = usePosition()
+  const radius = useClaimRadius()
+  const { position, others } = usePresence()
+
+  const onClaimed = () => {
+    refreshDrops()
+    refreshControl()
+    refreshPlayers()
+  }
 
   return (
     <div className="map-wrap">
-      <MapContainer center={CAMPUS_CENTER} zoom={16} className="map" preferCanvas>
-        <TileLayer {...OSM_TILES} />
-        <BuildingsLayer buildings={buildings} control={control} teams={teams} />
-        {drops.map((drop) => (
+      <CampusMap buildings={buildings} className="map">
+        <BuildingsLayer buildings={buildings} control={control} players={players} />
+        {drops.map((drop) => {
+          const distance = position ? distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng) : null
+          const inRange = radius !== null && distance !== null && distance <= radius
+          const color = DROP_TYPES[drop.type].color
+          return (
+            <Fragment key={drop.id}>
+              {radius !== null && (
+                <Circle
+                  center={[drop.lat, drop.lng]}
+                  radius={radius}
+                  interactive={false}
+                  pathOptions={
+                    inRange
+                      ? { color: '#16a34a', weight: 3, fillColor: '#22c55e', fillOpacity: 0.3 }
+                      : { color, weight: 1.5, dashArray: '6 6', fillColor: color, fillOpacity: 0.08 }
+                  }
+                />
+              )}
+              <CircleMarker
+                center={[drop.lat, drop.lng]}
+                radius={14}
+                pathOptions={{ color: 'white', weight: 3, fillColor: color, fillOpacity: 0.9 }}
+              >
+                <Popup>
+                  <DropPopup drop={drop} distance={distance} radius={radius} position={position} onClaimed={onClaimed} />
+                </Popup>
+              </CircleMarker>
+            </Fragment>
+          )
+        })}
+        {others.map((p) => (
           <CircleMarker
-            key={drop.id}
-            center={[drop.lat, drop.lng]}
-            radius={14}
-            pathOptions={{ color: 'white', weight: 3, fillColor: DROP_TYPES[drop.type].color, fillOpacity: 0.9 }}
+            key={p.playerId}
+            center={[p.lat, p.lng]}
+            radius={7}
+            pathOptions={{ color: 'white', weight: 2, fillColor: p.color, fillOpacity: 1 }}
           >
-            <Popup>
-              <DropPopup
-                drop={drop}
-                position={position}
-                onClaimed={() => {
-                  refreshDrops()
-                  refreshControl()
-                }}
-              />
-            </Popup>
+            <Popup>{p.name}</Popup>
           </CircleMarker>
         ))}
         {position && (
@@ -42,29 +72,35 @@ function MapPage() {
             center={[position.coords.latitude, position.coords.longitude]}
             radius={8}
             pathOptions={{ color: 'white', weight: 3, fillColor: '#2563eb', fillOpacity: 1 }}
-          />
+          >
+            <Popup>You</Popup>
+          </CircleMarker>
         )}
-      </MapContainer>
+      </CampusMap>
       {error && <div className="map-banner error">{error}</div>}
     </div>
   )
 }
 
-type DropPopupProps = { drop: DropRow; position: GeolocationPosition | null; onClaimed: () => void }
+type DropPopupProps = {
+  drop: DropRow
+  distance: number | null
+  radius: number | null
+  position: GeolocationPosition | null
+  onClaimed: () => void
+}
 
-function DropPopup({ drop, position, onClaimed }: DropPopupProps) {
+function DropPopup({ drop, distance, radius, position, onClaimed }: DropPopupProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const inRange = radius !== null && distance !== null && distance <= radius
 
   async function claim() {
-    if (!position) {
-      setMessage('No GPS fix yet. Scan the drop’s QR code to claim it.')
-      return
-    }
+    if (!position) return
     setBusy(true)
     try {
       await claimDrop(drop.id, { lat: position.coords.latitude, lng: position.coords.longitude })
-      setMessage(`Claimed! +${drop.points} for your team`)
+      setMessage(`Claimed! +${drop.points} points`)
       onClaimed()
     } catch (e) {
       setMessage((e as Error).message)
@@ -73,6 +109,13 @@ function DropPopup({ drop, position, onClaimed }: DropPopupProps) {
     }
   }
 
+  const hint =
+    distance === null
+      ? 'Waiting for GPS…'
+      : inRange
+        ? 'You’re in range!'
+        : `${Math.round(distance)} m away. Get within ${radius ?? '…'} m to claim.`
+
   return (
     <div className="stack-sm">
       <strong>{drop.title}</strong>
@@ -80,9 +123,11 @@ function DropPopup({ drop, position, onClaimed }: DropPopupProps) {
         {DROP_TYPES[drop.type].label} · {drop.points} pts
       </span>
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
-      <button className="button primary" onClick={claim} disabled={busy}>
+      <button className="button primary" onClick={claim} disabled={busy || !inRange}>
         {busy ? 'Claiming…' : 'Claim'}
       </button>
+      <span className="muted">{hint}</span>
+      <span className="muted">Indoors? Scan the drop’s QR code to claim from anywhere.</span>
       {message && <span>{message}</span>}
     </div>
   )

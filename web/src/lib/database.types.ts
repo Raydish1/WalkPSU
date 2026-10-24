@@ -4,13 +4,12 @@
 export type DropType = 'minigame' | 'photo_hunt' | 'checkin'
 export type DropStatus = 'active' | 'claimed' | 'expired'
 
-type Team = { id: string; name: string; color: string }
-
 type Player = {
   id: string
   auth_id: string
   display_name: string
-  team_id: string
+  /** Server-assigned map color. */
+  color: string
   is_admin: boolean
   created_at: string
 }
@@ -30,22 +29,21 @@ type Drop = {
   expires_at: string | null
 }
 
-type Claim = { id: string; drop_id: string; player_id: string; team_id: string; created_at: string }
+type Claim = { id: string; drop_id: string; player_id: string; created_at: string }
 
-type BuildingControl = { building_num: string; team_id: string; claim_id: string; captured_at: string }
+type BuildingControl = { building_num: string; player_id: string; claim_id: string; captured_at: string }
 
 type DropSecret = { drop_id: string; claim_code: string }
 
-type TeamScore = { team_id: string; name: string; color: string; points: number; claims: number; buildings: number }
+type PlayerScore = { player_id: string; display_name: string; color: string; points: number; claims: number; buildings: number }
 
 export type Database = {
   public: {
     Tables: {
-      teams: { Row: Team; Insert: Omit<Team, 'id'> & { id?: string }; Update: Partial<Team>; Relationships: [] }
       players: {
         Row: Player
-        Insert: Pick<Player, 'display_name' | 'team_id'>
-        Update: Partial<Pick<Player, 'display_name' | 'team_id'>>
+        Insert: Pick<Player, 'display_name'>
+        Update: Partial<Pick<Player, 'display_name'>>
         Relationships: []
       }
       drops: {
@@ -60,10 +58,11 @@ export type Database = {
       drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
     }
     Views: {
-      team_scores: { Row: TeamScore; Relationships: [] }
+      player_scores: { Row: PlayerScore; Relationships: [] }
     }
     Functions: {
       claim_drop: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: Claim }
+      claim_radius_m: { Args: Record<string, never>; Returns: number }
       is_admin: { Args: Record<string, never>; Returns: boolean }
     }
     Enums: { drop_type: DropType; drop_status: DropStatus }
@@ -72,10 +71,9 @@ export type Database = {
 }
 
 type PublicTables = Database['public']['Tables']
-export type TeamRow = PublicTables['teams']['Row']
 export type PlayerRow = PublicTables['players']['Row']
 export type DropRow = PublicTables['drops']['Row']
 export type NewDrop = PublicTables['drops']['Insert']
 export type ClaimRow = PublicTables['claims']['Row']
 export type BuildingControlRow = PublicTables['building_control']['Row']
-export type TeamScoreRow = Database['public']['Views']['team_scores']['Row']
+export type PlayerScoreRow = Database['public']['Views']['player_scores']['Row']

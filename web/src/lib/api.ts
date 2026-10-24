@@ -7,20 +7,20 @@ function unwrap<T>(response: PostgrestSingleResponse<T>): T {
   return response.data
 }
 
-export async function getTeams() {
-  return unwrap(await supabase.from('teams').select('*').order('name'))
-}
-
 export async function getPlayer(authId: string) {
   return unwrap(await supabase.from('players').select('*').eq('auth_id', authId).maybeSingle())
 }
 
-export async function createPlayer(displayName: string, teamId: string) {
-  return unwrap(await supabase.from('players').insert({ display_name: displayName, team_id: teamId }).select().single())
+export async function createPlayer(displayName: string) {
+  return unwrap(await supabase.from('players').insert({ display_name: displayName }).select().single())
 }
 
-export async function updatePlayer(id: string, changes: Partial<Pick<PlayerRow, 'display_name' | 'team_id'>>) {
+export async function updatePlayer(id: string, changes: Partial<Pick<PlayerRow, 'display_name'>>) {
   return unwrap(await supabase.from('players').update(changes).eq('id', id).select().single())
+}
+
+export async function getPlayers() {
+  return unwrap(await supabase.from('players').select('*'))
 }
 
 /** Active drops that haven't expired. */
@@ -51,7 +51,7 @@ export async function uploadHintPhoto(file: File) {
 
 export type ClaimProof = { lat: number; lng: number } | { code: string }
 
-/** Server checks the drop is active and unexpired, and that the player is within 60 m or has its QR code. */
+/** Server checks the drop is active and unexpired, and that the player is within claim_radius_m() or has its QR code. */
 export async function claimDrop(dropId: string, proof: ClaimProof) {
   const args = 'code' in proof ? { p_code: proof.code } : { p_lat: proof.lat, p_lng: proof.lng }
   return unwrap(await supabase.rpc('claim_drop', { p_drop_id: dropId, ...args }))
@@ -72,7 +72,19 @@ export async function getBuildingControl() {
 }
 
 export async function getLeaderboard() {
-  return unwrap(await supabase.from('team_scores').select('*').order('points', { ascending: false }))
+  return unwrap(
+    await supabase
+      .from('player_scores')
+      .select('*')
+      .order('points', { ascending: false })
+      .order('buildings', { ascending: false })
+      .order('display_name'),
+  )
+}
+
+/** The server's GPS claim radius in meters, so the map draws exactly what claim_drop enforces. */
+export async function getClaimRadius() {
+  return unwrap(await supabase.rpc('claim_radius_m'))
 }
 
 type RealtimeTable = 'drops' | 'claims' | 'building_control'

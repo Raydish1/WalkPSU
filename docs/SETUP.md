@@ -6,6 +6,7 @@
 2. Open **SQL Editor** and run each file in `supabase/migrations/` once, in filename order:
    - `20261024000000_init.sql`
    - `20261024010000_territory_and_qr.sql`
+   - `20261024020000_individual_players.sql`
 3. Fallback login: go to **Authentication → Sign In / Providers** and turn on **Allow anonymous sign-ins**.
 4. Go to **Project Settings → API** and copy the Project URL and the anon (publishable) key into `web/.env`.
 

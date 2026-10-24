@@ -27,7 +27,7 @@ function usePlayer(authId: string | null) {
 
 function toSession(
   state: PlayerState,
-  opts: { isAdminClaim: boolean; setPlayer: (p: PlayerRow) => void; join: (name: string, teamId: string) => Promise<void>; signOut: () => void },
+  opts: { isAdminClaim: boolean; setPlayer: (p: PlayerRow) => void; join: (name: string) => Promise<void>; signOut: () => void },
 ): Session {
   if (state.status !== 'loaded') return state
   if (!state.player) return { status: 'joining', join: opts.join, signOut: opts.signOut }
@@ -53,7 +53,7 @@ function Auth0Session({ children }: { children: ReactNode }) {
   }, [authId, getAccessTokenSilently])
 
   const [playerState, setPlayer] = usePlayer(tokenReady ? authId : null)
-  const join = useCallback(async (name: string, teamId: string) => setPlayer(await createPlayer(name, teamId)), [setPlayer])
+  const join = useCallback(async (name: string) => setPlayer(await createPlayer(name)), [setPlayer])
   const signOut = useCallback(() => logout({ logoutParams: { returnTo: window.location.origin } }), [logout])
 
   let session: Session
@@ -79,7 +79,7 @@ function AnonymousSession({ children }: { children: ReactNode }) {
   const [playerState, setPlayer] = usePlayer(authId ?? null)
 
   const join = useCallback(
-    async (name: string, teamId: string) => {
+    async (name: string) => {
       let id = authId
       if (!id) {
         const { data, error } = await supabase.auth.signInAnonymously()
@@ -87,7 +87,7 @@ function AnonymousSession({ children }: { children: ReactNode }) {
         id = data.user.id
       }
       // Create the row before publishing authId so usePlayer's fetch can't race it back to "joining".
-      setPlayer(await createPlayer(name, teamId))
+      setPlayer(await createPlayer(name))
       setAuthId(id)
     },
     [authId, setPlayer],

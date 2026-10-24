@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getBuildingControl, getClaimCodes, getDrops, getLeaderboard, getTeams, subscribeToDrops, subscribeToTable } from './api'
+import { getBuildingControl, getClaimCodes, getClaimRadius, getDrops, getLeaderboard, getPlayers, subscribeToDrops, subscribeToTable } from './api'
 import { loadBuildings, type Building } from './buildings'
-import type { BuildingControlRow, DropRow, TeamRow, TeamScoreRow } from './database.types'
+import type { BuildingControlRow, DropRow, PlayerRow, PlayerScoreRow } from './database.types'
 
 type Subscribe = (onChange: () => void) => () => void
 
@@ -19,8 +19,9 @@ function useLiveQuery<T>(load: () => Promise<T>, initial: T, subscribe: Subscrib
 }
 
 const NO_DROPS: DropRow[] = []
-const NO_SCORES: TeamScoreRow[] = []
+const NO_SCORES: PlayerScoreRow[] = []
 const NO_CONTROL: BuildingControlRow[] = []
+const NO_PLAYERS: PlayerRow[] = []
 const NO_CODES = new Map<string, string>()
 const subscribeToBuildingControl: Subscribe = (onChange) => subscribeToTable('building_control', onChange)
 
@@ -28,13 +29,22 @@ export const useDrops = () => useLiveQuery(getDrops, NO_DROPS)
 export const useLeaderboard = () => useLiveQuery(getLeaderboard, NO_SCORES)
 export const useClaimCodes = () => useLiveQuery(getClaimCodes, NO_CODES)
 export const useBuildingControl = () => useLiveQuery(getBuildingControl, NO_CONTROL, subscribeToBuildingControl)
+/** Refetched on every capture, so a newly joined player's color is known by the time they own a building. */
+export const usePlayers = () => useLiveQuery(getPlayers, NO_PLAYERS, subscribeToBuildingControl)
 
-export function useTeams() {
-  const [teams, setTeams] = useState<TeamRow[]>([])
+let claimRadiusPromise: Promise<number> | null = null
+
+/** Null until loaded from the server's claim_radius_m(). */
+export function useClaimRadius() {
+  const [radius, setRadius] = useState<number | null>(null)
   useEffect(() => {
-    getTeams().then(setTeams, console.error)
+    claimRadiusPromise ??= getClaimRadius()
+    claimRadiusPromise.then(setRadius, (e: Error) => {
+      claimRadiusPromise = null
+      console.error(e)
+    })
   }, [])
-  return teams
+  return radius
 }
 
 export function useBuildings() {
@@ -43,14 +53,4 @@ export function useBuildings() {
     loadBuildings().then(setBuildings, console.error)
   }, [])
   return buildings
-}
-
-export function usePosition() {
-  const [position, setPosition] = useState<GeolocationPosition | null>(null)
-  useEffect(() => {
-    if (!navigator.geolocation) return
-    const id = navigator.geolocation.watchPosition(setPosition, console.warn, { enableHighAccuracy: true })
-    return () => navigator.geolocation.clearWatch(id)
-  }, [])
-  return position
 }

@@ -5,7 +5,7 @@ export type Session =
   | { status: 'loading' }
   | { status: 'error'; message: string }
   | { status: 'signed-out'; signIn: () => void }
-  | { status: 'joining'; join: (displayName: string, teamId: string) => Promise<void>; signOut: () => void }
+  | { status: 'joining'; join: (displayName: string) => Promise<void>; signOut: () => void }
   | {
       status: 'ready'
       player: PlayerRow

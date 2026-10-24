@@ -6,6 +6,7 @@ import JoinScreen from './pages/JoinScreen'
 import LeaderboardPage from './pages/LeaderboardPage'
 import MapPage from './pages/MapPage'
 import ProfilePage from './pages/ProfilePage'
+import { PresenceProvider } from './session/PresenceProvider'
 import { useSession } from './session/session'
 import { SessionProvider } from './session/SessionProvider'
 
@@ -14,18 +15,20 @@ function Screens() {
   if (session.status !== 'ready') return <JoinScreen />
 
   return (
-    <div className="app">
-      <main className="app-main">
-        <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/claim/:dropId" element={<ClaimPage />} />
-        </Routes>
-      </main>
-      <BottomNav />
-    </div>
+    <PresenceProvider>
+      <div className="app">
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<MapPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/claim/:dropId" element={<ClaimPage />} />
+          </Routes>
+        </main>
+        <BottomNav />
+      </div>
+    </PresenceProvider>
   )
 }
 

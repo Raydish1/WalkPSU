@@ -1,13 +1,14 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { CircleMarker, MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
+import { CircleMarker, useMapEvents } from 'react-leaflet'
 import BuildingPicker from '../components/BuildingPicker'
 import BuildingsLayer from '../components/BuildingsLayer'
+import CampusMap from '../components/CampusMap'
 import DropQrList from '../components/DropQrList'
 import { createDrop, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
-import { CAMPUS_CENTER, DROP_TYPES, OSM_TILES } from '../lib/campus'
+import { DROP_TYPES } from '../lib/campus'
 import type { DropType, NewDrop } from '../lib/database.types'
-import { useBuildingControl, useBuildings, useDrops, useTeams } from '../lib/hooks'
+import { useBuildingControl, useBuildings, useDrops, usePlayers } from '../lib/hooks'
 import { useReadySession } from '../session/session'
 
 type Target = { lat: number; lng: number; building: Building | null }
@@ -29,7 +30,7 @@ function AdminPage() {
   const { data: drops, refresh: refreshDrops } = useDrops()
   const { data: control } = useBuildingControl()
   const buildings = useBuildings()
-  const teams = useTeams()
+  const { data: players } = usePlayers()
   const [target, setTarget] = useState<Target | null>(null)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<DropType>('minigame')
@@ -133,9 +134,8 @@ function AdminPage() {
             : 'Open-ground drop (no building)'
           : 'Search a building above or tap the map.'}
       </p>
-      <MapContainer center={CAMPUS_CENTER} zoom={16} className="admin-map" preferCanvas>
-        <TileLayer {...OSM_TILES} />
-        <BuildingsLayer buildings={buildings} control={control} teams={teams} interactive={false} />
+      <CampusMap buildings={buildings} className="admin-map">
+        <BuildingsLayer buildings={buildings} control={control} players={players} interactive={false} />
         <TapToPick onPick={pickPoint} />
         {drops.map((d) => (
           <CircleMarker key={d.id} center={[d.lat, d.lng]} radius={8} pathOptions={{ color: DROP_TYPES[d.type].color }} />
@@ -143,7 +143,7 @@ function AdminPage() {
         {target && (
           <CircleMarker center={[target.lat, target.lng]} radius={12} pathOptions={{ color: '#111', fillColor: '#facc15', fillOpacity: 1 }} />
         )}
-      </MapContainer>
+      </CampusMap>
       <form className="stack" onSubmit={submit}>
         <label className="stack-sm">
           Title

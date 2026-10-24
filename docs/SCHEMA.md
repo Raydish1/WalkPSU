@@ -2,6 +2,8 @@
 
 Source of truth: the files in `supabase/migrations/`, applied in order. TypeScript mirror: `web/src/lib/database.types.ts`. Call everything through `web/src/lib/api.ts`.
 
+Players compete as **individuals**. There are no permanent teams anywhere in the data model (migration `20261024020000_individual_players.sql` removed them).
+
 ## Identity
 
 Every request carries a JWT. Its `sub` claim is the user's id: the Auth0 user id (`auth0|abc…`) or, in fallback mode, the Supabase anonymous user id. `players.auth_id` stores that `sub`, and the database fills it in automatically on insert. You never send it.
@@ -13,16 +15,6 @@ A user is an **admin** if either:
 
 ## Tables
 
-### `teams`
-
-| column | type | notes |
-| --- | --- | --- |
-| `id` | uuid | |
-| `name` | text | unique |
-| `color` | text | hex, used for map/leaderboard styling |
-
-Seeded with Nittany Lions, Creamery Crew, Beaver Blitz, Old Main Owls. Readable by anyone, even signed out (the join screen needs it).
-
 ### `players`
 
 | column | type | notes |
@@ -30,11 +22,11 @@ Seeded with Nittany Lions, Creamery Crew, Beaver Blitz, Old Main Owls. Readable 
 | `id` | uuid | |
 | `auth_id` | text | JWT `sub`, unique, set by the database |
 | `display_name` | text | 1–32 chars |
-| `team_id` | uuid → `teams` | required |
-| `is_admin` | boolean | default false; clients cannot write it |
+| `color` | text | hex map color, server-assigned on insert (least-used color of a 12-color palette) |
+| `is_admin` | boolean | default false |
 | `created_at` | timestamptz | |
 
-Players can insert and update only their own row, and only `display_name` and `team_id`.
+Every signed-in user can read all players. A player can insert and update only their own row, and only `display_name`. `color` and `is_admin` can't be written by clients.
 
 ### `drops`
 
@@ -60,8 +52,7 @@ Only admins can insert, update, or delete. Everyone signed in can read.
 | --- | --- | --- |
 | `id` | uuid | |
 | `drop_id` | uuid → `drops` | **unique**: one claim per drop |
-| `player_id` | uuid → `players` | |
-| `team_id` | uuid → `teams` | the player's team at claim time |
+| `player_id` | uuid → `players` | who claimed it |
 | `created_at` | timestamptz | |
 
 Read-only for clients. Rows are created only by `claim_drop`.
@@ -71,11 +62,11 @@ Read-only for clients. Rows are created only by `claim_drop`.
 | column | type | notes |
 | --- | --- | --- |
 | `building_num` | text | primary key; one row per captured building |
-| `team_id` | uuid → `teams` | current holder |
+| `player_id` | uuid → `players` | current holder; the map fills the building with this player's `color` |
 | `claim_id` | uuid → `claims` | the claim that captured it |
 | `captured_at` | timestamptz | |
 
-Read-only for clients. `claim_drop` upserts the row, so a later claim at the same building by another team recaptures it. Buildings with no row are unclaimed. Polygons and names come from `web/public/data/buildings.geojson`, not the database.
+Read-only for clients. `claim_drop` upserts the row, so a later claim at the same building by someone else recaptures it. Buildings with no row are unclaimed. Polygons and names come from `web/public/data/buildings.geojson`, not the database.
 
 ### `drop_secrets`
 
@@ -86,26 +77,38 @@ Read-only for clients. `claim_drop` upserts the row, so a later claim at the sam
 
 Created automatically by a trigger when a drop is inserted. **Only admins can read it**; players never see codes except by scanning. The QR encodes `https://<app>/claim/<drop_id>?key=<claim_code>`.
 
-### `team_scores` (view)
+### `player_scores` (view)
 
-`team_id, name, color, points, claims, buildings` for every team. `points` is the sum of claimed drops' points; `buildings` is how many buildings the team currently holds. Runs with the caller's permissions.
+`player_id, display_name, color, points, claims, buildings` for every player. `points` is the sum of their claimed drops' points; `buildings` is how many buildings they currently hold. Runs with the caller's permissions. The leaderboard orders by points, then buildings, then name.
 
 ## Functions
 
-- **`claim_drop(p_drop_id, p_lat?, p_lng?, p_code?) → claims`**. Claims a drop for the caller's team and, if the drop has a `building_num`, captures that building. It locks the drop row, so if two players tap at once exactly one wins. Proof is either the drop's QR `p_code` (any distance) or a GPS position. It raises an error with a user-facing message when:
-  - the caller hasn't joined a team,
+- **`claim_drop(p_drop_id, p_lat?, p_lng?, p_code?) → claims`**. Claims a drop for the caller and, if the drop has a `building_num`, captures that building for them. It locks the drop row, so if two players tap at once exactly one wins. Proof is either the drop's QR `p_code` (any distance) or a GPS position within `claim_radius_m()`. It raises an error with a user-facing message when:
+  - the caller hasn't joined,
   - the drop is gone, claimed, or expired,
   - the code is wrong,
   - there's no code and no position,
-  - there's no code and the caller is more than **60 m** away (great-circle distance).
+  - there's no code and the caller is too far away.
 
   Client: `claimDrop(dropId, { lat, lng })` or `claimDrop(dropId, { code })`.
+- **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
+- **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine on a 6,371 km sphere. `web/src/lib/geo.ts` `distanceM` uses the identical formula, so the client's "in range" matches the server.
+- **`next_player_color() → text`**. Default for `players.color`.
 - **`is_admin() → boolean`**. Used by RLS. It's callable from the client too, but the app derives admin status from the session.
-- **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine distance.
 
 ## Realtime
 
-`drops`, `claims`, and `building_control` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh both the map and the leaderboard.
+`drops`, `claims`, and `building_control` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh the map and the leaderboard.
+
+### Presence: live player locations
+
+Live locations use the Realtime **Presence** channel `campus`, keyed by player id. They are **never written to the database**. A player who has "Show me on the map" on (Profile; default on, stored per device) broadcasts this payload:
+
+```ts
+{ playerId, name, color, lat, lng }
+```
+
+It sends at most every 5 s, only while the app is open and visible. It untracks when the tab is hidden or the toggle is turned off. See `web/src/session/PresenceProvider.tsx`.
 
 ## Storage
 

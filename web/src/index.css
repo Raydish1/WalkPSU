@@ -175,36 +175,31 @@ fieldset {
   opacity: 0.5;
 }
 
-.team-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.color-dot {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.4em;
+  border-radius: 50%;
+  background: var(--player);
+  vertical-align: 0.05em;
 }
 
-.team-option {
-  min-height: 72px;
-  border: 2px solid var(--team);
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
   border-radius: 12px;
   background: var(--surface);
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.team-option[aria-pressed="true"] {
-  background: var(--team);
-  color: white;
-}
-
-.team-chip {
-  align-self: flex-start;
-  margin: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--team);
-  color: white;
-  font-weight: 600;
+.toggle {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  accent-color: var(--psu-navy);
 }
 
 .leaderboard {
@@ -221,7 +216,7 @@ fieldset {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-left: 6px solid var(--team);
+  border-left: 6px solid var(--player);
   border-radius: 10px;
   background: var(--surface);
 }
@@ -231,7 +226,7 @@ fieldset {
   font-weight: 700;
 }
 
-.team-name {
+.player-name {
   flex: 1;
   font-weight: 600;
 }
