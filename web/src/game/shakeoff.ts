@@ -46,3 +46,24 @@ export function blueShare(totals: SideTotals) {
   const sum = totals.blue.perPlayer + totals.white.perPlayer
   return sum === 0 ? 0.5 : totals.blue.perPlayer / sum
 }
+
+export const shakesOf = (p: GamePlayer, live: ReadonlyMap<string, number>) => Math.max(p.shakes, live.get(p.player_id) ?? 0)
+
+/** One side's players, top shaker first. */
+export function sidePlayers(players: GamePlayer[], side: Side, live: ReadonlyMap<string, number>) {
+  return players
+    .filter((p) => p.side === side)
+    .sort((a, b) => shakesOf(b, live) - shakesOf(a, live) || a.joined_at.localeCompare(b.joined_at))
+}
+
+/** Top shaker across both sides. */
+export function mvp(players: GamePlayer[]) {
+  return [...players].filter((p) => p.side).sort((a, b) => b.shakes - a.shakes || a.joined_at.localeCompare(b.joined_at))[0] ?? null
+}
+
+/** "Rayhan", "Rayhan & Alex", "Rayhan, Alex & Sam", then "Rayhan, Alex & 3 others" past three names. */
+export function joinNames(names: string[]) {
+  if (names.length <= 1) return names[0] ?? ''
+  if (names.length <= 3) return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
+  return `${names.slice(0, 2).join(', ')} & ${names.length - 2} others`
+}

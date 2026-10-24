@@ -2,7 +2,8 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState, type CSSProperties } from 'react'
 import { useParams } from 'react-router'
 import TugBar from '../game/TugBar'
-import { SIDES, sideTotals } from '../game/shakeoff'
+import { MvpLine, WinnerHeadline } from '../game/Results'
+import { SIDES, shakesOf, sidePlayers } from '../game/shakeoff'
 import { useGame } from '../game/useGame'
 import { useShakeBroadcast } from '../game/useShakeBroadcast'
 import { claimUrl, getDrop, startGame } from '../lib/api'
@@ -11,6 +12,7 @@ import { useClaimCodes } from '../lib/hooks'
 import { useReadySession } from '../session/session'
 
 const seconds = (ms: number) => Math.ceil(ms / 1000)
+const NO_LIVE: ReadonlyMap<string, number> = new Map()
 
 /** Projector view of one Shake-Off: /battle/:dropId. Listens only; it never joins or shakes. */
 function BattlePage() {
@@ -25,17 +27,20 @@ function BattlePage() {
   }, [dropId])
 
   if (!state) return <section className="battle center-screen">Loading…</section>
-  const totals = sideTotals(state.players, phase.kind === 'finished' ? new Map() : live)
+  const shown = phase.kind === 'finished' ? NO_LIVE : live
   const title = drop?.title ?? 'Shake-Off'
 
   if (phase.kind === 'finished') {
     const winner = SIDES[phase.winner]
     return (
       <section className="battle battle-result" style={{ '--side': winner.color, '--side-ink': winner.ink } as CSSProperties}>
-        <p className="battle-eyebrow">{title}</p>
-        <h1 className="battle-huge">{winner.label} wins!</h1>
-        <TugBar totals={totals} big />
-        <SideRosters players={state.players} highlight={phase.winner} />
+        <p className="battle-eyebrow">
+          {title} · {winner.label} wins
+        </p>
+        <WinnerHeadline players={state.players} winner={phase.winner} points={drop?.points} className="battle-winners" />
+        <MvpLine players={state.players} />
+        <TugBar players={state.players} live={shown} big />
+        <SideRosters players={state.players} live={shown} highlight={phase.winner} />
       </section>
     )
   }
@@ -45,8 +50,8 @@ function BattlePage() {
       <section className="battle">
         <p className="battle-eyebrow">{title}</p>
         <h1 className="battle-huge">{phase.kind === 'playing' ? `${seconds(phase.remainingMs)}` : 'Counting…'}</h1>
-        <TugBar totals={totals} big />
-        <SideRosters players={state.players} live={live} />
+        <TugBar players={state.players} live={shown} big />
+        <SideRosters players={state.players} live={shown} />
       </section>
     )
   }
@@ -92,7 +97,7 @@ function JoinQr({ dropId }: { dropId: string }) {
   )
 }
 
-function SideRosters({ players, live, highlight }: { players: GamePlayer[]; live?: ReadonlyMap<string, number>; highlight?: Side }) {
+function SideRosters({ players, live, highlight }: { players: GamePlayer[]; live: ReadonlyMap<string, number>; highlight?: Side }) {
   return (
     <div className="battle-sides">
       {(['blue', 'white'] as const).map((side) => (
@@ -103,13 +108,11 @@ function SideRosters({ players, live, highlight }: { players: GamePlayer[]; live
         >
           <h2>{SIDES[side].label}</h2>
           <ul>
-            {players
-              .filter((p) => p.side === side)
-              .map((p) => (
-                <li key={p.player_id}>
-                  {p.display_name} <strong>{Math.max(p.shakes, live?.get(p.player_id) ?? 0)}</strong>
-                </li>
-              ))}
+            {sidePlayers(players, side, live).map((p) => (
+              <li key={p.player_id}>
+                {p.display_name} <strong>{shakesOf(p, live)}</strong>
+              </li>
+            ))}
           </ul>
         </div>
       ))}

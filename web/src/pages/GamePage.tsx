@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
-import TugBar from '../game/TugBar'
-import { SIDES, sideTotals, type Phase } from '../game/shakeoff'
+import { MvpLine, WinnerHeadline } from '../game/Results'
+import TugBar, { SideNames } from '../game/TugBar'
+import { SIDES, type Phase } from '../game/shakeoff'
 import { useGame } from '../game/useGame'
 import { useShakeBroadcast } from '../game/useShakeBroadcast'
 import { useShakes } from '../game/useShakes'
 import { getDrop, joinGame, startGame } from '../lib/api'
-import type { DropRow, GamePlayer, GameState } from '../lib/database.types'
+import type { DropRow, GamePlayer, GameState, Side } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useClaimRadius } from '../lib/hooks'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 
 const seconds = (ms: number) => Math.ceil(ms / 1000)
+const NO_LIVE: ReadonlyMap<string, number> = new Map()
+const sideStyle = (side: Side) => ({ '--side': SIDES[side].color, '--side-ink': SIDES[side].ink }) as CSSProperties
 const vibrate = (pattern: number | number[]) => navigator.vibrate?.(pattern)
 
 /** A player's Shake-Off: join → lobby → countdown → shake → winner. /game/:dropId (?key= when arriving by QR). */
@@ -32,7 +35,6 @@ function GamePage() {
   const playing = phase.kind === 'playing' && !!me?.side
   const shakes = useShakes(playing)
   const live = useShakeBroadcast(dropId, me ? { playerId: player.id, count: shakes.count, active: playing } : null)
-  const totals = sideTotals(state?.players ?? [], live)
 
   // Buzz once as the game starts and once at the result.
   const buzzed = useRef<string | null>(null)
@@ -54,13 +56,15 @@ function GamePage() {
 
   if (phase.kind === 'finished') {
     const won = me?.side === phase.winner
-    const winner = SIDES[phase.winner]
     return (
-      <section className="game-screen game-result" style={{ '--side': winner.color, '--side-ink': winner.ink } as CSSProperties}>
-        <p className="game-eyebrow">{title}</p>
-        <h1 className="game-huge">{winner.label} wins!</h1>
-        {me && <p className="game-big">{won ? `You won ${drop?.points ?? ''} points! 🎉` : 'So close. Get them next time.'}</p>}
-        <TugBar totals={sideTotals(state.players, new Map())} />
+      <section className="game-screen game-result" style={sideStyle(phase.winner)}>
+        <p className="game-eyebrow">
+          {title} · {SIDES[phase.winner].label} wins
+        </p>
+        <WinnerHeadline players={state.players} winner={phase.winner} points={drop?.points} className="game-winners" />
+        {me && <p className="game-big">{won ? 'You won! 🎉' : 'So close. Get them next time.'}</p>}
+        <MvpLine players={state.players} meId={player.id} />
+        <TugBar players={state.players} live={NO_LIVE} meId={player.id} />
         <Link className="button" to="/">
           Back to map
         </Link>
@@ -69,7 +73,7 @@ function GamePage() {
   }
 
   if (phase.kind === 'playing' || phase.kind === 'tallying') {
-    if (!me?.side) return <Spectating title={title} phase={phase} totals={totals} />
+    if (!me?.side) return <Spectating title={title} phase={phase} players={state.players} live={live} />
     return (
       <section className="game-screen" style={{ '--side': side!.color, '--side-ink': side!.ink } as CSSProperties}>
         <p className="game-eyebrow">You're {side!.label}</p>
@@ -82,7 +86,7 @@ function GamePage() {
           <h1 className="game-huge">Counting…</h1>
         )}
         <p className="game-count">{shakes.count}</p>
-        <TugBar totals={totals} />
+        <TugBar players={state.players} live={live} meId={player.id} />
         {!shakes.motionReady && phase.kind === 'playing' && (
           <button className="button primary game-tap" onClick={shakes.tap}>
             Motion is off: tap here as fast as you can!
@@ -111,7 +115,18 @@ function GamePage() {
       ) : (
         <JoinButton dropId={dropId} drop={drop} code={key} onJoined={refresh} />
       )}
-      <Roster players={state.players} meId={player.id} />
+      {state.players.some((p) => p.side) ? (
+        <div className="lobby-sides">
+          {(['blue', 'white'] as const).map((s) => (
+            <div key={s} className="lobby-side" style={sideStyle(s)}>
+              <strong>{SIDES[s].label}</strong>
+              <SideNames players={state.players} side={s} live={NO_LIVE} meId={player.id} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Roster players={state.players} meId={player.id} />
+      )}
       {isAdmin && <AdminStart dropId={dropId} state={state} startsIn={startsIn} onStarted={refresh} />}
       {error && <p className="error">{error}</p>}
       <Link className="muted" to={`/battle/${dropId}`}>
@@ -208,13 +223,13 @@ function AdminStart({ dropId, state, startsIn, onStarted }: { dropId: string; st
   )
 }
 
-function Spectating({ title, phase, totals }: { title: string; phase: Phase; totals: ReturnType<typeof sideTotals> }) {
+function Spectating({ title, phase, players, live }: { title: string; phase: Phase; players: GamePlayer[]; live: ReadonlyMap<string, number> }) {
   return (
     <section className="page stack">
       <p className="game-eyebrow">{title}</p>
       <h1>This Shake-Off already started</h1>
       {phase.kind === 'playing' && <p className="game-timer">{seconds(phase.remainingMs)}s left</p>}
-      <TugBar totals={totals} />
+      <TugBar players={players} live={live} />
       <Link className="button" to="/">
         Back to map
       </Link>
