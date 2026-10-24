@@ -1,6 +1,31 @@
 :root {
+  --psu-navy: #1e407c;
+  --bg: #ffffff;
+  --surface: #f4f5f8;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --nav-height: 64px;
+
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
   color-scheme: light dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --surface: #1a1d24;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --border: #2a2e37;
+  }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 html,
@@ -10,7 +35,56 @@ body,
   height: 100%;
 }
 
-.map {
+.app {
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.map {
+  height: 100%;
   width: 100%;
+}
+
+.page {
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+.bottom-nav {
+  display: flex;
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.bottom-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  user-select: none;
+}
+
+.bottom-nav-tab.active {
+  color: var(--psu-navy);
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bottom-nav-tab.active {
+    color: #96bee6;
+  }
 }

@@ -1,16 +1,23 @@
-import { MapContainer, TileLayer } from 'react-leaflet'
-
-// Old Main, Penn State University Park
-const CAMPUS_CENTER: [number, number] = [40.7982, -77.8599]
+import { Route, Routes } from 'react-router'
+import BottomNav from './components/BottomNav'
+import AdminPage from './pages/AdminPage'
+import LeaderboardPage from './pages/LeaderboardPage'
+import MapPage from './pages/MapPage'
+import ProfilePage from './pages/ProfilePage'
 
 function App() {
   return (
-    <MapContainer center={CAMPUS_CENTER} zoom={16} className="map">
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-    </MapContainer>
+    <div className="app">
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<MapPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </main>
+      <BottomNav />
+    </div>
   )
 }
 
