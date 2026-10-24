@@ -1,4 +1,3 @@
-import type { LatLngBoundsExpression } from 'leaflet'
 import type { Building } from './buildings'
 
 const EARTH_RADIUS_M = 6371000
@@ -18,8 +17,13 @@ const METERS_PER_DEG_LAT = 111_195
 
 const median = (values: number[]) => [...values].sort((a, b) => a - b)[values.length >> 1]
 
+/** [[west, south], [east, north]], the order MapLibre expects. */
+export type Bounds = [[number, number], [number, number]]
+
+export const insideBounds = ([[w, s], [e, n]]: Bounds, lat: number, lng: number) => lat >= s && lat <= n && lng >= w && lng <= e
+
 /** University Park's building footprint padded by ~1 mile on every side. */
-export function campusBounds(buildings: Building[]): LatLngBoundsExpression {
+export function campusBounds(buildings: Building[]): Bounds {
   const center = { lat: median(buildings.map((b) => b.properties.lat)), lng: median(buildings.map((b) => b.properties.lng)) }
   const core = buildings.filter((b) => distanceM(center.lat, center.lng, b.properties.lat, b.properties.lng) <= CORE_RADIUS_M)
   const lats = core.map((b) => b.properties.lat)
@@ -27,7 +31,7 @@ export function campusBounds(buildings: Building[]): LatLngBoundsExpression {
   const padLat = PADDING_M / METERS_PER_DEG_LAT
   const padLng = PADDING_M / (METERS_PER_DEG_LAT * Math.cos(rad(center.lat)))
   return [
-    [Math.min(...lats) - padLat, Math.min(...lngs) - padLng],
-    [Math.max(...lats) + padLat, Math.max(...lngs) + padLng],
+    [Math.min(...lngs) - padLng, Math.min(...lats) - padLat],
+    [Math.max(...lngs) + padLng, Math.max(...lats) + padLat],
   ]
 }

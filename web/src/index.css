@@ -49,8 +49,51 @@ body,
 }
 
 .map {
+  position: relative;
   height: 100%;
   width: 100%;
+}
+
+/* Life360-style floating controls and cards over a chrome-free map. */
+.map-fab {
+  position: absolute;
+  right: 16px;
+  bottom: 24px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.map-fab:active {
+  transform: scale(0.94);
+}
+
+.map-card .maplibregl-popup-content {
+  min-width: 220px;
+  max-width: 280px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  color: #111827;
+  font: inherit;
+}
+
+.map-card .maplibregl-popup-tip {
+  display: none;
+}
+
+.maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact {
+  margin: 0 0 12px 12px;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .page {
@@ -287,8 +330,17 @@ fieldset {
 }
 
 .admin-map {
-  height: 280px;
-  border-radius: 12px;
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.admin-map .map-fab {
+  right: 10px;
+  bottom: 10px;
+  width: 44px;
+  height: 44px;
 }
 
 .hint-photo {

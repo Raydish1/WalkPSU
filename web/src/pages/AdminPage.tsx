@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { CircleMarker, useMapEvents } from 'react-leaflet'
+import type { FeatureCollection, Point } from 'geojson'
+import { Layer, Source } from 'react-map-gl/maplibre'
 import BuildingPicker from '../components/BuildingPicker'
-import BuildingsLayer from '../components/BuildingsLayer'
 import CampusMap from '../components/CampusMap'
 import DropQrList from '../components/DropQrList'
 import { createDrop, uploadHintPhoto } from '../lib/api'
@@ -13,10 +13,10 @@ import { useReadySession } from '../session/session'
 
 type Target = { lat: number; lng: number; building: Building | null }
 
-function TapToPick({ onPick }: { onPick: (lat: number, lng: number) => void }) {
-  useMapEvents({ click: (e) => onPick(e.latlng.lat, e.latlng.lng) })
-  return null
-}
+const toPoints = (items: { lat: number; lng: number; color: string }[]): FeatureCollection<Point> => ({
+  type: 'FeatureCollection',
+  features: items.map(({ lat, lng, color }) => ({ type: 'Feature', properties: { color }, geometry: { type: 'Point', coordinates: [lng, lat] } })),
+})
 
 function currentPosition() {
   return new Promise<GeolocationPosition>((resolve, reject) => {
@@ -39,6 +39,9 @@ function AdminPage() {
   const [busy, setBusy] = useState(false)
 
   const namesByNum = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
+  const highlighted = useMemo(() => new Set(drops.flatMap((d) => (d.building_num ? [d.building_num] : []))), [drops])
+  const dropPoints = useMemo(() => toPoints(drops.map((d) => ({ lat: d.lat, lng: d.lng, color: DROP_TYPES[d.type].color }))), [drops])
+  const targetPoint = useMemo(() => toPoints(target ? [{ lat: target.lat, lng: target.lng, color: '#facc15' }] : []), [target])
 
   if (!isAdmin) {
     return (
@@ -132,15 +135,13 @@ function AdminPage() {
             : 'Open-ground drop (no building)'
           : 'Search a building above or tap the map.'}
       </p>
-      <CampusMap buildings={buildings} className="admin-map">
-        <BuildingsLayer buildings={buildings} drops={drops} interactive={false} />
-        <TapToPick onPick={pickPoint} />
-        {drops.map((d) => (
-          <CircleMarker key={d.id} center={[d.lat, d.lng]} radius={8} pathOptions={{ color: DROP_TYPES[d.type].color }} />
-        ))}
-        {target && (
-          <CircleMarker center={[target.lat, target.lng]} radius={12} pathOptions={{ color: '#111', fillColor: '#facc15', fillOpacity: 1 }} />
-        )}
+      <CampusMap buildings={buildings} highlighted={highlighted} className="admin-map" onClick={(e) => pickPoint(e.lngLat.lat, e.lngLat.lng)}>
+        <Source id="admin-drops" type="geojson" data={dropPoints}>
+          <Layer id="admin-drops" type="circle" paint={{ 'circle-radius': 7, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 }} />
+        </Source>
+        <Source id="admin-target" type="geojson" data={targetPoint}>
+          <Layer id="admin-target" type="circle" paint={{ 'circle-radius': 11, 'circle-color': '#facc15', 'circle-stroke-color': '#111827', 'circle-stroke-width': 2 }} />
+        </Source>
       </CampusMap>
       <form className="stack" onSubmit={submit}>
         <label className="stack-sm">

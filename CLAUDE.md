@@ -14,7 +14,8 @@ Hard requirements for judging: rivalry, phone motion (device sensors), and the g
 ## Stack
 
 - **Frontend:** React + Vite + TypeScript in `web/`, react-router, ESLint.
-- **Map:** Leaflet via `react-leaflet` (canvas renderer), OpenStreetMap tiles, centered on Old Main (`40.7982, -77.8599`). Both maps use `components/CampusMap.tsx`, which locks `maxBounds` and `minZoom` to the campus core plus ~1.6 km (`campusBounds` in `lib/geo.ts`).
+- **Map:** MapLibre GL via `react-map-gl/maplibre`, 2.5D and Life360-style: OpenFreeMap Positron vector tiles (no API key), pitch 45°, bearing −17°, `buildings.geojson` extruded 10–15 m, buildings hosting an active drop in the accent color with a pulse. Everything on the map (claim circles, drops, players) is a GeoJSON source and layer. Both maps use `components/CampusMap.tsx`, which locks `maxBounds` and `minZoom` to the campus core plus ~1.6 km (`campusBounds` in `lib/geo.ts`), opens on the player when they're on campus (else Old Main), and floats the recenter button. Basemap tuning and landmark labels live in `map/basemap.ts`.
+  - MapLibre 6 loads its worker from a separate file: `map/worker.ts` registers it via `setWorkerUrl`, and `vite.config.ts` excludes `maplibre-gl` from dep pre-bundling. Remove either and GeoJSON layers never load (blank map).
 - **Buildings:** 958 University Park footprints from PASDA, simplified into the static `web/public/data/buildings.geojson`. Regenerate with `npm run fetch-buildings`. Never fetch PASDA at runtime. Buildings are keyed by PSU building number (`num`); the database stores only that number.
 - **Backend:** Supabase: Postgres (with RLS), Realtime, Storage.
 - **Auth:** Auth0 for login and roles (`player`, `admin`), connected via Supabase third-party auth. Supabase verifies the Auth0 **ID token**, which an Auth0 Action stamps with `role: authenticated` and `app_role`.
@@ -34,7 +35,8 @@ web/
                        Game (/game/:dropId), Battle (/battle/:dropId, projector)
     game/              Shake-Off: phase model, useGame, useShakes (DeviceMotion), useShakeBroadcast, TugBar
     session/           Session (Auth0 or anonymous fallback) + Presence (GPS watcher, live players)
-    components/        CampusMap, BuildingsLayer, BuildingPicker, DropQrList, BottomNav
+    components/        CampusMap (MapLibre), BuildingPicker, DropQrList, BottomNav
+    map/               basemap tuning + landmarks, geodesic circles and building heights, worker setup
     lib/               supabase client, api.ts helpers, hooks, geo.ts, database.types.ts
 supabase/migrations/   SQL migrations (run in order)
 docs/                  SCHEMA.md (tables, RLS, functions), SETUP.md (Supabase/Auth0/Vercel)
