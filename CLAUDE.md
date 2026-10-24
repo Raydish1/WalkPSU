@@ -24,11 +24,12 @@ web/
   api/                 Vercel serverless functions (server-only secrets)
   src/
     App.tsx            Routes + bottom nav shell
-    pages/             Map, Leaderboard, Profile, Admin (/admin)
+    pages/             Map, Leaderboard, Profile, Admin (/admin), JoinScreen
+    session/           Session state (Auth0 or anonymous fallback), useSession()
     components/        Shared UI
-    lib/               supabase client, auth0 config, data helpers, types
+    lib/               supabase client, api.ts helpers, hooks, database.types.ts
 supabase/migrations/   SQL migrations (run in order)
-docs/                  SCHEMA.md, SETUP.md, design notes
+docs/                  SCHEMA.md (tables, RLS, functions), SETUP.md (Supabase/Auth0/Vercel)
 ```
 
 ## Commands

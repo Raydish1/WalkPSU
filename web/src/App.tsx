@@ -1,11 +1,17 @@
 import { Route, Routes } from 'react-router'
 import BottomNav from './components/BottomNav'
 import AdminPage from './pages/AdminPage'
+import JoinScreen from './pages/JoinScreen'
 import LeaderboardPage from './pages/LeaderboardPage'
 import MapPage from './pages/MapPage'
 import ProfilePage from './pages/ProfilePage'
+import { useSession } from './session/session'
+import { SessionProvider } from './session/SessionProvider'
 
-function App() {
+function Screens() {
+  const session = useSession()
+  if (session.status !== 'ready') return <JoinScreen />
+
   return (
     <div className="app">
       <main className="app-main">
@@ -18,6 +24,14 @@ function App() {
       </main>
       <BottomNav />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <SessionProvider>
+      <Screens />
+    </SessionProvider>
   )
 }
 

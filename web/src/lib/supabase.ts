@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Database } from './database.types'
 import { auth0Config } from './auth0'
 
 const url = import.meta.env.VITE_SUPABASE_URL
@@ -18,5 +19,5 @@ export function setAuth0IdTokenGetter(getter: () => Promise<string | null>) {
 // With Auth0, Supabase verifies the Auth0 ID token (third-party auth) and supabase.auth is disabled.
 // Without it, we use Supabase anonymous sign-ins so RLS still sees an authenticated user.
 export const supabase = auth0Config
-  ? createClient(url, anonKey, { accessToken: async () => (getAuth0IdToken ? getAuth0IdToken() : null) })
-  : createClient(url, anonKey)
+  ? createClient<Database>(url, anonKey, { accessToken: async () => (getAuth0IdToken ? getAuth0IdToken() : null) })
+  : createClient<Database>(url, anonKey)
