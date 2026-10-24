@@ -12,7 +12,7 @@ if (!url || !anonKey) {
 let getAuth0IdToken: (() => Promise<string | null>) | null = null
 
 // The Auth0 SDK only exposes tokens through a React hook, so the session layer registers a getter here.
-export function setAuth0IdTokenGetter(getter: () => Promise<string | null>) {
+export function setAuth0IdTokenGetter(getter: (() => Promise<string | null>) | null) {
   getAuth0IdToken = getter
 }
 
