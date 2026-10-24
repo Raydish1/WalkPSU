@@ -4,8 +4,8 @@ HackPSU project: a mobile-first web app that turns the Penn State (University Pa
 
 - **Admins** drop events at locations on the campus map: mini-games, photo hunts, check-ins.
 - **Players compete as individuals** (no permanent teams; each player gets a map color). They race to a drop's location to claim it. Claiming means being there: inside the drop's claim radius by GPS, or by scanning its QR code (for indoors, where GPS is unreliable).
-- Claimed drops award points. A drop placed at a campus building also **captures that building** for the player, and the map fills each building with its holder's color.
-- A leaderboard ranks players by points and territory (buildings held) in real time. Opted-in players appear live on the map (Realtime Presence).
+- Claimed drops award points. A drop can sit at a campus building; the map highlights that building in the accent color while the drop is active. Buildings are never owned or captured.
+- A leaderboard ranks players by points in real time. Opted-in players appear live on the map (Realtime Presence).
 
 - **Shake-Off** (`minigame` drops): players join a lobby at the drop (in range or by QR). At 4 players (or an admin's Start) they're split at random into Blue vs White for that game only, then shake their phones for 15 s. The side with more shakes per player wins, and every winner gets the drop's points. Phones show a live tug-of-war; `/battle/:dropId` is the projector view.
 

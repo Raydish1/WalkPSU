@@ -7,27 +7,23 @@ import { claimDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
-import { useBuildingControl, useBuildings, useClaimRadius, useDrops, usePlayers } from '../lib/hooks'
+import { useBuildings, useClaimRadius, useDrops } from '../lib/hooks'
 import { usePresence } from '../session/presence'
 
 function MapPage() {
   const { data: drops, error, refresh: refreshDrops } = useDrops()
-  const { data: control, refresh: refreshControl } = useBuildingControl()
-  const { data: players, refresh: refreshPlayers } = usePlayers()
   const buildings = useBuildings()
   const radius = useClaimRadius()
   const { position, others } = usePresence()
 
   const onClaimed = () => {
     refreshDrops()
-    refreshControl()
-    refreshPlayers()
   }
 
   return (
     <div className="map-wrap">
       <CampusMap buildings={buildings} className="map">
-        <BuildingsLayer buildings={buildings} control={control} players={players} />
+        <BuildingsLayer buildings={buildings} drops={drops} />
         {drops.map((drop) => {
           const distance = position ? distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng) : null
           const inRange = radius !== null && distance !== null && distance <= radius

@@ -19,10 +19,6 @@ export async function updatePlayer(id: string, changes: Partial<Pick<PlayerRow, 
   return unwrap(await supabase.from('players').update(changes).eq('id', id).select().single())
 }
 
-export async function getPlayers() {
-  return unwrap(await supabase.from('players').select('*'))
-}
-
 /** Active drops that haven't expired. */
 export async function getDrops() {
   const now = new Date().toISOString()
@@ -96,17 +92,12 @@ export function claimUrl(dropId: string, code: string) {
   return `${window.location.origin}/claim/${dropId}?key=${code}`
 }
 
-export async function getBuildingControl() {
-  return unwrap(await supabase.from('building_control').select('*'))
-}
-
 export async function getLeaderboard() {
   return unwrap(
     await supabase
       .from('player_scores')
       .select('*')
       .order('points', { ascending: false })
-      .order('buildings', { ascending: false })
       .order('display_name'),
   )
 }
@@ -116,7 +107,7 @@ export async function getClaimRadius() {
   return unwrap(await supabase.rpc('claim_radius_m'))
 }
 
-type RealtimeTable = 'drops' | 'claims' | 'building_control' | 'games' | 'game_players'
+type RealtimeTable = 'drops' | 'claims' | 'games' | 'game_players'
 type RowOf<T extends RealtimeTable> = Database['public']['Tables'][T]['Row']
 
 /** Calls onChange for every insert/update/delete on a Realtime-enabled table. Returns an unsubscribe fn. */

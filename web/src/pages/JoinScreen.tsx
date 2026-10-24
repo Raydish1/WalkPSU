@@ -39,7 +39,7 @@ function JoinScreen() {
         <div className="auth-card stack">
           <span className="auth-eyebrow">EXPLORE · COMPETE · CONNECT</span>
           <h1>Welcome to WalkPSU</h1>
-          <p className="muted">Race across campus to claim drops and capture buildings.</p>
+          <p className="muted">Race across campus to claim drops and win Shake-Offs.</p>
           <button className="button primary" disabled={busy} onClick={() => void runAuth(session.signUp ?? session.signIn)}>
             Create an account
           </button>

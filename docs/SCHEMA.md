@@ -2,7 +2,7 @@
 
 Source of truth: the files in `supabase/migrations/`, applied in order. TypeScript mirror: `web/src/lib/database.types.ts`. Call everything through `web/src/lib/api.ts`.
 
-Players compete as **individuals**. There are no permanent teams anywhere in the data model (migration `20261024020000_individual_players.sql` removed them).
+Players compete as **individuals**. There are no permanent teams anywhere in the data model (migration `20261024020000_individual_players.sql` removed them). Buildings aren't owned or captured (migration `20261024040000_remove_building_capture.sql` removed that).
 
 ## Identity
 
@@ -39,7 +39,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | `points` | integer | > 0, default 10 |
 | `status` | `active` \| `claimed` \| `expired` | default `active`; becomes `claimed` via `claim_drop` |
 | `hint_photo_url` | text | public URL in the `drop-hints` storage bucket |
-| `building_num` | text | PSU building number (`num` in `buildings.geojson`). null = open-ground drop. Claiming captures this building |
+| `building_num` | text | PSU building number (`num` in `buildings.geojson`). null = open-ground drop. The map highlights a building while it hosts an active drop |
 | `created_by` | uuid → `players` | |
 | `created_at` | timestamptz | |
 | `expires_at` | timestamptz | null = never. Past this time the drop can't be claimed even if `status` is still `active` |
@@ -56,17 +56,6 @@ Only admins can insert, update, or delete. Everyone signed in can read.
 | `created_at` | timestamptz | |
 
 Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary drop: it locks the drop and flips it to `claimed`) and `finish_game` (one claim per winner of a Shake-Off).
-
-### `building_control`
-
-| column | type | notes |
-| --- | --- | --- |
-| `building_num` | text | primary key; one row per captured building |
-| `player_id` | uuid → `players` | current holder; the map fills the building with this player's `color` |
-| `claim_id` | uuid → `claims` | the claim that captured it |
-| `captured_at` | timestamptz | |
-
-Read-only for clients. `claim_drop` upserts the row, so a later claim at the same building by someone else recaptures it. Buildings with no row are unclaimed. Polygons and names come from `web/public/data/buildings.geojson`, not the database.
 
 ### `drop_secrets`
 
@@ -102,11 +91,11 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
 
 ### `player_scores` (view)
 
-`player_id, display_name, color, points, claims, buildings` for every player. `points` is the sum of their claimed drops' points; `buildings` is how many buildings they currently hold. Runs with the caller's permissions. The leaderboard orders by points, then buildings, then name.
+`player_id, display_name, color, points, claims` for every player. `points` is the sum of their claimed drops' points. Runs with the caller's permissions. The leaderboard orders by points, then name.
 
 ## Functions
 
-- **`claim_drop(p_drop_id, p_lat?, p_lng?, p_code?) → claims`**. Claims a drop for the caller and, if the drop has a `building_num`, captures that building for them. It locks the drop row, so if two players tap at once exactly one wins. Proof is either the drop's QR `p_code` (any distance) or a GPS position within `claim_radius_m()`. It raises an error with a user-facing message when:
+- **`claim_drop(p_drop_id, p_lat?, p_lng?, p_code?) → claims`**. Claims a drop for the caller. It locks the drop row, so if two players tap at once exactly one wins. Proof is either the drop's QR `p_code` (any distance) or a GPS position within `claim_radius_m()`. It raises an error with a user-facing message when:
   - the caller hasn't joined,
   - the drop is gone, claimed, or expired,
   - the code is wrong,
@@ -119,7 +108,7 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
   - `join_game(drop, lat?, lng?, code?)`. Same proof as claiming. Rejoining is a no-op. Joining closes at `started_at`. The 4th player schedules the start `auto_start_delay_seconds` out.
   - `start_game(drop)`. Admin only, needs 2+ players. Pulls the start in to `admin_start_delay_seconds` from now.
   - `submit_shakes(drop, count)`. Running total during and just after the game. Stored as `greatest(previous, min(count, floor(elapsed_seconds × max_shakes_per_second)))`, so a client can't report more than a human could shake.
-  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds`. The higher **average shakes per player** wins (fair for uneven sides). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, the drop is marked claimed, and if it sits on a building the winning side's top shaker captures it.
+  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds`. The higher **average shakes per player** wins (fair for uneven sides). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
   - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. The client reads them from `get_game_state`; don't copy them into client code.
   - `claim_drop` refuses `minigame` drops, so the game can't be skipped.
 - **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
@@ -129,7 +118,7 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
 
 ## Realtime
 
-`drops`, `claims`, and `building_control` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh the map and the leaderboard.
+`drops`, `claims`, `games`, and `game_players` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh the map and the leaderboard.
 
 ### Broadcast: live Shake-Off counts
 

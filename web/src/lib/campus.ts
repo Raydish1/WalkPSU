@@ -6,6 +6,9 @@ export const OSM_TILES = {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }
 
+/** Highlight for buildings hosting an active drop. */
+export const DROP_ACCENT = '#f97316'
+
 export const DROP_TYPES = {
   minigame: { label: 'Mini-game', color: '#7c3aed' },
   photo_hunt: { label: 'Photo hunt', color: '#db2777' },

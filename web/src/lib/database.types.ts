@@ -31,8 +31,6 @@ type Drop = {
 
 type Claim = { id: string; drop_id: string; player_id: string; created_at: string }
 
-type BuildingControl = { building_num: string; player_id: string; claim_id: string; captured_at: string }
-
 type DropSecret = { drop_id: string; claim_code: string }
 
 export type Side = 'blue' | 'white'
@@ -56,7 +54,7 @@ export type GamePlayer = { player_id: string; display_name: string; color: strin
 /** Returned by get_game_state() and finish_game(). `game` is null until someone joins. */
 export type GameState = { server_now: string; settings: ShakeOffSettings; game: Game | null; players: GamePlayer[] }
 
-type PlayerScore = { player_id: string; display_name: string; color: string; points: number; claims: number; buildings: number }
+type PlayerScore = { player_id: string; display_name: string; color: string; points: number; claims: number }
 
 export type Database = {
   public: {
@@ -75,7 +73,6 @@ export type Database = {
         Relationships: []
       }
       claims: { Row: Claim; Insert: never; Update: never; Relationships: [] }
-      building_control: { Row: BuildingControl; Insert: never; Update: never; Relationships: [] }
       drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
       games: { Row: Game & { seed: string }; Insert: never; Update: never; Relationships: [] }
       game_players: { Row: GamePlayerRow; Insert: never; Update: never; Relationships: [] }
@@ -103,5 +100,4 @@ export type PlayerRow = PublicTables['players']['Row']
 export type DropRow = PublicTables['drops']['Row']
 export type NewDrop = PublicTables['drops']['Insert']
 export type ClaimRow = PublicTables['claims']['Row']
-export type BuildingControlRow = PublicTables['building_control']['Row']
 export type PlayerScoreRow = Database['public']['Views']['player_scores']['Row']
