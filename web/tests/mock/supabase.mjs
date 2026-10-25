@@ -35,6 +35,8 @@ function seed() {
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
     // ~25 m west — mental math at Old Main.
     drop('math-drop', 'Old Main Mental Math', 'math', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng - 25 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 20, '0001000'),
+    // ~40 m north — chemistry quiz (Osmond Lab area).
+    drop('chem-drop', 'Osmond Lab Chemistry', 'chemistry', OLD_MAIN_LAWN.lat + 40 / 111_195, OLD_MAIN_LAWN.lng, 20, '0015000'),
   ]
   return {
     players,

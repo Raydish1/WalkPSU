@@ -1,7 +1,7 @@
 // Hand-written to match supabase/migrations. Keep in sync with every migration.
 // (Or regenerate: npx supabase gen types typescript --project-id <id> > src/lib/database.types.ts)
 
-export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'math'
+export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'math' | 'chemistry'
 export type DropStatus = 'active' | 'claimed' | 'expired'
 
 type Player = {

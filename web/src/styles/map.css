@@ -698,3 +698,44 @@
   background: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
+
+/* Chemistry challenge */
+
+.chem-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  text-align: center;
+}
+
+.chem-prompt-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chem-prompt-hero {
+  margin: 0;
+  font-family: 'Oxanium', system-ui, sans-serif;
+  font-size: clamp(36px, 10vw, 52px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.chem-prompt-name {
+  font-size: clamp(28px, 8vw, 40px);
+  letter-spacing: 0.02em;
+}
+
+.chem-formula sub {
+  font-size: 0.55em;
+  vertical-align: baseline;
+  position: relative;
+  bottom: -0.15em;
+}

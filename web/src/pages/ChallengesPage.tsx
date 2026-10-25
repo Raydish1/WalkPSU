@@ -6,7 +6,15 @@ import { difficultyForPoints } from '../lib/progress'
 import { useDrops } from '../lib/hooks'
 import { distanceM } from '../lib/geo'
 import { usePresence } from '../session/presence'
+import { CHEM_PRACTICE_ID } from './ChemPage'
 import { MATH_PRACTICE_ID } from './MathPage'
+
+function challengeHref(type: keyof typeof DROP_TYPES, id: string) {
+  if (type === 'minigame') return `/game/${id}`
+  if (type === 'math') return `/math/${id}`
+  if (type === 'chemistry') return `/chem/${id}`
+  return '/'
+}
 
 function ChallengesPage() {
   const { data: drops, error } = useDrops()
@@ -39,13 +47,30 @@ function ChallengesPage() {
         </Link>
       </div>
 
+      <div className="card stack-sm" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+          <span className="chip" style={{ '--player': DROP_TYPES.chemistry.color } as CSSProperties}>
+            <span className="color-dot" aria-hidden />
+            Chemistry
+          </span>
+          <span className="diff-pill diff-medium">Practice</span>
+        </div>
+        <h2 style={{ margin: 0, fontSize: 18 }}>Osmond Lab Chemistry</h2>
+        <p className="muted" style={{ margin: 0 }}>
+          3 problems · elements + easy formulas (H₂O) · no GPS needed
+        </p>
+        <Link className="button primary" to={`/chem/${CHEM_PRACTICE_ID}`}>
+          Start Challenge
+        </Link>
+      </div>
+
       {error && <p className="error">{error}</p>}
 
       {drops.length === 0 ? (
         <div className="card empty-state">
           <StarIcon size={40} strokeWidth={1.6} />
           <strong>No live campus drops yet</strong>
-          <p className="muted footnote">Try the practice math challenge above, or wait for an admin drop.</p>
+          <p className="muted footnote">Try a practice challenge above, or wait for an admin drop.</p>
           <Link className="button" to="/">
             Open map
           </Link>
@@ -58,10 +83,11 @@ function ChallengesPage() {
                 ? Math.round(distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng))
                 : null
             const difficulty = difficultyForPoints(drop.points)
-            const href =
-              drop.type === 'minigame' ? `/game/${drop.id}` : drop.type === 'math' ? `/math/${drop.id}` : '/'
+            const href = challengeHref(drop.type, drop.id)
             const cta =
-              drop.type === 'minigame' || drop.type === 'math' ? 'Start Challenge' : 'View on map'
+              drop.type === 'minigame' || drop.type === 'math' || drop.type === 'chemistry'
+                ? 'Start Challenge'
+                : 'View on map'
             return (
               <li key={drop.id} className="card stack-sm" style={{ '--accent-local': DROP_TYPES[drop.type].color, padding: 16 } as CSSProperties}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -76,6 +102,7 @@ function ChallengesPage() {
                   +{drop.points} pts
                   {distance !== null ? ` · ${distance} m away` : ''}
                   {drop.type === 'math' ? ' · √ − ÷ fractions' : ''}
+                  {drop.type === 'chemistry' ? ' · elements + formulas' : ''}
                 </p>
                 <Link className="button primary" to={href}>
                   {cta}

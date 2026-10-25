@@ -9,6 +9,7 @@ export const DROP_TYPES = {
   photo_hunt: { label: 'Photo hunt', color: '#7eb6e8' },
   checkin: { label: 'Check-in', color: '#a8d4f0' },
   math: { label: 'Mental math', color: '#3d8fc7' },
+  chemistry: { label: 'Chemistry', color: '#2f7eb5' },
 } as const
 
 /** Extra search terms for buildings whose official PASDA names don't match what students call them. */

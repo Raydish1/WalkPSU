@@ -22,9 +22,10 @@ function ClaimPage() {
     attempted.current = true
     getDrop(dropId)
       .then((drop) => {
-        // Mini-game QR opens the Shake-Off lobby; math QR opens the puzzle (claim after solving).
+        // Mini-game QR opens the Shake-Off lobby; math/chem QR opens the puzzle (claim after solving).
         if (drop?.type === 'minigame') return navigate(`/game/${dropId}?key=${encodeURIComponent(key)}`, { replace: true })
         if (drop?.type === 'math') return navigate(`/math/${dropId}?key=${encodeURIComponent(key)}`, { replace: true })
+        if (drop?.type === 'chemistry') return navigate(`/chem/${dropId}?key=${encodeURIComponent(key)}`, { replace: true })
         return claimDrop(dropId, { code: key }).then(() => setResult({ status: 'claimed' }))
       })
       .catch((e: Error) => setResult({ status: 'failed', message: e.message }))

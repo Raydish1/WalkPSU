@@ -55,7 +55,9 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
                         ? 'Scan to join the Shake-Off lobby'
                         : drop.type === 'math'
                           ? 'Scan to open the mental-math challenge'
-                          : 'Scan with your phone camera to claim'}
+                          : drop.type === 'chemistry'
+                            ? 'Scan to open the chemistry challenge'
+                            : 'Scan with your phone camera to claim'}
                     </span>
                     {drop.type === 'minigame' && (
                       <Link className="button primary" to={`/battle/${drop.id}`}>

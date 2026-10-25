@@ -17,7 +17,13 @@ function BuildingSheet({ building, drop, onClose }: Props) {
   const difficulty = difficultyForPoints(points)
   const accent = drop ? DROP_TYPES[drop.type].color : 'var(--accent)'
   const challengePath =
-    drop?.type === 'minigame' ? `/game/${drop.id}` : drop?.type === 'math' ? `/math/${drop.id}` : null
+    drop?.type === 'minigame'
+      ? `/game/${drop.id}`
+      : drop?.type === 'math'
+        ? `/math/${drop.id}`
+        : drop?.type === 'chemistry'
+          ? `/chem/${drop.id}`
+          : null
 
   return (
     <aside className="building-sheet glass slide-up" style={{ '--team': accent } as CSSProperties}>

@@ -11,14 +11,15 @@ import GamePage from './pages/GamePage'
 import JoinScreen from './pages/JoinScreen'
 import LeaderboardPage from './pages/LeaderboardPage'
 import MapPage from './pages/MapPage'
+import ChemPage from './pages/ChemPage'
 import MathPage from './pages/MathPage'
 import ProfilePage from './pages/ProfilePage'
 import { PresenceProvider } from './session/PresenceProvider'
 import { useSession } from './session/session'
 import { SessionProvider } from './session/SessionProvider'
 
-// Full-screen game views: no bottom nav to mis-tap while shaking, solving math, or on the projector.
-const FULL_SCREEN = /^\/(game|battle|math)\//
+// Full-screen game views: no bottom nav to mis-tap while shaking, solving, or on the projector.
+const FULL_SCREEN = /^\/(game|battle|math|chem)\//
 
 // Sonner reads these on the toaster; pointing them at our tokens makes toasts follow light/dark with the app.
 const TOAST_THEME = {
@@ -47,6 +48,7 @@ function Screens() {
             <Route path="/claim/:dropId" element={<ClaimPage />} />
             <Route path="/game/:dropId" element={<GamePage />} />
             <Route path="/math/:dropId" element={<MathPage />} />
+            <Route path="/chem/:dropId" element={<ChemPage />} />
             <Route path="/battle/:dropId" element={<BattlePage />} />
           </Routes>
         </main>
