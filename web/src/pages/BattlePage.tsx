@@ -1,7 +1,8 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState, type CSSProperties } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import Avatar from '../components/Avatar'
+import { ChevronIcon } from '../components/icons'
 import TugBar from '../game/TugBar'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import { SIDES, shakesOf, sidePlayers } from '../game/shakeoff'
@@ -18,6 +19,19 @@ const NO_LIVE: ReadonlyMap<string, number> = new Map()
 /** Projector view of one Shake-Off: /battle/:dropId. Listens only; it never joins or shakes. */
 function BattlePage() {
   const { dropId = '' } = useParams()
+  return (
+    <>
+      {/* Full-screen with no tab bar, so whoever opened it (an organizer's phone or laptop) needs a way out. */}
+      <Link className="battle-exit" to={`/game/${dropId}`}>
+        <ChevronIcon className="back-link-icon" />
+        Lobby
+      </Link>
+      <BattleScreen dropId={dropId} />
+    </>
+  )
+}
+
+function BattleScreen({ dropId }: { dropId: string }) {
   const { isAdmin } = useReadySession()
   const { state, phase, refresh } = useGame(dropId)
   const live = useShakeBroadcast(dropId, null)

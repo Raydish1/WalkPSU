@@ -18,7 +18,7 @@ import { SessionProvider } from './session/SessionProvider'
 // Full-screen game views: no bottom nav to mis-tap while shaking or on the projector.
 const FULL_SCREEN = /^\/(game|battle)\//
 
-// Sonner reads these on the toaster; pointing them at our tokens makes toasts follow light/dark with the app.
+// Sonner reads these on the toaster; pointing them at our tokens makes toasts match the app.
 const TOAST_THEME = {
   '--normal-bg': 'var(--material-strong)',
   '--normal-border': 'var(--material-edge)',
@@ -59,7 +59,7 @@ function App() {
       <Screens />
       <Toaster
         position="top-center"
-        theme="system"
+        theme="light"
         gap={8}
         mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 8px)', left: 12, right: 12 }}
         toastOptions={{ className: 'toast' }}

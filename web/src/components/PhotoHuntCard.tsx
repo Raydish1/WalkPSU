@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { toast } from 'sonner'
+import { Drawer } from 'vaul'
 import { submitHuntPhoto } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
@@ -70,7 +71,9 @@ function PhotoHuntCard({ drop, position, onFound }: Props) {
         </span>
         <span className="points-badge">{drop.points} pts</span>
       </div>
-      <h3>{drop.title}</h3>
+      <Drawer.Title asChild>
+        <h3>{drop.title}</h3>
+      </Drawer.Title>
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="The spot to find" />}
       {drop.twist && (
         <p className="hunt-twist">

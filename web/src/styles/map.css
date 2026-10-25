@@ -156,6 +156,53 @@
   border-radius: 999px;
 }
 
+/* Drop details: a floating sheet (Vaul) the player drags down to dismiss. */
+.drop-sheet {
+  position: fixed;
+  z-index: 20;
+  right: 8px;
+  bottom: max(8px, var(--safe-bottom));
+  left: 8px;
+  max-width: 480px;
+  max-height: 80dvh;
+  margin: 0 auto;
+  padding: 8px 20px 20px;
+  overflow-y: auto;
+  border: 0.5px solid var(--material-edge);
+  border-radius: 28px;
+  outline: none;
+  background: var(--material-strong);
+  backdrop-filter: var(--material-blur);
+  -webkit-backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-float);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.38;
+  overscroll-behavior: contain;
+}
+
+/* Vaul extends a full-width backing under the sheet for over-drag; a floating sheet doesn't want it. */
+.drop-sheet::after {
+  display: none;
+}
+
+.drop-sheet-handle[data-vaul-handle] {
+  width: 40px;
+  height: 5px;
+  margin-bottom: 14px;
+  background: var(--separator);
+  opacity: 1;
+}
+
+.lobby-status {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--fill);
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 .drop-card {
   display: flex;
   flex-direction: column;
@@ -375,5 +422,119 @@
   from {
     opacity: 0;
     transform: scale(0.8);
+  }
+}
+
+/* Player sprites: little round faces for presence. Everything moves with transform/opacity only. */
+
+/* Only the face takes taps, so a sprite standing near a drop never hides the drop's marker from a tap. */
+.sprite-marker {
+  pointer-events: none;
+}
+
+.sprite {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  will-change: transform;
+}
+
+.sprite-shadow {
+  position: absolute;
+  bottom: -3px;
+  width: 20px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(30, 24, 40, 0.28);
+  filter: blur(1.5px);
+}
+
+.sprite.is-me .sprite-shadow {
+  width: 26px;
+}
+
+.sprite-hop,
+.sprite-land {
+  display: block;
+  /* Hops and squashes pivot on the feet, so landing looks like contact with the ground. */
+  transform-origin: 50% 100%;
+}
+
+.sprite-body {
+  display: block;
+  pointer-events: auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+}
+
+.sprite.is-me .sprite-body {
+  width: 38px;
+  height: 38px;
+}
+
+.sprite-body svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Pastel body: the player's color mixed with white, still recognizably theirs. The outline is a deeper shade of
+   the same hue so pale faces keep a clear edge on the light map. */
+.sprite-face {
+  fill: color-mix(in oklab, var(--c) 45%, #ffffff);
+  stroke: color-mix(in oklab, var(--c) 70%, #1e1828);
+  stroke-opacity: 0.55;
+}
+
+.sprite-ring {
+  fill: none;
+}
+
+.sprite.is-me .sprite-ring {
+  fill: #ffffff;
+  stroke: rgba(30, 24, 40, 0.16);
+  stroke-width: 1;
+}
+
+.sprite-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Idle breathing: a slow squash and stretch, each sprite on its own period and phase. */
+  .sprite-body {
+    animation: breathe var(--breathe) ease-in-out var(--breathe-delay) infinite alternate;
+  }
+
+  .sprite-eyes {
+    animation: blink var(--blink) linear var(--blink-delay) infinite;
+  }
+}
+
+@keyframes breathe {
+  from {
+    transform: scale(1.035, 0.965);
+  }
+  to {
+    transform: scale(0.98, 1.025);
+  }
+}
+
+/* A blink is a ~120 ms dip at the end of each cycle; the cycle length varies per player. */
+@keyframes blink {
+  0%,
+  95%,
+  100% {
+    transform: scaleY(1);
+  }
+  97.5% {
+    transform: scaleY(0.1);
   }
 }
