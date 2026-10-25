@@ -5,6 +5,7 @@ import type { ExpressionSpecification, FilterSpecification } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AttributionControl, Layer, Map, Source, useMap, type MapLayerMouseEvent, type MapRef } from 'react-map-gl/maplibre'
 import type { Building } from '../lib/buildings'
+import { LocateIcon } from './icons'
 import { CAMPUS_CENTER, DROP_ACCENT } from '../lib/campus'
 import { campusBounds, insideBounds, type Bounds } from '../lib/geo'
 import { BASEMAP_STYLE, LABEL_FONT, LANDMARKS, tuneBasemap } from '../map/basemap'
@@ -166,9 +167,7 @@ function CampusCamera({ bounds, onMinZoom }: { bounds: Bounds; onMinZoom: (zoom:
       aria-label="Recenter"
       onClick={() => map?.easeTo({ ...target(), pitch: PITCH, bearing: BEARING, duration: 900 })}
     >
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
-        <path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z" fill="currentColor" />
-      </svg>
+      <LocateIcon size={22} />
     </button>
   )
 }

@@ -4,13 +4,14 @@ import { Link } from 'react-router'
 import { claimUrl } from '../lib/api'
 import type { DropRow } from '../lib/database.types'
 import { useClaimCodes } from '../lib/hooks'
+import { ChevronIcon, QrIcon } from './icons'
 
 /** Active drops with a scannable claim QR code each, for claiming where GPS is unreliable (indoors). */
 function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (num: string) => string | undefined }) {
   const { data: codes, error, refresh } = useClaimCodes()
   const [openId, setOpenId] = useState<string | null>(null)
 
-  if (drops.length === 0) return <p className="muted">No active drops.</p>
+  if (drops.length === 0) return <p className="card muted">No active drops.</p>
 
   const place = (drop: DropRow) => {
     const name = drop.building_num && (buildingName(drop.building_num) ?? drop.building_num)
@@ -20,7 +21,7 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
   return (
     <>
       {error && <p className="error">{error}</p>}
-      <ul className="qr-list">
+      <ul className="list qr-list">
         {drops.map((drop) => {
           const code = codes.get(drop.id)
           const open = openId === drop.id
@@ -28,20 +29,22 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
             <li key={drop.id} className="qr-row">
               <button
                 type="button"
-                className="qr-toggle"
+                className="list-row qr-toggle"
                 onClick={() => {
                   if (!open && !code) refresh()
                   setOpenId(open ? null : drop.id)
                 }}
                 aria-expanded={open}
               >
-                <span>
-                  <strong>{drop.title}</strong>
-                  <span className="muted">
-                    {' '}· {drop.points} pts{place(drop)}
+                <QrIcon className="muted" size={22} />
+                <span className="list-row-main">
+                  <strong className="truncate">{drop.title}</strong>
+                  <span className="muted footnote">
+                    {drop.points} pts{place(drop)}
                   </span>
                 </span>
-                <span className="muted">{open ? 'Hide QR' : 'Show QR'}</span>
+                <span className="visually-hidden">{open ? 'Hide QR' : 'Show QR'}</span>
+                <ChevronIcon className="chevron" />
               </button>
               {open &&
                 (code ? (
@@ -51,13 +54,13 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
                       {drop.type === 'minigame' ? 'Scan to join the Shake-Off lobby' : 'Scan with your phone camera to claim'}
                     </span>
                     {drop.type === 'minigame' && (
-                      <Link className="button" to={`/battle/${drop.id}`}>
+                      <Link className="button primary" to={`/battle/${drop.id}`}>
                         Open big screen
                       </Link>
                     )}
                   </div>
                 ) : (
-                  <p className="muted">Loading code…</p>
+                  <p className="list-row muted">Loading code…</p>
                 ))}
             </li>
           )

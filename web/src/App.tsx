@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { Route, Routes, useLocation } from 'react-router'
 import { Toaster } from 'sonner'
 import BottomNav from './components/BottomNav'
+import DropAlerts from './components/DropAlerts'
 import AdminPage from './pages/AdminPage'
 import BattlePage from './pages/BattlePage'
 import ClaimPage from './pages/ClaimPage'
@@ -46,6 +47,7 @@ function Screens() {
           </Routes>
         </main>
         {!fullScreen && <BottomNav />}
+        {!fullScreen && <DropAlerts />}
       </div>
     </PresenceProvider>
   )

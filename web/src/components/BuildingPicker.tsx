@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Building } from '../lib/buildings'
 import { BUILDING_NICKNAMES } from '../lib/campus'
+import { ChevronIcon } from './icons'
 
 function BuildingPicker({ buildings, onPick }: { buildings: Building[]; onPick: (building: Building) => void }) {
   const [query, setQuery] = useState('')
@@ -14,22 +15,25 @@ function BuildingPicker({ buildings, onPick }: { buildings: Building[]; onPick: 
         className="input"
         type="search"
         placeholder="Search buildings (e.g. HUB, Old Main)"
+        enterKeyHint="search"
+        autoCorrect="off"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
       {matches.length > 0 && (
-        <ul className="picker-list">
+        <ul className="list picker-list">
           {matches.map((b) => (
             <li key={b.properties.num}>
               <button
                 type="button"
-                className="picker-option"
+                className="list-row picker-option"
                 onClick={() => {
                   onPick(b)
                   setQuery('')
                 }}
               >
-                {b.properties.name}
+                <span className="list-row-main">{b.properties.name}</span>
+                <ChevronIcon className="chevron" />
               </button>
             </li>
           ))}

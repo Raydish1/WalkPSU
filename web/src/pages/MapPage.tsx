@@ -1,8 +1,11 @@
 import type { FeatureCollection, Point, Polygon } from 'geojson'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { Layer, Popup, Source, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import { Link } from 'react-router'
+import { toast } from 'sonner'
+import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
+import { PinIcon } from '../components/icons'
 import { claimDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
@@ -68,7 +71,9 @@ function MapPage() {
     const id = hit?.properties?.id as string | undefined
     if (hit?.layer.id === 'drop-points' && id) setSelected({ kind: 'drop', id })
     else if (hit?.layer.id === 'players' && id) setSelected({ kind: 'player', id })
-    else setSelected(null)
+    else return setSelected(null)
+    // Glide the tapped marker to the lower middle so its card has room above it on a narrow screen.
+    if (hit.geometry.type === 'Point') e.target.easeTo({ center: hit.geometry.coordinates as [number, number], offset: [0, 140], duration: 450 })
   }
 
   const selectedDrop = selected?.kind === 'drop' ? drops.find((d) => d.id === selected.id) : undefined
@@ -107,12 +112,21 @@ function MapPage() {
           </Popup>
         )}
         {selectedPlayer && (
-          <Popup longitude={selectedPlayer.lng} latitude={selectedPlayer.lat} anchor="bottom" offset={12} closeButton={false} onClose={() => setSelected(null)} className="map-card">
-            <strong>{selectedPlayer.name}</strong>
+          <Popup longitude={selectedPlayer.lng} latitude={selectedPlayer.lat} anchor="bottom" offset={12} closeButton={false} onClose={() => setSelected(null)} className="map-card is-player">
+            <span className="player-tag">
+              <Avatar name={selectedPlayer.name} color={selectedPlayer.color} />
+              <span className="truncate">{selectedPlayer.name}</span>
+            </span>
           </Popup>
         )}
       </CampusMap>
-      {error && <div className="map-banner error">{error}</div>}
+      <div className="map-top">
+        <span className="map-pill glass" role="status">
+          <span className="live-dot" data-off={drops.length === 0 || undefined} aria-hidden />
+          {drops.length === 0 ? 'No live drops' : `${drops.length} live ${drops.length === 1 ? 'drop' : 'drops'}`}
+        </span>
+        {error && <div className="map-banner glass error">{error}</div>}
+      </div>
     </div>
   )
 }
@@ -126,54 +140,58 @@ type DropCardProps = {
 }
 
 function DropCard({ drop, distance, radius, position, onClaimed }: DropCardProps) {
-  const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const inRange = radius !== null && distance !== null && distance <= radius
+  const verb = drop.type === 'minigame' ? 'join' : 'claim'
 
   async function claim() {
     if (!position) return
     setBusy(true)
     try {
       await claimDrop(drop.id, { lat: position.coords.latitude, lng: position.coords.longitude })
-      setMessage(`Claimed! +${drop.points} points`)
+      navigator.vibrate?.(30)
+      toast.success(`Claimed! +${drop.points} points`, { description: drop.title })
       onClaimed()
     } catch (e) {
-      setMessage((e as Error).message)
+      toast.error('Couldn’t claim', { description: (e as Error).message })
     } finally {
       setBusy(false)
     }
   }
 
-  const hint =
+  const range =
     distance === null
       ? 'Waiting for GPS…'
       : inRange
-        ? 'You’re in range!'
-        : `${Math.round(distance)} m away. Get within ${radius ?? '…'} m to claim.`
+        ? `You’re in range to ${verb}!`
+        : `${Math.round(distance)} m away · get within ${radius ?? '…'} m`
 
   return (
-    <div className="stack-sm">
-      <strong>{drop.title}</strong>
-      <span className="muted">
-        {DROP_TYPES[drop.type].label} · {drop.points} pts
-      </span>
+    <div className="drop-card">
+      <div className="drop-card-head">
+        <span className="chip" style={{ '--player': DROP_TYPES[drop.type].color } as CSSProperties}>
+          <span className="color-dot" aria-hidden />
+          {DROP_TYPES[drop.type].label}
+        </span>
+        <span className="points-badge">{drop.points} pts</span>
+      </div>
+      <h3>{drop.title}</h3>
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
+      {drop.type === 'minigame' && <p className="muted">Two random teams race to shake the hardest. Every winner gets the points.</p>}
+      <span className="range" data-in={inRange || undefined}>
+        <PinIcon size={16} />
+        {range}
+      </span>
       {drop.type === 'minigame' ? (
-        <>
-          <span>Shake-Off: two random teams, 15 seconds of shaking. Every winner gets the points.</span>
-          <Link className="button primary" to={`/game/${drop.id}`}>
-            Open the lobby
-          </Link>
-          <span className="muted">{inRange ? 'You’re in range to join!' : hint.replace('to claim', 'to join')}</span>
-        </>
+        <Link className="button primary" to={`/game/${drop.id}`}>
+          Open the lobby
+        </Link>
       ) : (
         <>
           <button className="button primary" onClick={claim} disabled={busy || !inRange}>
             {busy ? 'Claiming…' : 'Claim'}
           </button>
-          <span className="muted">{hint}</span>
-          <span className="muted">Indoors? Scan the drop’s QR code to claim from anywhere.</span>
-          {message && <span>{message}</span>}
+          <span className="muted footnote">Indoors? Scan the drop’s QR code to claim from anywhere.</span>
         </>
       )}
     </div>

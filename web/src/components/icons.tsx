@@ -58,3 +58,15 @@ export const QrIcon = (p: IconProps) => (
     <path d="M14 14h2v2h-2zM18 18h2v2h-2zM14 18v2M18 14h2" />
   </Icon>
 )
+
+export const CheckIcon = (p: IconProps) => (
+  <Icon {...p} strokeWidth={2.6}>
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </Icon>
+)
+
+export const CrossIcon = (p: IconProps) => (
+  <Icon {...p} strokeWidth={2.6}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </Icon>
+)

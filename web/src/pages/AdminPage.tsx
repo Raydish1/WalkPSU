@@ -1,8 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import type { FeatureCollection, Point } from 'geojson'
 import { Layer, Source } from 'react-map-gl/maplibre'
+import { toast } from 'sonner'
 import BuildingPicker from '../components/BuildingPicker'
 import CampusMap from '../components/CampusMap'
+import { PinIcon } from '../components/icons'
 import DropQrList from '../components/DropQrList'
 import { createDrop, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
@@ -35,7 +37,6 @@ function AdminPage() {
   const [points, setPoints] = useState(10)
   const [minutes, setMinutes] = useState(30)
   const [photo, setPhoto] = useState<File | null>(null)
-  const [status, setStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const namesByNum = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
@@ -63,16 +64,15 @@ function AdminPage() {
     if (building && !title.trim()) setTitle(building.properties.name)
   }
 
-  async function drop(fields: () => Promise<NewDrop> | NewDrop, label: string) {
+  async function drop(fields: () => Promise<NewDrop> | NewDrop, label: string, toastId?: string | number) {
     setBusy(true)
-    setStatus(null)
     try {
       await createDrop({ ...(await fields()), created_by: player.id })
-      setStatus(`Dropped "${label}"`)
+      toast.success('Dropped', { id: toastId, description: label })
       refreshDrops()
       return true
     } catch (err) {
-      setStatus((err as Error).message)
+      toast.error('Couldn’t drop it', { id: toastId, description: (err as Error).message })
       return false
     } finally {
       setBusy(false)
@@ -103,32 +103,35 @@ function AdminPage() {
   }
 
   async function demoDropHere() {
-    setStatus('Getting your location…')
+    const toastId = toast.loading('Getting your location…')
     let position: GeolocationPosition
     try {
       position = await currentPosition()
     } catch (err) {
-      setStatus(`Location failed: ${(err as GeolocationPositionError | Error).message}`)
+      toast.error('Location failed', { id: toastId, description: (err as GeolocationPositionError | Error).message })
       return
     }
     const { latitude: lat, longitude: lng } = position.coords
     const building = findBuildingAt(buildings, lat, lng)
     const label = building ? `Demo: ${building.properties.name}` : 'Demo drop'
-    await drop(() => ({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null }), label)
+    await drop(() => ({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null }), label, toastId)
   }
 
   return (
     <section className="page stack">
       <h1>Admin</h1>
 
-      <button type="button" className="button primary" onClick={demoDropHere} disabled={busy}>
-        📍 Demo drop here
-      </button>
-      {status && <p>{status}</p>}
+      <div className="card stack-sm">
+        <button type="button" className="button primary" onClick={demoDropHere} disabled={busy}>
+          <PinIcon size={20} />
+          Demo drop here
+        </button>
+        <span className="muted footnote">A 10-point check-in at your current location.</span>
+      </div>
 
       <h2>New drop</h2>
       <BuildingPicker buildings={buildings} onPick={pickBuilding} />
-      <p className="muted">
+      <p className="muted footnote">
         {target
           ? target.building
             ? `At ${target.building.properties.name}`
@@ -144,11 +147,11 @@ function AdminPage() {
         </Source>
       </CampusMap>
       <form className="stack" onSubmit={submit}>
-        <label className="stack-sm">
+        <label className="field">
           Title
-          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} enterKeyHint="done" required />
         </label>
-        <label className="stack-sm">
+        <label className="field">
           Type
           <select className="input" value={type} onChange={(e) => setType(e.target.value as DropType)}>
             {Object.entries(DROP_TYPES).map(([value, { label }]) => (
@@ -159,16 +162,16 @@ function AdminPage() {
           </select>
         </label>
         <div className="row">
-          <label className="stack-sm">
+          <label className="field">
             Points
-            <input className="input" type="number" min={1} value={points} onChange={(e) => setPoints(Number(e.target.value))} />
+            <input className="input" type="number" inputMode="numeric" min={1} value={points} onChange={(e) => setPoints(Number(e.target.value))} />
           </label>
-          <label className="stack-sm">
+          <label className="field">
             Expires in min (0 = never)
-            <input className="input" type="number" min={0} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} />
+            <input className="input" type="number" inputMode="numeric" min={0} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} />
           </label>
         </div>
-        <label className="stack-sm">
+        <label className="field">
           Hint photo (optional)
           <input className="input" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
         </label>

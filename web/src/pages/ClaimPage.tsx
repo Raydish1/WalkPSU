@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { CheckIcon, CrossIcon } from '../components/icons'
 import { claimDrop, getDrop } from '../lib/api'
 
 type Result = { status: 'claiming' } | { status: 'claimed' } | { status: 'failed'; message: string }
@@ -30,15 +31,28 @@ function ClaimPage() {
 
   return (
     <section className="center-screen">
-      {result.status === 'claiming' && <h1>Claiming…</h1>}
+      {result.status === 'claiming' && (
+        <>
+          <span className="result-badge">
+            <span className="spinner" aria-hidden />
+          </span>
+          <h1>Claiming…</h1>
+        </>
+      )}
       {result.status === 'claimed' && (
         <>
-          <h1>Claimed! 🎉</h1>
+          <span className="result-badge" data-tone="success">
+            <CheckIcon size={44} />
+          </span>
+          <h1>Claimed!</h1>
           <p className="muted">The points are yours.</p>
         </>
       )}
       {result.status === 'failed' && (
         <>
+          <span className="result-badge" data-tone="error">
+            <CrossIcon size={40} />
+          </span>
           <h1>Couldn’t claim</h1>
           <p className="muted">{result.message}</p>
         </>
