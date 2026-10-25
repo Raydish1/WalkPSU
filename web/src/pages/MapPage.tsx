@@ -13,6 +13,8 @@ import { usePresence } from '../session/presence'
 
 const IN_RANGE = '#16a34a'
 const ME = '#2563eb'
+/** How close a tapped drop is framed: about a block across, so its claim circle and building are both visible. */
+const DROP_ZOOM = 17
 
 
 function MapPage() {
@@ -73,8 +75,11 @@ function MapPage() {
     if (drop) {
       setSelectedPlayerId(null)
       setSheet({ drop, open: true })
-      // Lift the tapped drop into the top half of the screen, clear of the sheet.
-      e.target.easeTo({ center: [drop.lng, drop.lat], offset: [0, -170], duration: 450 })
+      // Lift the tapped drop into the top half of the screen, clear of the sheet, zooming in if the player was
+      // zoomed out (never out, if they were closer). A longer glide when it zooms, so the jump reads as one move.
+      const zoom = Math.max(e.target.getZoom(), DROP_ZOOM)
+      const zooming = zoom - e.target.getZoom() > 0.25
+      e.target.easeTo({ center: [drop.lng, drop.lat], zoom, offset: [0, -170], duration: zooming ? 800 : 450 })
     } else if (hit?.layer.id === 'players' && id) {
       closeSheet()
       setSelectedPlayerId(id)
