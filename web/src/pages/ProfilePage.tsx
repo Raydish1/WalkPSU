@@ -1,12 +1,20 @@
 import { Link } from 'react-router'
 import Avatar from '../components/Avatar'
+import LevelCard from '../components/LevelCard'
 import { ChevronIcon } from '../components/icons'
+import { useLeaderboard } from '../lib/hooks'
+import { useLevelUpToast } from '../lib/useLevelUp'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 
 function ProfilePage() {
   const { player, isAdmin, signOut } = useReadySession()
   const { sharing, setSharing } = usePresence()
+  const { data: scores } = useLeaderboard()
+  const myScore = scores.find((s) => s.player_id === player.id)
+  const points = myScore?.points ?? 0
+  const claims = myScore?.claims ?? 0
+  useLevelUpToast(points)
 
   return (
     <section className="page stack">
@@ -15,6 +23,8 @@ function ProfilePage() {
         <h1>{player.display_name}</h1>
         <span className="chip">{isAdmin ? 'Organizer' : 'Player'}</span>
       </div>
+
+      <LevelCard points={points} claims={claims} />
 
       <div className="list">
         <label className="toggle-row">

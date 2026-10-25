@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import Avatar from '../components/Avatar'
 import { TrophyIcon } from '../components/icons'
 import { useLeaderboard } from '../lib/hooks'
+import { progressFromPoints } from '../lib/progress'
 import { useReadySession } from '../session/session'
 
 function LeaderboardPage() {
@@ -11,6 +12,7 @@ function LeaderboardPage() {
   return (
     <section className="page stack">
       <h1>Leaderboard</h1>
+      <p className="muted">Points earn XP — climb the board and your level together.</p>
       {error && <p className="error">{error}</p>}
       {scores.length === 0 && !error ? (
         <div className="card empty-state">
@@ -23,23 +25,29 @@ function LeaderboardPage() {
         </div>
       ) : (
         <ol className="list leaderboard">
-          {scores.map((row, i) => (
-            <li
-              key={row.player_id}
-              className={`leaderboard-row ${row.player_id === player.id ? 'is-me' : ''}`}
-            >
-              <span className={`rank rank-${i + 1}`}>{i + 1}</span>
-              <Avatar name={row.display_name} color={row.color} />
-              <span className="player-name">
-                <span>{row.display_name}</span>
-                {row.player_id === player.id && <span className="muted"> (you)</span>}
-              </span>
-              <span className="score">
-                {row.points}
-                <span className="muted"> pts</span>
-              </span>
-            </li>
-          ))}
+          {scores.map((row, i) => {
+            const { level } = progressFromPoints(row.points)
+            return (
+              <li
+                key={row.player_id}
+                className={`leaderboard-row ${row.player_id === player.id ? 'is-me' : ''}`}
+              >
+                <span className={`rank rank-${i + 1}`}>{i + 1}</span>
+                <Avatar name={row.display_name} color={row.color} />
+                <span className="player-name">
+                  <span>{row.display_name}</span>
+                  {row.player_id === player.id && <span className="muted"> (you)</span>}
+                  <span className="muted footnote" style={{ display: 'block' }}>
+                    Lv {level}
+                  </span>
+                </span>
+                <span className="score">
+                  {row.points}
+                  <span className="muted"> pts</span>
+                </span>
+              </li>
+            )
+          })}
         </ol>
       )}
     </section>

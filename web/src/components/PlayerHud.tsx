@@ -26,13 +26,15 @@ function PlayerHud({ player, points, claims }: Props) {
         <div className="player-hud-stats">
           <span>Lv {level}</span>
           <span className="dot-sep" aria-hidden />
+          <span>{points} pts</span>
+          <span className="dot-sep" aria-hidden />
           <span>{claims} claims</span>
         </div>
         <div className="xp-track" role="progressbar" aria-valuenow={xp} aria-valuemin={0} aria-valuemax={xpMax} aria-label="XP progress">
           <div className="xp-fill" style={{ width: `${Math.round(pct * 100)}%` }} />
         </div>
         <span className="xp-label">
-          {xp}/{xpMax} XP
+          {xp}/{xpMax} XP to Lv {level + 1}
         </span>
       </div>
     </div>

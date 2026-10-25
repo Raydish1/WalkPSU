@@ -1,11 +1,43 @@
-/** Derive level / XP from claim points for the HUD. */
-const XP_PER_LEVEL = 100
+/** Level / XP from claim points. Every point earned is 1 XP. */
 
-export function progressFromPoints(points: number) {
-  const safe = Math.max(0, points)
-  const level = Math.floor(safe / XP_PER_LEVEL) + 1
-  const xp = safe % XP_PER_LEVEL
-  return { level, xp, xpMax: XP_PER_LEVEL, pct: xp / XP_PER_LEVEL }
+/** XP needed to finish `level` and reach the next (grows as you climb). */
+export function xpToAdvance(level: number): number {
+  const safe = Math.max(1, Math.floor(level))
+  // L1→2: 50 · L2→3: 75 · L3→4: 100 · …
+  return 50 + 25 * (safe - 1)
+}
+
+export type Progress = {
+  /** Current player level (starts at 1). */
+  level: number
+  /** XP into the current level. */
+  xp: number
+  /** XP needed to reach the next level. */
+  xpMax: number
+  /** 0–1 fill for the XP bar. */
+  pct: number
+  /** Lifetime XP (= total points claimed). */
+  totalXp: number
+}
+
+/** Derive level and bar fill from total claim points (1 pt = 1 XP). */
+export function progressFromPoints(points: number): Progress {
+  const totalXp = Math.max(0, Math.floor(points))
+  let level = 1
+  let remaining = totalXp
+  let need = xpToAdvance(level)
+  while (remaining >= need && level < 999) {
+    remaining -= need
+    level += 1
+    need = xpToAdvance(level)
+  }
+  return {
+    level,
+    xp: remaining,
+    xpMax: need,
+    pct: need === 0 ? 1 : remaining / need,
+    totalXp,
+  }
 }
 
 /** Difficulty for outdoor-readable challenge labels. */

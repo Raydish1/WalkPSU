@@ -90,7 +90,7 @@ function MathPage() {
       if (!proof) throw new Error('Waiting for GPS… get in range or scan the drop’s QR code.')
       await claimDrop(drop.id, proof)
       navigator.vibrate?.(40)
-      toast.success(`Math cleared! +${drop.points} points`, { description: drop.title })
+      toast.success(`Math cleared! +${drop.points} XP`, { description: `${drop.title} · points feed your level` })
       refresh()
       setDone(true)
     } catch (e) {

@@ -15,6 +15,7 @@ import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useBuildings, useClaimRadius, useDrops, useLeaderboard } from '../lib/hooks'
+import { useLevelUpToast } from '../lib/useLevelUp'
 import { circlePolygon } from '../map/geometry'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
@@ -59,6 +60,7 @@ function MapPage() {
   }, [drops])
 
   const myScore = scores.find((s) => s.player_id === player.id)
+  useLevelUpToast(myScore?.points ?? 0)
   const mission = useMemo(() => {
     const hub = drops.find((d) => /hub/i.test(d.title))
     return hub ?? drops[0] ?? null
@@ -250,7 +252,7 @@ function DropCard({ drop, distance, radius, position, onClaimed }: DropCardProps
     try {
       await claimDrop(drop.id, { lat: position.coords.latitude, lng: position.coords.longitude })
       navigator.vibrate?.(30)
-      toast.success(`Claimed! +${drop.points} points`, { description: drop.title })
+      toast.success(`Claimed! +${drop.points} XP`, { description: `${drop.title} · points feed your level` })
       onClaimed()
     } catch (e) {
       toast.error('Couldn’t claim', { description: (e as Error).message })
