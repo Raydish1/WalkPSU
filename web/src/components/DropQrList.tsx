@@ -51,7 +51,11 @@ function DropQrList({ drops, buildingName }: { drops: DropRow[]; buildingName: (
                   <div className="qr-code">
                     <QRCodeSVG value={claimUrl(drop.id, code)} size={240} marginSize={2} />
                     <span className="muted">
-                      {drop.type === 'minigame' ? 'Scan to join the Shake-Off lobby' : 'Scan with your phone camera to claim'}
+                      {drop.type === 'minigame'
+                        ? 'Scan to join the Shake-Off lobby'
+                        : drop.type === 'math'
+                          ? 'Scan to open the mental-math challenge'
+                          : 'Scan with your phone camera to claim'}
                     </span>
                     {drop.type === 'minigame' && (
                       <Link className="button primary" to={`/battle/${drop.id}`}>

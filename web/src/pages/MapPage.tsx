@@ -241,7 +241,7 @@ type DropCardProps = {
 function DropCard({ drop, distance, radius, position, onClaimed }: DropCardProps) {
   const [busy, setBusy] = useState(false)
   const inRange = radius !== null && distance !== null && distance <= radius
-  const verb = drop.type === 'minigame' ? 'join' : 'claim'
+  const verb = drop.type === 'minigame' ? 'join' : drop.type === 'math' ? 'solve' : 'claim'
 
   async function claim() {
     if (!position) return
@@ -277,12 +277,17 @@ function DropCard({ drop, distance, radius, position, onClaimed }: DropCardProps
       <h3>{drop.title}</h3>
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
       {drop.type === 'minigame' && <p className="muted">Two random teams race to shake the hardest. Every winner gets the points.</p>}
+      {drop.type === 'math' && <p className="muted">Solve 3 mental-math problems (−, ÷, √, fractions) for the points.</p>}
       <span className="range" data-in={inRange || undefined}>
         <PinIcon size={16} />
         {range}
       </span>
       {drop.type === 'minigame' ? (
         <Link className="button primary" to={`/game/${drop.id}`}>
+          Start Challenge
+        </Link>
+      ) : drop.type === 'math' ? (
+        <Link className="button primary" to={`/math/${drop.id}`}>
           Start Challenge
         </Link>
       ) : (

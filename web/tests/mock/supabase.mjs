@@ -33,6 +33,8 @@ function seed() {
     drop('center-drop', 'Old Main lawn', 'checkin', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng, 15, null),
     // ~30 m east of the lawn drop, at the HUB (so the map highlights building 0005000).
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
+    // ~25 m west — mental math at Old Main.
+    drop('math-drop', 'Old Main Mental Math', 'math', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng - 25 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 20, '0001000'),
   ]
   return {
     players,

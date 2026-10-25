@@ -8,6 +8,7 @@ export const DROP_TYPES = {
   minigame: { label: 'Mini-game', color: '#5ba8e0' },
   photo_hunt: { label: 'Photo hunt', color: '#7eb6e8' },
   checkin: { label: 'Check-in', color: '#a8d4f0' },
+  math: { label: 'Mental math', color: '#3d8fc7' },
 } as const
 
 /** Extra search terms for buildings whose official PASDA names don't match what students call them. */

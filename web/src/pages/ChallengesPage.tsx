@@ -40,7 +40,10 @@ function ChallengesPage() {
                 ? Math.round(distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng))
                 : null
             const difficulty = difficultyForPoints(drop.points)
-            const href = drop.type === 'minigame' ? `/game/${drop.id}` : '/'
+            const href =
+              drop.type === 'minigame' ? `/game/${drop.id}` : drop.type === 'math' ? `/math/${drop.id}` : '/'
+            const cta =
+              drop.type === 'minigame' || drop.type === 'math' ? 'Start Challenge' : 'View on map'
             return (
               <li key={drop.id} className="card stack-sm" style={{ '--accent-local': DROP_TYPES[drop.type].color, padding: 16 } as CSSProperties}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -54,9 +57,10 @@ function ChallengesPage() {
                 <p className="muted" style={{ margin: 0 }}>
                   +{drop.points} pts
                   {distance !== null ? ` · ${distance} m away` : ''}
+                  {drop.type === 'math' ? ' · √ − ÷ fractions' : ''}
                 </p>
                 <Link className="button primary" to={href}>
-                  {drop.type === 'minigame' ? 'Start Challenge' : 'View on map'}
+                  {cta}
                 </Link>
               </li>
             )

@@ -34,7 +34,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | --- | --- | --- |
 | `id` | uuid | |
 | `title` | text | |
-| `type` | `minigame` \| `photo_hunt` \| `checkin` | |
+| `type` | `minigame` \| `photo_hunt` \| `checkin` \| `math` | `math` = mental-math challenge at `/math/:dropId` (claim after solving) |
 | `lat`, `lng` | double precision | |
 | `points` | integer | > 0, default 10 |
 | `status` | `active` \| `claimed` \| `expired` | default `active`; becomes `claimed` via `claim_drop` |

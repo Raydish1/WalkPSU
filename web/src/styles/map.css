@@ -62,7 +62,7 @@
 @keyframes live {
   70%,
   100% {
-    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
+    box-shadow: 0 0 0 8px rgba(91, 168, 224, 0);
   }
 }
 
@@ -596,10 +596,10 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35);
+    box-shadow: 0 0 0 0 rgba(91, 168, 224, 0.35);
   }
   50% {
-    box-shadow: 0 0 16px 2px rgba(34, 211, 238, 0.45);
+    box-shadow: 0 0 16px 2px rgba(91, 168, 224, 0.45);
   }
 }
 
@@ -612,4 +612,89 @@
     left: auto;
     width: min(400px, calc(100% - 32px));
   }
+}
+
+/* Mental-math challenge */
+
+.math-page .math-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  margin: 8px 0 4px;
+  font-family: 'Oxanium', system-ui, sans-serif;
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-align: center;
+}
+
+.math-prompt-eq {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.math-sqrt {
+  display: inline-flex;
+  align-items: flex-start;
+  line-height: 1;
+}
+
+.math-sqrt-sign {
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+.math-sqrt-radicand {
+  margin-left: 0.02em;
+  padding: 0 0.12em 0.05em;
+  border-top: 3px solid currentColor;
+  line-height: 1.05;
+}
+
+.math-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.12em;
+  vertical-align: middle;
+  font-size: 0.72em;
+  line-height: 1.1;
+}
+
+.math-frac-bar {
+  width: 100%;
+  min-width: 1.1em;
+  height: 2px;
+  margin: 0.12em 0;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.math-answer {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.math-progress {
+  display: flex;
+  gap: 8px;
+}
+
+.math-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fill);
+}
+
+.math-progress-dot[data-on] {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
