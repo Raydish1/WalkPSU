@@ -38,13 +38,16 @@ Every signed-in user can read all players. A player can insert and update only t
 | `lat`, `lng` | double precision | |
 | `points` | integer | > 0, default 10 |
 | `status` | `active` \| `claimed` \| `expired` | default `active`; becomes `claimed` via `claim_drop` |
-| `hint_photo_url` | text | public URL in the `drop-hints` storage bucket |
-| `building_num` | text | PSU building number (`num` in `buildings.geojson`). null = open-ground drop. The map highlights a building while it hosts an active drop |
+| `hint_photo_url` | text | public URL in the `drop-hints` storage bucket. For photo hunts, the reference photo of the spot |
+| `twist` | text | photo hunts: what the player's photo must also show, e.g. "with a thumbs up" |
+| `search_radius_m` | integer | photo hunts: radius of the search circle shown before the first find |
+| `first_found_at` | timestamptz | photo hunts: when the first player found it. null = not found yet, so `lat`/`lng` is only the search circle's center |
+| `building_num` | text | PSU building number (`num` in `buildings.geojson`). null = open-ground drop. The map highlights a building while it hosts an active drop. Photo hunts keep it null until the first find |
 | `created_by` | uuid → `players` | |
 | `created_at` | timestamptz | |
 | `expires_at` | timestamptz | null = never. Past this time the drop can't be claimed even if `status` is still `active` |
 
-Only admins can insert, update, or delete. Everyone signed in can read.
+Only admins can insert, update, or delete. Everyone signed in can read. Create photo hunts with `create_photo_hunt`, not a plain insert, so the spot stays hidden.
 
 ### `claims`
 
@@ -53,9 +56,10 @@ Only admins can insert, update, or delete. Everyone signed in can read.
 | `id` | uuid | |
 | `drop_id` | uuid → `drops` | unique together with `player_id` |
 | `player_id` | uuid → `players` | who claimed it |
+| `points` | integer | what this claim earned. A trigger fills in the drop's `points` when an insert leaves it out (`claim_drop`, `finish_game`); `claim_photo_hunt` sets less for later finders |
 | `created_at` | timestamptz | |
 
-Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary drop: it locks the drop and flips it to `claimed`) and `finish_game` (one claim per winner of a Shake-Off).
+Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary drop: it locks the drop and flips it to `claimed`), `finish_game` (one claim per winner of a Shake-Off), and `claim_photo_hunt` (one claim per finder).
 
 ### `drop_secrets`
 
@@ -63,6 +67,8 @@ Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary 
 | --- | --- | --- |
 | `drop_id` | uuid → `drops` | primary key |
 | `claim_code` | text | 32-char random code encoded in the drop's QR |
+| `hunt_lat`, `hunt_lng` | double precision | photo hunts: the exact spot |
+| `hunt_building_num` | text | photo hunts: the spot's building, copied to `drops.building_num` on the first find |
 
 Created automatically by a trigger when a drop is inserted. **Only admins can read it**; players never see codes except by scanning. The QR encodes `https://<app>/claim/<drop_id>?key=<claim_code>`.
 
@@ -91,7 +97,7 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
 
 ### `player_scores` (view)
 
-`player_id, display_name, color, points, claims` for every player. `points` is the sum of their claimed drops' points. Runs with the caller's permissions. The leaderboard orders by points, then name.
+`player_id, display_name, color, points, claims` for every player. `points` is the sum of their claims' `points`. Runs with the caller's permissions. The leaderboard orders by points, then name.
 
 ## Functions
 
@@ -111,6 +117,11 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
   - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds`. The higher **average shakes per player** wins (fair for uneven sides). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
   - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. The client reads them from `get_game_state`; don't copy them into client code.
   - `claim_drop` refuses `minigame` drops, so the game can't be skipped.
+- **Photo hunt functions:**
+  - `create_photo_hunt(p_title, p_lat, p_lng, p_hint_photo_url, p_twist, p_points?, p_building_num?, p_expires_at?) → drops`. Admin only. Saves the exact spot and building in `drop_secrets` and publishes the drop at a random point up to 3/4 of `search_radius_m` (125 m) away, so neither the row nor its Realtime insert reveals the spot. Client: `createPhotoHunt(...)`.
+  - `photo_hunt_check(drop, player, lat, lng) → drops` and `claim_photo_hunt(...) → claims`. **Service role only**, called by `web/api/verify-photo.ts`. The check raises a user-facing error unless the hunt is open, the player hasn't found it yet, and they're within `claim_radius_m()` of the exact spot. It never says how far off they are. The claim reruns the check under a row lock, then records points: full for the first finder, halved for each earlier finder, at least 1. The first find copies the exact spot and building onto the drop (the map's red pin and building highlight) and sets `expires_at` to 7 minutes later unless it was due sooner. The drop stays `active` until then.
+  - `current_player_id() → uuid`. The caller's player id, so `/api` functions can identify the caller from their JWT.
+  - `claim_drop` refuses `photo_hunt` drops, by GPS and by QR.
 - **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
 - **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine on a 6,371 km sphere. `web/src/lib/geo.ts` `distanceM` uses the identical formula, so the client's "in range" matches the server.
 - **`next_player_color() → text`**. Default for `players.color`.
@@ -118,7 +129,16 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
 
 ## Realtime
 
-`drops`, `claims`, `games`, and `game_players` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete. Claims flip a drop's `status`, so this one channel is enough to refresh the map and the leaderboard.
+`drops`, `claims`, `games`, and `game_players` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete, which is enough to refresh the map. A photo hunt's later finders add claims without touching the drop, so the leaderboard listens to `claims`.
+
+## Photo hunts and `/api/verify-photo`
+
+1. The player takes a photo. The client shrinks it to a 1280 px JPEG and POSTs `{ dropId, lat, lng, image }` (base64) to `/api/verify-photo` with their JWT as `Authorization: Bearer …` (`submitHuntPhoto`).
+2. The function resolves the player with `current_player_id()` under that JWT, then runs `photo_hunt_check` with the service key. Failures come back as `{ error }` with a 4xx status.
+3. It sends the reference photo, the player's photo, and the twist to Gemini, which answers `same_place`, `twist_done`, `photo_of_screen_or_print`, and a one-sentence `reason`. A busy or retired model is retried, then other models are tried (`GEMINI_ATTEMPTS`).
+4. On a match it calls `claim_photo_hunt` and returns `{ match: true, points, reason }`. Otherwise it returns `{ match: false, reason }`. Player photos are never stored.
+
+The function needs `GEMINI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY`. `npm run dev` serves `web/api/*.ts` through a small Vite plugin in `vite.config.ts`, and Vercel serves them in production. `npm run test-gemini -- <reference> <photo> ["twist"]` tries the referee on two local photos without the database.
 
 ### Broadcast: live Shake-Off counts
 

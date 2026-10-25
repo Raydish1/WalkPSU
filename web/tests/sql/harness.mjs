@@ -11,7 +11,7 @@ export const MIGRATIONS = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('
 export async function createDb() {
   const db = new PGlite()
   await db.exec(`
-    create role anon; create role authenticated;
+    create role anon; create role authenticated; create role service_role;
     create schema auth; create schema storage;
     create function auth.jwt() returns jsonb language sql stable as $$
       select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
@@ -19,8 +19,8 @@ export async function createDb() {
     create table storage.objects (id uuid default gen_random_uuid(), bucket_id text);
     alter table storage.objects enable row level security;
     create publication supabase_realtime;
-    grant usage on schema public, auth to anon, authenticated;
-    grant execute on function auth.jwt() to anon, authenticated;
+    grant usage on schema public, auth to anon, authenticated, service_role;
+    grant execute on function auth.jwt() to anon, authenticated, service_role;
     -- Supabase grants API roles full table privileges by default; migrations then narrow them.
     alter default privileges in schema public grant all on tables to anon, authenticated;
   `)
@@ -43,6 +43,20 @@ export function actor(db) {
     await db.exec('reset role')
     await db.query(`select set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub, ...claims })])
     await db.exec('set role authenticated')
+    try {
+      return { rows: (await db.query(q, params)).rows }
+    } catch (e) {
+      return { error: e.message }
+    }
+  }
+}
+
+/** Runs `q` as the service role, the way server code in web/api does (no user JWT). */
+export function serviceRole(db) {
+  return async (q, params) => {
+    await db.exec('reset role')
+    await db.query(`select set_config('request.jwt.claims', '', false)`)
+    await db.exec('set role service_role')
     try {
       return { rows: (await db.query(q, params)).rows }
     } catch (e) {

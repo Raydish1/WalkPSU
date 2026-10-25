@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getClaimCodes, getClaimRadius, getDrops, getLeaderboard, subscribeToDrops } from './api'
+import { getClaimCodes, getClaimRadius, getDrops, getLeaderboard, subscribeToDrops, subscribeToTable } from './api'
 import { loadBuildings, type Building } from './buildings'
 import type { DropRow, PlayerScoreRow } from './database.types'
 
@@ -21,9 +21,11 @@ function useLiveQuery<T>(load: () => Promise<T>, initial: T, subscribe: Subscrib
 const NO_DROPS: DropRow[] = []
 const NO_SCORES: PlayerScoreRow[] = []
 const NO_CODES = new Map<string, string>()
+// Not drops: a photo hunt's later finders add claims without changing the drop.
+const subscribeToClaims: Subscribe = (onChange) => subscribeToTable('claims', onChange)
 
 export const useDrops = () => useLiveQuery(getDrops, NO_DROPS)
-export const useLeaderboard = () => useLiveQuery(getLeaderboard, NO_SCORES)
+export const useLeaderboard = () => useLiveQuery(getLeaderboard, NO_SCORES, subscribeToClaims)
 export const useClaimCodes = () => useLiveQuery(getClaimCodes, NO_CODES)
 
 let claimRadiusPromise: Promise<number> | null = null

@@ -6,11 +6,12 @@ import BuildingPicker from '../components/BuildingPicker'
 import CampusMap from '../components/CampusMap'
 import { PinIcon } from '../components/icons'
 import DropQrList from '../components/DropQrList'
-import { createDrop, uploadHintPhoto } from '../lib/api'
+import { createDrop, createPhotoHunt, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
 import { DROP_TYPES } from '../lib/campus'
-import type { DropType, NewDrop } from '../lib/database.types'
+import type { DropType } from '../lib/database.types'
 import { useBuildings, useDrops } from '../lib/hooks'
+import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 
 type Target = { lat: number; lng: number; building: Building | null }
@@ -31,18 +32,25 @@ function AdminPage() {
   const { player, isAdmin } = useReadySession()
   const { data: drops, refresh: refreshDrops } = useDrops()
   const buildings = useBuildings()
+  const { position } = usePresence()
   const [target, setTarget] = useState<Target | null>(null)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<DropType>('minigame')
   const [points, setPoints] = useState(10)
   const [minutes, setMinutes] = useState(30)
   const [photo, setPhoto] = useState<File | null>(null)
+  const [twist, setTwist] = useState('')
   const [busy, setBusy] = useState(false)
 
   const namesByNum = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
   const highlighted = useMemo(() => new Set(drops.flatMap((d) => (d.building_num ? [d.building_num] : []))), [drops])
   const dropPoints = useMemo(() => toPoints(drops.map((d) => ({ lat: d.lat, lng: d.lng, color: DROP_TYPES[d.type].color }))), [drops])
   const targetPoint = useMemo(() => toPoints(target ? [{ lat: target.lat, lng: target.lng, color: '#facc15' }] : []), [target])
+  const isHunt = type === 'photo_hunt'
+  // A photo hunt's title is public before anyone finds it, so naming it after the building would give it away.
+  const suggestTitle = (name: string) => {
+    if (!isHunt && !title.trim()) setTitle(name)
+  }
 
   if (!isAdmin) {
     return (
@@ -55,19 +63,19 @@ function AdminPage() {
 
   function pickBuilding(building: Building) {
     setTarget({ lat: building.properties.lat, lng: building.properties.lng, building })
-    if (!title.trim()) setTitle(building.properties.name)
+    suggestTitle(building.properties.name)
   }
 
   function pickPoint(lat: number, lng: number) {
     const building = findBuildingAt(buildings, lat, lng) ?? null
     setTarget({ lat, lng, building })
-    if (building && !title.trim()) setTitle(building.properties.name)
+    if (building) suggestTitle(building.properties.name)
   }
 
-  async function drop(fields: () => Promise<NewDrop> | NewDrop, label: string, toastId?: string | number) {
+  async function drop(create: () => Promise<unknown>, label: string, toastId?: string | number) {
     setBusy(true)
     try {
-      await createDrop({ ...(await fields()), created_by: player.id })
+      await create()
       toast.success('Dropped', { id: toastId, description: label })
       refreshDrops()
       return true
@@ -82,22 +90,26 @@ function AdminPage() {
   async function submit(e: FormEvent) {
     e.preventDefault()
     if (!target) return
-    const ok = await drop(
-      async () => ({
-        title: title.trim(),
-        type,
-        points,
-        lat: target.lat,
-        lng: target.lng,
-        building_num: target.building?.properties.num ?? null,
-        hint_photo_url: photo ? await uploadHintPhoto(photo) : null,
-        expires_at: minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : null,
-      }),
-      title.trim(),
-    )
+    const fields = {
+      title: title.trim(),
+      points,
+      lat: target.lat,
+      lng: target.lng,
+      building_num: target.building?.properties.num ?? null,
+      expires_at: minutes > 0 ? new Date(Date.now() + minutes * 60_000).toISOString() : null,
+    }
+    const ok = await drop(async () => {
+      if (isHunt) {
+        if (!photo) throw new Error('Add a reference photo of the spot')
+        await createPhotoHunt({ ...fields, hint_photo_url: await uploadHintPhoto(photo), twist: twist.trim() })
+      } else {
+        await createDrop({ ...fields, type, hint_photo_url: photo ? await uploadHintPhoto(photo) : null, created_by: player.id })
+      }
+    }, title.trim())
     if (ok) {
       setTitle('')
       setPhoto(null)
+      setTwist('')
       setTarget(null)
     }
   }
@@ -114,7 +126,11 @@ function AdminPage() {
     const { latitude: lat, longitude: lng } = position.coords
     const building = findBuildingAt(buildings, lat, lng)
     const label = building ? `Demo: ${building.properties.name}` : 'Demo drop'
-    await drop(() => ({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null }), label, toastId)
+    await drop(
+      () => createDrop({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null, created_by: player.id }),
+      label,
+      toastId,
+    )
   }
 
   return (
@@ -131,6 +147,16 @@ function AdminPage() {
 
       <h2>New drop</h2>
       <BuildingPicker buildings={buildings} onPick={pickBuilding} />
+      {/* The same GPS reading the player map uses, so a drop placed here is in range from here, even if GPS is off. */}
+      <button
+        type="button"
+        className="button"
+        disabled={!position}
+        onClick={() => position && pickPoint(position.coords.latitude, position.coords.longitude)}
+      >
+        <PinIcon size={20} />
+        {position ? 'Use my location' : 'Waiting for GPS…'}
+      </button>
       <p className="muted footnote">
         {target
           ? target.building
@@ -149,7 +175,15 @@ function AdminPage() {
       <form className="stack" onSubmit={submit}>
         <label className="field">
           Title
-          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} enterKeyHint="done" required />
+          <input
+            className="input"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={isHunt ? 'e.g. Mystery spot #1' : undefined}
+            enterKeyHint="done"
+            required
+          />
+          {isHunt && <span className="muted footnote">Players see this before they find the spot, so don’t name it.</span>}
         </label>
         <label className="field">
           Type
@@ -171,9 +205,25 @@ function AdminPage() {
             <input className="input" type="number" inputMode="numeric" min={0} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} />
           </label>
         </div>
+        {isHunt && (
+          <label className="field">
+            Twist
+            <input
+              className="input"
+              value={twist}
+              onChange={(e) => setTwist(e.target.value)}
+              placeholder="e.g. with a thumbs up"
+              maxLength={100}
+              enterKeyHint="done"
+              required
+            />
+            <span className="muted footnote">Their photo must show this too, so it has to be taken on the spot.</span>
+          </label>
+        )}
         <label className="field">
-          Hint photo (optional)
-          <input className="input" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+          {isHunt ? 'Reference photo of the spot' : 'Hint photo (optional)'}
+          <input className="input" type="file" accept="image/*" required={isHunt} onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+          {isHunt && <span className="muted footnote">The exact spot stays hidden until someone finds it. Players see a 250 m search circle.</span>}
         </label>
         <button className="button primary" disabled={busy || !target || !title.trim()}>
           {busy ? 'Dropping…' : target ? 'Drop it' : 'Pick a spot first'}
@@ -181,7 +231,8 @@ function AdminPage() {
       </form>
 
       <h2>QR codes</h2>
-      <DropQrList drops={drops} buildingName={(num) => namesByNum.get(num)} />
+      <DropQrList drops={drops.filter((d) => d.type !== 'photo_hunt')} buildingName={(num) => namesByNum.get(num)} />
+      <p className="muted footnote">Photo hunts are claimed by photo, so they have no QR code.</p>
     </section>
   )
 }

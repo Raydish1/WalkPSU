@@ -5,6 +5,8 @@ import { Link } from 'react-router'
 import { toast } from 'sonner'
 import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
+import FoundOverlay, { type Found } from '../components/FoundOverlay'
+import PhotoHuntCard from '../components/PhotoHuntCard'
 import { PinIcon } from '../components/icons'
 import { claimDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
@@ -16,6 +18,12 @@ import { usePresence } from '../session/presence'
 
 const IN_RANGE = '#16a34a'
 const ME = '#2563eb'
+/** A photo hunt's pin once someone has found it. */
+const REVEALED = '#dc2626'
+
+/** A photo hunt nobody has found yet: its lat/lng is only the center of a search circle, so it gets no pin. */
+const isHiddenHunt = (d: DropRow) => d.type === 'photo_hunt' && !d.first_found_at
+const pinColor = (d: DropRow) => (d.type === 'photo_hunt' ? REVEALED : DROP_TYPES[d.type].color)
 
 type Selected = { kind: 'drop'; id: string } | { kind: 'player'; id: string } | null
 
@@ -25,6 +33,7 @@ function MapPage() {
   const radius = useClaimRadius()
   const { position, others } = usePresence()
   const [selected, setSelected] = useState<Selected>(null)
+  const [found, setFound] = useState<Found | null>(null)
 
   const here = position?.coords
   const distanceTo = (d: DropRow) => (here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null)
@@ -36,21 +45,32 @@ function MapPage() {
       features:
         radius === null
           ? []
-          : drops.map((d) => {
+          : drops.filter((d) => !isHiddenHunt(d)).map((d) => {
               const distance = here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null
               return {
                 type: 'Feature',
-                properties: { color: DROP_TYPES[d.type].color, inRange: distance !== null && distance <= radius },
+                properties: { color: pinColor(d), inRange: distance !== null && distance <= radius },
                 geometry: circlePolygon(d.lat, d.lng, radius),
               }
             }),
     }),
     [drops, radius, here],
   )
+  const huntAreas = useMemo<FeatureCollection<Polygon>>(
+    () => ({
+      type: 'FeatureCollection',
+      features: drops
+        .filter(isHiddenHunt)
+        .map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: circlePolygon(d.lat, d.lng, d.search_radius_m ?? 125) })),
+    }),
+    [drops],
+  )
   const dropPoints = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops.map((d) => ({ type: 'Feature', properties: { id: d.id, color: DROP_TYPES[d.type].color }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
+      features: drops
+        .filter((d) => !isHiddenHunt(d))
+        .map((d) => ({ type: 'Feature', properties: { id: d.id, color: pinColor(d) }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
     }),
     [drops],
   )
@@ -69,11 +89,13 @@ function MapPage() {
   const onClick = (e: MapLayerMouseEvent) => {
     const hit = e.features?.[0]
     const id = hit?.properties?.id as string | undefined
-    if (hit?.layer.id === 'drop-points' && id) setSelected({ kind: 'drop', id })
+    if ((hit?.layer.id === 'drop-points' || hit?.layer.id === 'hunt-areas') && id) setSelected({ kind: 'drop', id })
     else if (hit?.layer.id === 'players' && id) setSelected({ kind: 'player', id })
     else return setSelected(null)
-    // Glide the tapped marker to the lower middle so its card has room above it on a narrow screen.
-    if (hit.geometry.type === 'Point') e.target.easeTo({ center: hit.geometry.coordinates as [number, number], offset: [0, 140], duration: 450 })
+    // Glide the tapped marker (or search circle's center) to the lower middle so its card has room above it.
+    const hunt = hit.layer.id === 'hunt-areas' ? drops.find((d) => d.id === id) : undefined
+    const center = hunt ? [hunt.lng, hunt.lat] : hit.geometry.type === 'Point' ? hit.geometry.coordinates : null
+    if (center) e.target.easeTo({ center: center as [number, number], offset: [0, 140], duration: 450 })
   }
 
   const selectedDrop = selected?.kind === 'drop' ? drops.find((d) => d.id === selected.id) : undefined
@@ -81,7 +103,11 @@ function MapPage() {
 
   return (
     <div className="map-wrap">
-      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points', 'players']} onClick={onClick}>
+      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points', 'players', 'hunt-areas']} onClick={onClick}>
+        <Source id="hunt-areas" type="geojson" data={huntAreas}>
+          <Layer id="hunt-areas" type="fill" paint={{ 'fill-color': DROP_TYPES.photo_hunt.color, 'fill-opacity': 0.14 }} />
+          <Layer id="hunt-areas-line" type="line" paint={{ 'line-color': DROP_TYPES.photo_hunt.color, 'line-width': 2.5, 'line-dasharray': [1, 2] }} />
+        </Source>
         <Source id="claim-circles" type="geojson" data={circles}>
           <Layer
             id="claim-circles-fill"
@@ -108,7 +134,21 @@ function MapPage() {
 
         {selectedDrop && (
           <Popup longitude={selectedDrop.lng} latitude={selectedDrop.lat} anchor="bottom" offset={18} closeButton={false} onClose={() => setSelected(null)} className="map-card">
-            <DropCard drop={selectedDrop} distance={distanceTo(selectedDrop)} radius={radius} position={position} onClaimed={refreshDrops} />
+            {selectedDrop.type === 'photo_hunt' ? (
+              <PhotoHuntCard
+                drop={selectedDrop}
+                position={position}
+                onFound={(points, reason) => {
+                  // The first find moves the drop from the search circle's center to the spot, so the card would jump.
+                  setSelected(null)
+                  // Only the first finder gets full points; the map's copy of the drop may be a moment stale.
+                  setFound({ title: selectedDrop.title, points, first: points === selectedDrop.points && !selectedDrop.first_found_at, reason })
+                  refreshDrops()
+                }}
+              />
+            ) : (
+              <DropCard drop={selectedDrop} distance={distanceTo(selectedDrop)} radius={radius} position={position} onClaimed={refreshDrops} />
+            )}
           </Popup>
         )}
         {selectedPlayer && (
@@ -127,6 +167,7 @@ function MapPage() {
         </span>
         {error && <div className="map-banner glass error">{error}</div>}
       </div>
+      {found && <FoundOverlay found={found} onClose={() => setFound(null)} />}
     </div>
   )
 }

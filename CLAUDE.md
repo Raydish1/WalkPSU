@@ -6,6 +6,7 @@ HackPSU project: a mobile-first web app that turns the Penn State (University Pa
 - **Players compete as individuals.** There are no permanent teams, and each player gets a server-assigned map color. They race to a drop to claim it: inside the claim radius by GPS, or anywhere by scanning the drop's QR code (indoors, where GPS is unreliable).
 - Claims award points. A drop can sit at a campus building, and the map highlights that building in the accent color while the drop is active. Buildings are never owned or captured.
 - The leaderboard ranks players by points, live. Opted-in players appear live on the map (Realtime Presence).
+- **Photo hunt:** the admin posts a reference photo of a spot plus a twist ("with a thumbs up"). Players see only a 250 m search circle, find the spot, and take a photo there; Gemini (`web/api/verify-photo.ts`) judges it. The first finder gets full points and reveals a red pin; the hunt then stays open 7 minutes, each later finder getting half the points of the one before.
 - **Shake-Off:** players join a lobby at the drop (in range or by QR). At 4 joins (or an admin's Start) they're dealt into Blue vs White **for that game only** and shake their phones for 15 s. The side with more shakes per player wins, and every winner gets the drop's points. Phones show a named tug-of-war, and `/battle/:dropId` is the projector view.
 
 Judging requirements: rivalry, phone motion, and the game working for **4+ players in total**. Never enforce a minimum group size. Never add permanent teams; Shake-Off sides are derived per game (`game_sides()`), never stored.
@@ -17,7 +18,7 @@ Judging requirements: rivalry, phone motion, and the game working for **4+ playe
 - **Buildings:** 958 University Park footprints from PASDA, simplified into the static `web/public/data/buildings.geojson` (`npm run fetch-buildings` regenerates it; never fetch PASDA at runtime). Buildings are keyed by PSU building number `num`; the DB stores only that.
 - **Backend:** Supabase: Postgres + RLS, Realtime (postgres_changes, broadcast, presence), Storage (`drop-hints` bucket).
 - **Auth:** Auth0 via Supabase third-party auth. Supabase verifies the Auth0 **ID token**, which an Auth0 Action stamps with `role: authenticated` and `app_role`. When `VITE_AUTH0_*` is empty, the app falls back to Supabase anonymous sign-in plus an "enter your name" screen. Both give RLS a JWT `sub`, so policies are identical.
-- **Deploy:** Vercel, Root Directory `web`. `web/vercel.json` holds the SPA rewrite. Secret-key code goes in `web/api/` (none yet).
+- **Deploy:** Vercel, Root Directory `web`. `web/vercel.json` holds the SPA rewrite. Secret-key code goes in `web/api/`: `verify-photo.ts` (Gemini + service-role key). `npm run dev` serves `web/api/*.ts` too, via the `apiRoutes` plugin in `vite.config.ts`.
 
 ## Layout
 
@@ -47,6 +48,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 3. `20261024020000_individual_players.sql`: drops teams, adds `players.color`, `claim_radius_m()`, `player_scores`.
 4. `20261024030000_shake_off.sql`: `games`, `game_players`, Shake-Off functions, claims unique per (drop, player).
 5. `20261024040000_remove_building_capture.sql`: drops `building_control` and the capture logic.
+6. `20261024050000_photo_hunt.sql`: hunt columns, hidden spot in `drop_secrets`, `claims.points`, `create_photo_hunt`, service-only `photo_hunt_check`/`claim_photo_hunt`, `current_player_id`.
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -54,6 +56,8 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 
 - Authorization lives in RLS and `security definer` functions. Clients write only through functions; direct writes to `claims`, `games`, and `game_players` are blocked. The anon key is public.
 - `claim_drop` refuses `minigame` drops. Shake-Off payout happens only in `finish_game`.
+- `claim_drop` also refuses `photo_hunt` drops. Hunt claims come only from `claim_photo_hunt`, which only the service role (`web/api/verify-photo.ts`, after Gemini) may call. Until the first find, a hunt's `lat`/`lng` is a decoy search-circle center and its `building_num` is null; never expose `drop_secrets.hunt_*` to players.
+- Scores sum `claims.points`, not `drops.points`.
 - The GPS radius exists only in SQL `claim_radius_m()`; the client reads it (`useClaimRadius`). Never hard-code 60. `distanceM` (TS) must stay identical to SQL `distance_m` (same haversine, R = 6,371 km).
 - Shake-Off timing and caps come from `get_game_state().settings` plus `server_now` (clock-skew offset). Never hard-code 15 s or 8 shakes/s. Broadcast counts are cosmetic; only capped `submit_shakes` totals decide winners.
 - Claim codes live only in `drop_secrets` (admin-read). Never put them in `drops`.
@@ -78,10 +82,12 @@ Run `npm test` in `web/` (SQL + e2e, about a minute), plus `npm run lint` and `n
 
 - **`npm run test:sql`:** runs migrations in PGlite (in-process Postgres) and checks behavior through real RLS. `tests/sql/harness.mjs` stubs Supabase (`anon`/`authenticated` roles, `auth.jwt()` from `request.jwt.claims`, storage tables, the `supabase_realtime` publication, and Supabase's default table grants via `alter default privileges`). It also provides `actor(db)(sub, claims, sql)` to act as a user and `superuser(db)` for setup and time travel (move `games.started_at` into the past).
   - `current-schema.test.mjs`: all migrations applied. Joining, RLS, claims, the 59 m/61 m boundary, QR codes, scores, and the full Shake-Off lifecycle.
-  - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal). Add a block here for any migration that rewrites data.
+  - `photo-hunt.test.mjs`: hidden spot, admin-only creation, service-only claiming, halving points, reveal, 7-minute window.
+  - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal; per-claim points). Add a block here for any migration that rewrites data.
   - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.
-- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers two scenarios:
+- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers three scenarios:
   - **Map:** camera, layers, highlight, claim in range, bounds, recenter, leaderboard, admin tap-to-place.
+  - **Photo hunt:** the search circle hides the spot, the card shows the twist, a photo is "taken" (the mock's `/__verify-photo` stands in for Gemini via `page.route`), and the red pin and countdown appear.
   - **Shake-Off:** joins as the 4th player with 3 bots and shakes via synthetic `DeviceMotionEvent`s (after deleting `DeviceMotionEvent.requestPermission`, which desktop Chromium answers "denied"), then checks the named winners and MVP.
 
   Screenshots land in `tests/e2e/screenshots/` (gitignored). It also prints frame rate (software WebGL, so a phone GPU will differ).
@@ -109,6 +115,7 @@ npm run lint
 npm run fetch-buildings  # regenerate public/data/buildings.geojson
 npm test                 # test:sql + test:e2e (needs Microsoft Edge, or E2E_BROWSER_CHANNEL=chrome)
 npm run mock             # mock Supabase on :54321 for manual UI testing
+npm run test-gemini -- <reference.jpg> <photo.jpg> ["twist"]   # try the photo-hunt referee on local photos
 ```
 
 Copy `web/.env.example` to `web/.env`. `VITE_*` vars ship to the browser; secrets must not use that prefix. Never commit `.env`.

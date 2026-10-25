@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "fetch-buildings": "node scripts/fetch-buildings.mjs",
+    "test-gemini": "node --disable-warning=ExperimentalWarning scripts/test-gemini.ts",
     "test:sql": "node tests/sql/run.mjs",
     "test:e2e": "node tests/e2e/run.mjs",
     "test": "npm run test:sql && npm run test:e2e",

@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { MOCK_PORT, OLD_MAIN_LAWN, startMockSupabase } from '../mock/supabase.mjs'
+import { HUNT_SPOT, MOCK_PORT, OLD_MAIN_LAWN, startMockSupabase } from '../mock/supabase.mjs'
 
 const WEB_DIR = fileURLToPath(new URL('../../', import.meta.url))
 const PORT = Number(process.env.E2E_PORT ?? 5199)
@@ -193,6 +193,61 @@ async function mapScenario(browser) {
   await page.context().close()
 }
 
+// 1x1 PNG: any real image will do, since the mock referee accepts every photo.
+const PHOTO = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+
+async function photoHuntScenario(browser) {
+  console.log('\n# Photo hunt (player standing at the hidden spot)')
+  const page = await newPhone(browser, HUNT_SPOT)
+  // vite preview doesn't run web/api, and the real referee is Gemini, so the mock stands in for /api/verify-photo.
+  await page.route('**/api/verify-photo', async (route) => {
+    const res = await fetch(`${MOCK}/__verify-photo`, { method: 'POST', headers: route.request().headers(), body: route.request().postData() })
+    await route.fulfill({ status: res.status, contentType: 'application/json', body: await res.text() })
+  })
+  await mapReady(page)
+  await page.waitForTimeout(1500)
+
+  const rendered = () =>
+    page.evaluate(() => {
+      const q = (layers) => window.__walkpsuMap.queryRenderedFeatures({ layers }).map((f) => f.properties.id)
+      return { areas: q(['hunt-areas']), pins: q(['drop-points']) }
+    })
+  let s = await rendered()
+  check('hidden hunt shows a search circle and no pin', s.areas.includes('hunt-drop') && !s.pins.includes('hunt-drop'), s)
+
+  const hunt = (await (await fetch(`${MOCK}/__state`)).json()).drops.find((d) => d.id === 'hunt-drop')
+  const center = await page.evaluate(([lng, lat]) => {
+    const map = window.__walkpsuMap
+    const box = map.getContainer().getBoundingClientRect()
+    const p = map.project([lng, lat])
+    return { x: box.left + p.x, y: box.top + p.y }
+  }, [hunt.lng, hunt.lat])
+  await page.touchscreen.tap(center.x, center.y)
+  await page.waitForSelector('.map-card .hunt-twist')
+  await page.waitForSelector('.map-card label.button:not([aria-disabled])')
+  check('card shows the twist and a camera button', /with a thumbs up/.test(await page.textContent('.map-card')) && /Take the photo/.test(await page.textContent('.map-card')))
+  await page.screenshot({ path: SHOTS + 'photo-hunt-card.png' })
+
+  await page.setInputFiles('.map-card input[type=file]', { name: 'spot.png', mimeType: 'image/png', buffer: PHOTO })
+  await page.waitForSelector('.found-overlay', { timeout: 10_000 })
+  const overlay = (await page.textContent('.found-overlay')).replace(/\s+/g, ' ')
+  check('celebration shows the points and that the pin is revealed', /Found it!.*\+20 points.*First to find it/.test(overlay), overlay)
+  await page.screenshot({ path: SHOTS + 'photo-hunt-celebration.png' })
+  await page.click('.found-overlay .button')
+  await page.waitForFunction(() => window.__walkpsuMap.queryRenderedFeatures({ layers: ['drop-points'] }).some((f) => f.properties.id === 'hunt-drop'), null, { timeout: 10_000 })
+  s = await rendered()
+  check('after the first find, the red pin replaces the search circle', s.pins.includes('hunt-drop') && !s.areas.includes('hunt-drop'), s)
+  const state = await (await fetch(`${MOCK}/__state`)).json()
+  check('the claim earned the full 20 points', state.claims.some((c) => c.drop_id === 'hunt-drop' && c.points === 20), state.claims)
+  await page.screenshot({ path: SHOTS + 'photo-hunt-found.png' })
+
+  await tapFeature(page, 'drop-points', 'hunt-drop')
+  await page.waitForFunction(() => /Closes in [67]:\d\d/.test(document.querySelector('.map-card')?.textContent ?? ''), null, { timeout: 5_000 })
+  check('revealed card counts down the 7-minute window', true)
+  check('no console errors', page.errors.length === 0, page.errors)
+  await page.context().close()
+}
+
 async function shakeOffScenario(browser) {
   console.log('\n# Shake-Off (3 bot players already in the lobby; joining makes 4)')
   const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat, lng: OLD_MAIN_LAWN.lng })
@@ -239,6 +294,7 @@ const browser = await chromium.launch({
 })
 try {
   await mapScenario(browser)
+  await photoHuntScenario(browser)
   await shakeOffScenario(browser)
 } catch (e) {
   failures++
