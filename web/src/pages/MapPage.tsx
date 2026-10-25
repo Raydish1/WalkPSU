@@ -11,7 +11,7 @@ import PlayerHud from '../components/PlayerHud'
 import { PinIcon } from '../components/icons'
 import { claimDrop } from '../lib/api'
 import type { Building } from '../lib/buildings'
-import { DROP_TYPES } from '../lib/campus'
+import { dropTypeMeta } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useBuildings, useClaimRadius, useDrops, useLeaderboard } from '../lib/hooks'
@@ -54,7 +54,7 @@ function MapPage() {
   const highlightColors = useMemo(() => {
     const colors = new Map<string, string>()
     for (const d of drops) {
-      if (d.building_num) colors.set(d.building_num, DROP_TYPES[d.type].color)
+      if (d.building_num) colors.set(d.building_num, dropTypeMeta(d.type).color)
     }
     return colors
   }, [drops])
@@ -90,7 +90,7 @@ function MapPage() {
               const distance = here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null
               return {
                 type: 'Feature',
-                properties: { color: DROP_TYPES[d.type].color, inRange: distance !== null && distance <= radius },
+                properties: { color: dropTypeMeta(d.type).color, inRange: distance !== null && distance <= radius },
                 geometry: circlePolygon(d.lat, d.lng, radius),
               }
             }),
@@ -100,7 +100,7 @@ function MapPage() {
   const dropPoints = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops.map((d) => ({ type: 'Feature', properties: { id: d.id, color: DROP_TYPES[d.type].color }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
+      features: drops.map((d) => ({ type: 'Feature', properties: { id: d.id, color: dropTypeMeta(d.type).color }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
     }),
     [drops],
   )
@@ -271,9 +271,9 @@ function DropCard({ drop, distance, radius, position, onClaimed }: DropCardProps
   return (
     <div className="drop-card">
       <div className="drop-card-head">
-        <span className="chip" style={{ '--player': DROP_TYPES[drop.type].color } as CSSProperties}>
+        <span className="chip" style={{ '--player': dropTypeMeta(drop.type).color } as CSSProperties}>
           <span className="color-dot" aria-hidden />
-          {DROP_TYPES[drop.type].label}
+          {dropTypeMeta(drop.type).label}
         </span>
         <span className="points-badge">{drop.points} pts</span>
       </div>

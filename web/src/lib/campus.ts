@@ -12,6 +12,14 @@ export const DROP_TYPES = {
   chemistry: { label: 'Chemistry', color: '#2f7eb5' },
 } as const
 
+export type KnownDropType = keyof typeof DROP_TYPES
+
+/** Safe look-up when live data has an unexpected or missing drop type. */
+export function dropTypeMeta(type: string | null | undefined): { label: string; color: string } {
+  if (type && type in DROP_TYPES) return DROP_TYPES[type as KnownDropType]
+  return { label: type || 'Event', color: DROP_ACCENT }
+}
+
 /** Extra search terms for buildings whose official PASDA names don't match what students call them. */
 export const BUILDING_NICKNAMES: Record<string, string> = {
   '0005000': 'HUB-Robeson Center',

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { DROP_TYPES } from '../lib/campus'
+import { dropTypeMeta } from '../lib/campus'
 import { distanceM } from '../lib/geo'
 import { useDrops } from '../lib/hooks'
 import { usePresence } from '../session/presence'
@@ -32,7 +32,7 @@ function DropAlerts() {
       if (distance !== null && distance > NEARBY_M) continue
       toast(distance === null ? 'New drop on campus' : 'New drop nearby', {
         id: `drop-${drop.id}`,
-        description: [drop.title, `${DROP_TYPES[drop.type].label} · ${drop.points} pts`, distance !== null && `${Math.round(distance)} m away`]
+        description: [drop.title, `${dropTypeMeta(drop.type).label} · ${drop.points} pts`, distance !== null && `${Math.round(distance)} m away`]
           .filter(Boolean)
           .join(' · '),
         action: { label: 'View', onClick: () => navigate('/') },

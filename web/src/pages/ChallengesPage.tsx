@@ -1,7 +1,7 @@
 import { useMemo, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { StarIcon } from '../components/icons'
-import { DROP_TYPES } from '../lib/campus'
+import { DROP_TYPES, dropTypeMeta } from '../lib/campus'
 import {
   EVENT_CATEGORIES,
   categoryLabel,
@@ -227,13 +227,13 @@ function ChallengesPage() {
               <li
                 key={item.key}
                 className="card stack-sm"
-                style={{ '--accent-local': DROP_TYPES[drop.type].color, padding: 16 } as CSSProperties}
+                style={{ '--accent-local': dropTypeMeta(drop.type).color, padding: 16 } as CSSProperties}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="chip" style={{ '--player': DROP_TYPES[drop.type].color } as CSSProperties}>
+                    <span className="chip" style={{ '--player': dropTypeMeta(drop.type).color } as CSSProperties}>
                       <span className="color-dot" aria-hidden />
-                      {DROP_TYPES[drop.type].label}
+                      {dropTypeMeta(drop.type).label}
                     </span>
                     <span className="chip" style={{ '--player': EVENT_CATEGORIES[theme].color } as CSSProperties}>
                       <span className="color-dot" aria-hidden />

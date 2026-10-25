@@ -8,7 +8,7 @@ import { PinIcon } from '../components/icons'
 import DropQrList from '../components/DropQrList'
 import { createDrop, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
-import { DROP_TYPES } from '../lib/campus'
+import { DROP_TYPES, dropTypeMeta } from '../lib/campus'
 import type { DropType, NewDrop } from '../lib/database.types'
 import { EVENT_CATEGORIES, type EventCategoryId } from '../lib/events'
 import { useBuildings, useDrops } from '../lib/hooks'
@@ -43,7 +43,7 @@ function AdminPage() {
 
   const namesByNum = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
   const highlighted = useMemo(() => new Set(drops.flatMap((d) => (d.building_num ? [d.building_num] : []))), [drops])
-  const dropPoints = useMemo(() => toPoints(drops.map((d) => ({ lat: d.lat, lng: d.lng, color: DROP_TYPES[d.type].color }))), [drops])
+  const dropPoints = useMemo(() => toPoints(drops.map((d) => ({ lat: d.lat, lng: d.lng, color: dropTypeMeta(d.type).color }))), [drops])
   const targetPoint = useMemo(() => toPoints(target ? [{ lat: target.lat, lng: target.lng, color: '#facc15' }] : []), [target])
 
   if (!isAdmin) {

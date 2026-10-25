@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
 import type { Building } from '../lib/buildings'
 import type { DropRow } from '../lib/database.types'
-import { DROP_TYPES } from '../lib/campus'
+import { dropTypeMeta } from '../lib/campus'
 import { difficultyForPoints } from '../lib/progress'
 import { CrossIcon } from './icons'
 
@@ -15,7 +15,7 @@ type Props = {
 function BuildingSheet({ building, drop, onClose }: Props) {
   const points = drop?.points ?? 50
   const difficulty = difficultyForPoints(points)
-  const accent = drop ? DROP_TYPES[drop.type].color : 'var(--accent)'
+  const accent = drop ? dropTypeMeta(drop.type).color : 'var(--accent)'
   const challengePath =
     drop?.type === 'minigame'
       ? `/game/${drop.id}`
@@ -54,7 +54,7 @@ function BuildingSheet({ building, drop, onClose }: Props) {
         </div>
         <div>
           <dt>Challenge</dt>
-          <dd>{drop ? DROP_TYPES[drop.type].label : 'Explore campus'}</dd>
+          <dd>{drop ? dropTypeMeta(drop.type).label : 'Explore campus'}</dd>
         </div>
       </dl>
 

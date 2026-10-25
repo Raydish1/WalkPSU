@@ -1,6 +1,6 @@
 import { TargetIcon } from './icons'
 import type { DropRow } from '../lib/database.types'
-import { DROP_TYPES } from '../lib/campus'
+import { dropTypeMeta } from '../lib/campus'
 
 type Props = {
   drop: DropRow | null
@@ -34,7 +34,7 @@ function MissionCard({ drop, onFocus }: Props) {
           Visit {drop.title.includes('HUB') ? 'the HUB' : drop.title} and complete a challenge
         </strong>
         <p>
-          {DROP_TYPES[drop.type].label} · {drop.points} pts
+          {dropTypeMeta(drop.type).label} · {drop.points} pts
         </p>
       </div>
     </button>

@@ -94,7 +94,7 @@ export function resolveCategory(drop: Pick<DropRow, 'title' | 'type'> & { catego
   for (const [id, meta] of Object.entries(EVENT_CATEGORIES) as [EventCategoryId, (typeof EVENT_CATEGORIES)[EventCategoryId]][]) {
     if (meta.keywords.some((k) => hay.includes(k))) return id
   }
-  return TYPE_FALLBACK[drop.type] ?? 'campus'
+  return TYPE_FALLBACK[drop.type as keyof typeof TYPE_FALLBACK] ?? 'campus'
 }
 
 export function categoryLabel(id: EventCategoryId): string {
