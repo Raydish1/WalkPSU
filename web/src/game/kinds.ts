@@ -10,6 +10,10 @@ export const MINIGAMES: Record<MinigameKind, { name: string; blurb: string }> = 
     name: 'Quick Draw',
     blurb: 'Hold still, then flick your phone the instant it flashes DRAW! Three rounds. The faster team wins.',
   },
+  landmark: {
+    name: 'Point to the Landmark',
+    blurb: 'Point your phone at a famous campus landmark you can’t see. Three rounds. The team that’s closer on average wins.',
+  },
 }
 
 export const minigameOf = (game: MinigameKind | null | undefined) => MINIGAMES[game ?? 'shake_off']

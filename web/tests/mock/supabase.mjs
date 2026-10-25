@@ -1,6 +1,6 @@
 // In-memory stand-in for the Supabase REST/auth/RPC endpoints the app uses, for UI tests without a real project.
 // It mirrors the SQL rules closely enough to drive the screens (60 m claim radius, QR codes, Shake-Off timing and
-// caps, Quick Draw rounds, photo hunts) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
+// caps, Quick Draw rounds, Point to the Landmark rounds, photo hunts) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
 // polling fallbacks keep screens current, exactly as on flaky venue Wi-Fi.
 //
 //   node tests/mock/supabase.mjs            # serves on :54321
@@ -26,7 +26,23 @@ const QUICK_DRAW = {
   ...SETTINGS, game_seconds: 15, rounds: 3, round_seconds: 5, min_signal_delay_ms: 1500, max_signal_delay_ms: 2500,
   min_reaction_ms: 100, max_reaction_ms: 1500, clock_tolerance_ms: 1000,
 }
-const settingsOf = (kind) => (kind === 'quick_draw' ? QUICK_DRAW : SETTINGS)
+// Point to the Landmark, shortened: 3 rounds of 12 s, 6 s of them to point.
+const LANDMARK = {
+  ...SETTINGS, game_seconds: 36, rounds: 3, round_seconds: 12, point_seconds: 6, steady_ms: 1000, steady_degrees: 6, lock_after_ms: 1500,
+  min_landmark_m: 200, miss_degrees: 180,
+}
+/** A few rows of SQL campus_landmarks. */
+const LANDMARKS = [
+  { num: '0001000', name: 'Old Main', lat: 40.796443, lng: -77.862804 },
+  { num: '0812000', name: 'Beaver Stadium', lat: 40.812537, lng: -77.855221 },
+  { num: '0045000', name: 'Bryce Jordan Center', lat: 40.808639, lng: -77.855565 },
+  { num: '0003000', name: 'Pattee Library', lat: 40.797799, lng: -77.866229 },
+  { num: '0005000', name: 'the HUB', lat: 40.798261, lng: -77.861197 },
+  { num: '0801000', name: 'Rec Hall', lat: 40.796017, lng: -77.869278 },
+]
+/** Bots' errors per round, in degrees: they point late and badly, so the e2e player's side wins. */
+const BOT_ERRORS = { bot0: [50, 70, 60], bot1: [40, 45, 35], bot2: [80, 65, 75] }
+const settingsOf = (kind) => ({ quick_draw: QUICK_DRAW, landmark: LANDMARK })[kind] ?? SETTINGS
 /** Bots' Quick Draw times per round: valid but slow, so the e2e player wins however fast the test machine is. */
 const BOT_TIMES = { bot0: [1300, 1350, 1320], bot1: [1200, 1250, 1180], bot2: [1400, 1380, 1420] }
 const PALETTE = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4']
@@ -34,6 +50,11 @@ const BOT_SHAKES = 20
 
 const R = 6371000
 const rad = (d) => (d * Math.PI) / 180
+/** SQL bearing_deg / angle_diff. */
+const deg = (r) => (r * 180) / Math.PI
+const bearing = (lat1, lng1, lat2, lng2) =>
+  (deg(Math.atan2(Math.sin(rad(lng2 - lng1)) * Math.cos(rad(lat2)), Math.cos(rad(lat1)) * Math.sin(rad(lat2)) - Math.sin(rad(lat1)) * Math.cos(rad(lat2)) * Math.cos(rad(lng2 - lng1)))) + 360) % 360
+const angleDiff = (a, b) => 180 - Math.abs(180 - ((((a - b) % 360) + 360) % 360))
 const distance = (a, b, c, d) => 2 * R * Math.asin(Math.sqrt(Math.sin(rad(c - a) / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(rad(d - b) / 2) ** 2))
 const now = () => new Date().toISOString()
 
@@ -59,6 +80,8 @@ function seed() {
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
     // ~30 m south of the lawn drop, in the open.
     drop('draw-drop', 'Lawn Quick Draw', 'minigame', OLD_MAIN_LAWN.lat - 30 / 111_195, OLD_MAIN_LAWN.lng, 25, null, { game: 'quick_draw' }),
+    // ~30 m west of the lawn drop.
+    drop('aim-drop', 'Lawn Landmarks', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng - 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 35, null, { game: 'landmark' }),
     // Hidden photo hunt: the public row has only the search circle's center and no building.
     drop('hunt-drop', 'Mystery spot', 'photo_hunt', HUNT_SPOT.lat, HUNT_SPOT.lng + 60 / (111_195 * Math.cos(rad(HUNT_SPOT.lat))), 20, null, {
       twist: 'with a thumbs up',
@@ -73,9 +96,9 @@ function seed() {
     claims: [],
     discovered: [],
     secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
-    games: new Map(['game-drop', 'draw-drop'].map((id) => [id, newGame(id)])),
+    games: new Map(['game-drop', 'draw-drop', 'aim-drop'].map((id) => [id, newGame(id)])),
     // Three bots wait in each lobby, so joining makes 4 and starts the countdown.
-    gamePlayers: ['game-drop', 'draw-drop'].flatMap((dropId) =>
+    gamePlayers: ['game-drop', 'draw-drop', 'aim-drop'].flatMap((dropId) =>
       ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: dropId, player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
     ),
     results: [],
@@ -86,7 +109,9 @@ function seed() {
 /** A games row. `delays` stands in for the SQL seed: each Quick Draw round's hidden signal delay. */
 function newGame(dropId) {
   const delays = [0, 1, 2].map(() => QUICK_DRAW.min_signal_delay_ms + Math.floor(Math.random() * (QUICK_DRAW.max_signal_delay_ms - QUICK_DRAW.min_signal_delay_ms + 1)))
-  return { drop_id: dropId, created_at: now(), started_at: null, finished_at: null, winner_side: null, delays }
+  // Stands in for the seeded landmark order (the SQL also keeps them 200 m+ from the drop; roundsOf filters).
+  const shuffled = [...LANDMARKS].sort(() => Math.random() - 0.5)
+  return { drop_id: dropId, created_at: now(), started_at: null, finished_at: null, winner_side: null, delays, shuffled }
 }
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
@@ -109,8 +134,21 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const kindOf = (dropId) => drops.find((d) => d.id === dropId)?.game ?? 'shake_off'
   const roundsOf = (dropId) => {
     const g = games.get(dropId)
-    if (kindOf(dropId) !== 'quick_draw' || !g?.started_at) return []
+    if (!g?.started_at) return []
     const start = Date.parse(g.started_at)
+    if (kindOf(dropId) === 'landmark') {
+      const drop = drops.find((d) => d.id === dropId)
+      return g.shuffled
+        .filter((l) => distance(drop.lat, drop.lng, l.lat, l.lng) >= LANDMARK.min_landmark_m)
+        .slice(0, LANDMARK.rounds)
+        .map((landmark, i) => ({
+          round: i + 1,
+          starts_at: new Date(start + i * LANDMARK.round_seconds * 1000).toISOString(),
+          landmark,
+          bearing: bearing(drop.lat, drop.lng, landmark.lat, landmark.lng),
+        }))
+    }
+    if (kindOf(dropId) !== 'quick_draw') return []
     return g.delays.map((delay, i) => ({
       round: i + 1,
       starts_at: new Date(start + i * QUICK_DRAW.round_seconds * 1000).toISOString(),
@@ -123,17 +161,30 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     const roster = gamePlayers.filter((gp) => gp.drop_id === dropId).sort((a, b) => a.joined_at.localeCompare(b.joined_at))
     return new Map(roster.map((gp, i) => [gp.player_id, i % 2 === 0 ? 'blue' : 'white']))
   }
+  /** Landmark bots lock their (poor) headings when each round's pointing time ends. */
+  const botsPoint = (dropId) => {
+    if (kindOf(dropId) !== 'landmark') return
+    for (const r of roundsOf(dropId)) {
+      if (Date.now() < Date.parse(r.starts_at) + LANDMARK.point_seconds * 1000) continue
+      for (const gp of gamePlayers.filter((x) => x.drop_id === dropId && x.player_id.startsWith('bot'))) {
+        if (results.some((x) => x.drop_id === dropId && x.player_id === gp.player_id && x.round === r.round)) continue
+        const error = BOT_ERRORS[gp.player_id][r.round - 1]
+        results.push({ drop_id: dropId, player_id: gp.player_id, round: r.round, value: error, false_start: false, heading: (r.bearing + error) % 360, created_at: now() })
+      }
+    }
+  }
   const gameState = (dropId) => {
     const sides = sidesOf(dropId)
-    // The delays stand in for the SQL seed, which get_game_state() never returns.
-    const { delays: _seed, ...game } = games.get(dropId) ?? {}
+    botsPoint(dropId)
+    // The delays and shuffle stand in for the SQL seed, which get_game_state() never returns.
+    const { delays: _seed, shuffled: _order, ...game } = games.get(dropId) ?? {}
     return {
       server_now: now(),
       kind: kindOf(dropId),
       settings: settingsOf(kindOf(dropId)),
       game: game.drop_id ? game : null,
       rounds: roundsOf(dropId),
-      results: results.filter((r) => r.drop_id === dropId).map(({ player_id, round, value, false_start }) => ({ player_id, round, value, false_start })),
+      results: results.filter((r) => r.drop_id === dropId).map(({ player_id, round, value, false_start, heading }) => ({ player_id, round, value, false_start, heading: heading ?? null })),
       players: gamePlayers
         .filter((gp) => gp.drop_id === dropId)
         .map((gp) => {
@@ -287,6 +338,25 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       }
       return [200, row]
     },
+    submit_heading: (json, me) => {
+      const g = games.get(json.p_drop_id)
+      if (kindOf(json.p_drop_id) !== 'landmark' || !g?.started_at || Date.now() < Date.parse(g.started_at)) return [400, { message: "This Landmark game hasn't started" }]
+      if (g.finished_at) return [400, { message: 'This Landmark game is over' }]
+      if (!gamePlayers.some((gp) => gp.drop_id === json.p_drop_id && gp.player_id === me?.id)) return [400, { message: "You're not in this Landmark game" }]
+      const round = roundsOf(json.p_drop_id).find((r) => r.round === json.p_round)
+      if (!round) return [400, { message: `There's no round ${json.p_round}` }]
+      if (!(json.p_heading >= 0 && json.p_heading < 360)) return [400, { message: 'A heading must be from 0 up to 360 degrees' }]
+      const start = Date.parse(round.starts_at)
+      if (Date.now() < start) return [400, { message: `Round ${json.p_round} hasn't started` }]
+      if (Date.now() > start + (LANDMARK.point_seconds + LANDMARK.submit_grace_seconds) * 1000) return [400, { message: `Round ${json.p_round} is over` }]
+      let row = results.find((r) => r.drop_id === json.p_drop_id && r.player_id === me.id && r.round === json.p_round)
+      if (!row) {
+        row = { drop_id: json.p_drop_id, player_id: me.id, round: json.p_round, value: angleDiff(json.p_heading, round.bearing), false_start: false, heading: json.p_heading, created_at: now() }
+        results.push(row)
+        log.push(`heading round ${row.round}: ${row.heading.toFixed(1)} (${row.value.toFixed(1)} off)`)
+      }
+      return [200, row]
+    },
     submit_shakes: (json, me) => {
       const started = Date.parse(games.get(json.p_drop_id)?.started_at ?? '')
       if (!started || Date.now() < started) return [400, { message: "This Shake-Off hasn't started" }]
@@ -310,9 +380,14 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
             BOT_TIMES[gp.player_id].forEach((value, i) => results.push({ drop_id: json.p_drop_id, player_id: gp.player_id, round: i + 1, value, false_start: false, created_at: now() }))
           }
         }
-        // As SQL side_scores(): shakes per player, or each player's best valid time (max_reaction_ms if none).
+        botsPoint(json.p_drop_id)
+        // As SQL side_scores(): shakes per player, average error (a missed round = miss_degrees), or best valid time.
         const score = (gp) => {
           if (kind === 'shake_off') return gp.shakes
+          if (kind === 'landmark') {
+            const errors = [1, 2, 3].map((round) => results.find((r) => r.drop_id === json.p_drop_id && r.player_id === gp.player_id && r.round === round)?.value ?? LANDMARK.miss_degrees)
+            return errors.reduce((a, b) => a + b, 0) / errors.length
+          }
           const times = results.filter((r) => r.drop_id === json.p_drop_id && r.player_id === gp.player_id && r.value !== null).map((r) => r.value)
           return times.length ? Math.min(...times) : QUICK_DRAW.max_reaction_ms
         }

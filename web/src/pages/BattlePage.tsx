@@ -5,6 +5,7 @@ import Avatar from '../components/Avatar'
 import { ChevronIcon } from '../components/icons'
 import GameIcon from '../game/GameIcon'
 import { MINIGAMES } from '../game/kinds'
+import { LandmarkBoard, LandmarkSides } from '../game/LandmarkScreens'
 import { DrawSides, RoundBoard } from '../game/QuickDrawScreens'
 import TugBar from '../game/TugBar'
 import { MvpLine, WinnerHeadline } from '../game/Results'
@@ -68,6 +69,8 @@ function BattleScreen({ dropId }: { dropId: string }) {
         <MvpLine state={state} />
         {kind === 'quick_draw' ? (
           <DrawSides state={state} highlight={phase.winner} />
+        ) : kind === 'landmark' ? (
+          <LandmarkSides state={state} serverNow={serverNow} highlight={phase.winner} />
         ) : (
           <>
             <TugBar players={state.players} live={shown} big />
@@ -84,6 +87,16 @@ function BattleScreen({ dropId }: { dropId: string }) {
         <p className="battle-eyebrow">{title}</p>
         <RoundBoard state={state} serverNow={serverNow} big />
         <DrawSides state={state} />
+      </section>
+    )
+  }
+
+  if ((phase.kind === 'playing' || phase.kind === 'tallying') && kind === 'landmark') {
+    return (
+      <section className="battle">
+        <p className="battle-eyebrow">{title}</p>
+        <LandmarkBoard state={state} serverNow={serverNow} drop={drop} />
+        <LandmarkSides state={state} serverNow={serverNow} />
       </section>
     )
   }

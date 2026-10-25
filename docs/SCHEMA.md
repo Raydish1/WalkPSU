@@ -49,7 +49,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | `subtitle` | text | optional line under the title; the hosting organization for imported campus events |
 | `starts_at` | timestamptz | optional; when the event behind the drop begins. The drop card shows it with `expires_at` |
 | `source_id` | text | unique. Set only on drops seeded from campus events (`discover:<event id>`, by `web/scripts/seed-event-drops.mjs`); null for drops made in `/admin` |
-| `game` | `shake_off` \| `quick_draw` | `minigame` drops only: which game the lobby plays. A trigger sets `shake_off` when a minigame insert leaves it out and clears it on other types |
+| `game` | `shake_off` \| `quick_draw` \| `landmark` | `minigame` drops only: which game the lobby plays. A trigger sets `shake_off` when a minigame insert leaves it out and clears it on other types |
 
 Only admins can insert, update, or delete. Everyone signed in can read. Create photo hunts with `create_photo_hunt`, not a plain insert, so the spot stays hidden.
 
@@ -102,11 +102,16 @@ One per `minigame` drop, created by the first `join_game`. Every kind (`drops.ga
 | column | type | notes |
 | --- | --- | --- |
 | `drop_id`, `player_id`, `round` | uuid, uuid, smallint | primary key. The first submission for a round is final |
-| `value` | double precision | the round's score, lower is better. Quick Draw: reaction time in ms. Null exactly when `false_start` |
-| `false_start` | boolean | flicked before the signal, or under `min_reaction_ms` |
+| `value` | double precision | the round's score, lower is better. Quick Draw: reaction time in ms. Point to the Landmark: error in degrees (0–180). Null exactly when `false_start` |
+| `false_start` | boolean | Quick Draw: flicked before the signal, or under `min_reaction_ms` |
+| `heading` | double precision | Point to the Landmark: the locked true heading, [0, 360) |
 | `created_at` | timestamptz | |
 
-All three are read-only for clients and in the Realtime publication. Sides aren't stored: `game_sides(drop_id)` deals them from the seed once `started_at` is set, so every caller sees the same balanced split. Teams exist only inside one game.
+### `campus_landmarks`
+
+`num` (PSU building number, as in `buildings.geojson`), `name`, `lat`, `lng`: 15 well-known landmarks (Old Main, Beaver Stadium, the BJC, Pattee, the HUB, Rec Hall, the Creamery…) that Point to the Landmark asks for. Seeded by the migration; everyone signed in can read it, nobody can write.
+
+`games`, `game_players`, and `game_results` are read-only for clients and in the Realtime publication. Sides aren't stored: `game_sides(drop_id)` deals them from the seed once `started_at` is set, so every caller sees the same balanced split. Teams exist only inside one game.
 
 ### `player_scores` (view)
 
@@ -132,13 +137,15 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
 
   Client: `claimDrop(dropId, { lat, lng })` or `claimDrop(dropId, { code })`.
 - **Mini-game functions** (all keyed by the drop id; phases come from timestamps, so there's no server timer):
-  - `get_game_state(drop) → { server_now, kind, settings, game, players[], rounds[], results[] }`. One call per screen. `server_now` lets phones correct skewed clocks. `settings` is `minigame_settings(kind)`. `rounds` (Quick Draw, once a start is set) holds each round's `starts_at` and `signal_at`; `results` holds every `game_results` row.
+  - `get_game_state(drop) → { server_now, kind, settings, game, players[], rounds[], results[] }`. One call per screen. `server_now` lets phones correct skewed clocks. `settings` is `minigame_settings(kind)`. `rounds` (Quick Draw, once a start is set) holds each round's `starts_at` and `signal_at`; Point to the Landmark's hold each round's `starts_at`, `landmark` (`num, name, lat, lng`), and true `bearing` from the drop. `results` holds every `game_results` row.
   - `join_game(drop, lat?, lng?, code?)`. Same proof as claiming. Rejoining is a no-op. Joining closes at `started_at`. The 4th player schedules the start `auto_start_delay_seconds` out.
   - `start_game(drop)`. Admin only, needs 2+ players. Pulls the start in to `admin_start_delay_seconds` from now.
   - `submit_shakes(drop, count)`. Shake-Off only. Running total during and just after the game. Stored as `greatest(previous, min(count, floor(elapsed_seconds × max_shakes_per_second)))`, so a client can't report more than a human could shake.
   - `submit_reaction(drop, round, reaction_ms?)`. Quick Draw only. The phone times the reaction itself (`performance.now()` from the frame that shows "DRAW!" to the flick), so network lag never counts; no `reaction_ms` = flicked before the signal. Under `min_reaction_ms` is stored as a false start. Refused: a round that doesn't exist or hasn't begun, a time outside 0..`max_reaction_ms`, a time the server's clock says couldn't have happened yet (`now < signal_at + reaction_ms − clock_tolerance_ms`), and anything after `signal_at + max_reaction_ms + submit_grace_seconds`.
-  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds` (per kind). `side_scores(drop, kind)` scores each side: Shake-Off, average shakes per player (higher wins, fair for uneven sides); Quick Draw, the average of each player's best valid time, with `max_reaction_ms` for a player who has none (lower wins). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
-  - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. `minigame_settings(kind)` adds each kind's own: Quick Draw `game_seconds` 30, `rounds` 3, `round_seconds` 10, signal 2000–6000 ms into each round (`quick_draw_signal_at(game, round)`, seeded), `min_reaction_ms` 100, `max_reaction_ms` 1500, `clock_tolerance_ms` 1000. The client reads them from `get_game_state`; don't copy them into client code.
+  - `submit_heading(drop, round, heading)`. Point to the Landmark only. The phone's locked true heading; the server stores the error `angle_diff(heading, bearing)` from the round's true bearing (`bearing_deg` from the **drop's** location to the landmark, not the phone's). Refused: a round that doesn't exist or hasn't begun, a heading outside [0, 360) or NaN, and anything after `point_seconds + submit_grace_seconds` into the round. First heading per round is final.
+  - `landmark_rounds(game)`: each round's landmark, a different seeded pick among `campus_landmarks` at least `min_landmark_m` from the drop (the farthest fill in if too few qualify), with its bearing.
+  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds` (per kind). `side_scores(drop, kind)` scores each side: Shake-Off, average shakes per player (higher wins, fair for uneven sides); Quick Draw, the average of each player's best valid time, with `max_reaction_ms` for a player who has none (lower wins); Point to the Landmark, the average of each player's mean error over all rounds, a round without a heading counting `miss_degrees` (lower wins). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
+  - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. `minigame_settings(kind)` adds each kind's own: Quick Draw `game_seconds` 30, `rounds` 3, `round_seconds` 10, signal 2000–6000 ms into each round (`quick_draw_signal_at(game, round)`, seeded), `min_reaction_ms` 100, `max_reaction_ms` 1500, `clock_tolerance_ms` 1000. Point to the Landmark `game_seconds` 42, `rounds` 3, `round_seconds` 14 (`point_seconds` 8, then the reveal), `steady_ms` 1000, `steady_degrees` 6, `lock_after_ms` 1500, `min_landmark_m` 200, `miss_degrees` 180. The client reads them from `get_game_state`; don't copy them into client code.
   - `claim_drop` refuses `minigame` drops, so the game can't be skipped.
 - **Photo hunt functions:**
   - `create_photo_hunt(p_title, p_lat, p_lng, p_hint_photo_url, p_twist, p_points?, p_building_num?, p_expires_at?) → drops`. Admin only. Saves the exact spot and building in `drop_secrets` and publishes the drop at a random point up to 3/4 of `search_radius_m` (125 m) away, so neither the row nor its Realtime insert reveals the spot. Client: `createPhotoHunt(...)`.

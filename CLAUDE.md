@@ -10,7 +10,7 @@ HackPSU project: a mobile-first web app that turns the Penn State (University Pa
 - **Walking:** my trail (today, `localStorage` only) fades behind my sprite; others get a faint 2-minute tail from Presence. **Fog of war** covers 150 campus hexes (120 m edges, `map/hexgrid.ts`); walking into one with a good GPS fix discovers it (`discovered_areas`). Profile shows distance walked today, the fog toggle, and areas discovered.
 - **Photo hunt:** the admin posts a reference photo of a spot plus a twist ("with a thumbs up"). Players see only a 250 m search circle, find the spot, and take a photo there; Gemini (`web/api/verify-photo.ts`) judges it. The first finder gets full points and reveals a red pin; the hunt then stays open 7 minutes, each later finder getting half the points of the one before.
 - **Shake-Off:** players join a lobby at the drop (in range or by QR). At 4 joins (or an admin's Start) they're dealt into Blue vs White **for that game only** and shake their phones for 15 s. The side with more shakes per player wins, and every winner gets the drop's points. Phones show a named tug-of-war, and `/battle/:dropId` is the projector view.
-- **Mini-game kinds:** a `minigame` drop's `game` picks what its lobby plays (admin picker; default Shake-Off). **Quick Draw:** 3 rounds; every phone flashes "DRAW!" at the same seeded server moment, phones time the flick themselves, and the side with the lower average best time wins (MVP: fastest draw). All kinds share the lobby, sides, `finish_game`, and `/battle`.
+- **Mini-game kinds:** a `minigame` drop's `game` picks what its lobby plays (admin picker; default Shake-Off). **Quick Draw:** 3 rounds; every phone flashes "DRAW!" at the same seeded server moment, phones time the flick themselves, and the side with the lower average best time wins (MVP: fastest draw). **Point to the Landmark:** 3 rounds, each naming a famous landmark 200 m+ from the drop; players point their phone (compass, after a figure-8 calibration; no compass = spectate) and lock by holding steady 1 s (or at 8 s). The server scores the angular error from the true bearing measured from the drop; lower average error wins (MVP: closest point). The projector reveals a north-up map with the true line and everyone's arrows. All kinds share the lobby, sides, `finish_game`, and `/battle`.
 
 Judging requirements: rivalry, phone motion, and the game working for **4+ players in total**. Never enforce a minimum group size. Never add permanent teams; Shake-Off sides are derived per game (`game_sides()`), never stored.
 
@@ -37,7 +37,9 @@ web/
     game/              Mini-games: kinds.ts + GameIcon (names, blurbs, icons), shakeoff.ts (phase model, side math, names),
                        useGame (state + clock offset), motion.ts (shared DeviceMotion permission), useShakes,
                        useShakeBroadcast, TugBar, Results (winner headline + MVP), quickdraw.ts (scoring),
-                       useQuickDraw (signal scheduling, on-phone timing), QuickDrawScreens
+                       useQuickDraw (signal scheduling, on-phone timing), QuickDrawScreens, compass.ts (useCompass:
+                       iOS/Android heading, magnetic → true), landmark.ts (scoring), useLandmarkAim (steady lock),
+                       LandmarkScreens (play, projector board, SVG reveal map)
     session/           SessionProvider (Auth0 or anonymous), PresenceProvider (the only GPS watcher; `subscribe` for every fix),
                        TrailProvider (my trail + others' tails), DiscoveryProvider (fog-of-war areas)
     components/        CampusMap (MapLibre wrapper), DropSheet, PlayerSprite, WalkLayers (fog + trails), BuildingPicker, DropQrList, BottomNav
@@ -59,6 +61,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 8. `20261025000000_discovered_areas.sql`: fog-of-war `discovered_areas (player_id, hex_id)` (own rows only) and `discover_area()`.
 9. `20261025010000_meetups.sql`: `meetup` drop type, `create_meetup()` (any player), `close_drop()` (admins any drop, players their own meetup), `claim_drop` refuses meetups.
 10. `20261025020000_quick_draw.sql`: `drops.game` (mini-game kind), `game_results`, `minigame_settings()`, `submit_reaction`, per-kind `finish_game` (`side_scores`).
+11. `20261025030000_landmark.sql`: `landmark` game kind, `campus_landmarks`, `game_results.heading`, `bearing_deg`, `landmark_rounds`, `submit_heading`.
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -71,7 +74,8 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 - Scores sum `claims.points`, not `drops.points`.
 - The GPS radius exists only in SQL `claim_radius_m()`; the client reads it (`useClaimRadius`). Never hard-code 60. `distanceM` (TS) must stay identical to SQL `distance_m` (same haversine, R = 6,371 km).
 - Mini-game timing and caps come from `get_game_state().settings` plus `server_now` (clock-skew offset, from the lowest-latency sample). Never hard-code 15 s, 8 shakes/s, or Quick Draw's rounds and delays. Broadcast counts are cosmetic; only capped `submit_shakes` totals and `game_results` decide winners.
-- Quick Draw signal moments are derived from `games.seed` and `started_at` (`quick_draw_signal_at`), never stored or timed by a server process. Reaction times are measured on the phone; the server only bounds them.
+- Quick Draw signal moments and Landmark picks are derived from `games.seed` and `started_at` (`quick_draw_signal_at`, `landmark_rounds`), never stored or timed by a server process. Reaction times and headings are measured on the phone; the server bounds them and computes the landmark error itself.
+- Compass headings are magnetic; `game/compass.ts` converts to true north with State College's declination (−10.5°). Landmark bearings are true and measured from the drop, never from the phone's GPS.
 - Claim codes live only in `drop_secrets` (admin-read). Never put them in `drops`.
 - Live locations go only over the Presence channel `campus`; never store them. Read position from `usePresence()` and never start a second geolocation watcher. Code that must see every fix (trails, discovery) uses `usePresence().subscribe`. My trail stays in `localStorage`; `discovered_areas` holds only (player, hex), never times or coordinates.
 - Components call Supabase only through `lib/api.ts`. Live data uses `useLiveQuery`; call `refresh()` after your own writes (venue Wi-Fi drops Realtime). `useGame` also polls every 2 s.
@@ -100,16 +104,18 @@ Run `npm test` in `web/` (SQL + API + e2e, about a minute), plus `npm run lint` 
   - `meetups.test.mjs`: posting rules (length, on campus, one live meetup, 5/hour, 15–180 min), no points by GPS or QR, and `close_drop` permissions (admins any drop, players only their own meetup; points survive).
   - `discovery.test.mjs`: `discovered_areas` RLS (own rows only, no edits/deletes, anon blocked), duplicate-ignoring `discover_area`, hex id format, cascade on player delete.
   - `quick-draw.test.mjs`: `drops.game` defaults, the seeded round schedule, every `submit_reaction` refusal, first-result-final, best-time scoring with a false starter.
+  - `landmark.test.mjs`: `bearing_deg`/`angle_diff`, landmark picks (distinct, 200 m+, never the drop's own building), bearings from the drop, every `submit_heading` refusal, error scoring with a no-show.
   - `photo-hunt.test.mjs`: hidden spot, admin-only creation, service-only claiming, halving points, reveal, 7-minute window.
   - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal; per-claim points). Add a block here for any migration that rewrites data.
   - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.
 - **`npm run test:api`:** runs the real `web/api/verify-photo.ts` against the mock Supabase with Gemini faked at the `fetch` level: auth, cheap checks before any Gemini call, each verdict field, retry on 503, halving points, and that players can't call the service-only hunt functions.
-- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers five scenarios:
+- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers six scenarios:
   - **Map:** camera, layers, highlight, claim in range, bounds, recenter, leaderboard, admin tap-to-place.
   - **Photo hunt:** the search circle hides the spot, the card shows the twist, a photo is "taken" (the mock's `/__verify-photo` stands in for Gemini via `page.route`), and the red pin and countdown appear.
   - **Meetups (runs last):** posts a meetup from the "+ Meetup" sheet, checks its card (no points, no claim circle), ends it with the two-tap confirm, then clears the revealed photo hunt as an admin.
   - **Shake-Off:** joins as the 4th player with 3 bots and shakes via synthetic `DeviceMotionEvent`s (after deleting `DeviceMotionEvent.requestPermission`, which desktop Chromium answers "denied"), then checks the named winners and MVP.
   - **Quick Draw:** joins `draw-drop` as the 4th player, flicks after each "DRAW!" (and once too early), checks the false start, that the server stored the phone's times, the projector's live ranking, and the winners and MVP. The mock's bots are deliberately slow (1.2–1.4 s) so the result doesn't depend on machine speed.
+  - **Point to the Landmark:** a synthetic compass (`deviceorientationabsolute`) aims at each round's true bearing (20° off in round 2), checks the figure-8 step, the steady lock, the server's errors, the projector's reveal map (true line, landmark, buildings, 4 arrows), and the winners and MVP.
 
   Screenshots land in `tests/e2e/screenshots/` (gitignored). It also prints frame rate (software WebGL, so a phone GPU will differ).
 - **`npm run mock`:** runs the mock alone on :54321 for manual testing with `VITE_SUPABASE_URL=http://localhost:54321 VITE_SUPABASE_ANON_KEY=mock npm run dev`. The mock mirrors the SQL rules (radius, QR, Shake-Off timing with a 4 s countdown, caps, 3 bots) but isn't authoritative; `tests/sql` is. It has **no Realtime**, which is why the app's `refresh()`/poll fallbacks matter. `GET /__state` dumps its data.

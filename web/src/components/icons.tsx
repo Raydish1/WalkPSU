@@ -98,3 +98,11 @@ export const BoltIcon = (p: IconProps) => (
     <path d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12z" />
   </Icon>
 )
+
+/** Point to the Landmark: a compass. */
+export const CompassIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m15.5 8.5-2 5-5 2 2-5z" />
+  </Icon>
+)

@@ -74,7 +74,7 @@ function DrawOutcome({ result }: { result: DrawResult }) {
 export function RoundBoard({ state, serverNow, big = false }: { state: GameState; serverNow: number; big?: boolean }) {
   const round = currentRound(state.rounds, serverNow) ?? state.rounds[0]
   if (!round) return null
-  const drawn = serverNow >= Date.parse(round.signal_at)
+  const drawn = serverNow >= Date.parse(round.signal_at!)
   return (
     <div className={`round-board ${big ? 'round-board-big' : ''}`}>
       <p className="round-board-head">

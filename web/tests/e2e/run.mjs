@@ -417,6 +417,88 @@ async function quickDrawScenario(browser) {
   await page.context().close()
 }
 
+async function landmarkScenario(browser) {
+  console.log('\n# Point to the Landmark (3 bots in the lobby; joining makes 4; 3 rounds)')
+  const spot = { lat: OLD_MAIN_LAWN.lat, lng: OLD_MAIN_LAWN.lng - 30 / (M_PER_DEG_LAT * Math.cos((OLD_MAIN_LAWN.lat * Math.PI) / 180)) }
+  const page = await newPhone(browser, spot)
+  await page.waitForSelector('.bottom-nav')
+  // Behave like Android Chrome: no permission prompt, and a compass on deviceorientationabsolute. __aim(trueHeading)
+  // points the phone; the app adds State College's -10.5° declination to the magnetic reading, so undo it here.
+  await page.evaluate(() => {
+    Object.defineProperty(DeviceOrientationEvent, 'requestPermission', { value: undefined, configurable: true })
+    window.__heading = 0
+    window.__aim = (heading) => (window.__heading = heading)
+    window.__compass = setInterval(() => {
+      const magnetic = window.__heading + 10.5 + (Math.random() - 0.5)
+      window.dispatchEvent(new DeviceOrientationEvent('deviceorientationabsolute', { alpha: (((360 - magnetic) % 360) + 360) % 360, beta: 0, gamma: 0, absolute: true }))
+    }, 50)
+    window.history.pushState({}, '', '/game/aim-drop')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
+  await page.waitForSelector('.game-kind')
+  check('lobby names the game', /Point to the Landmark/.test(await page.textContent('.game-kind')))
+
+  const projector = await newPhone(browser, OLD_MAIN_LAWN)
+  await projector.waitForSelector('.bottom-nav')
+  await projector.evaluate(() => {
+    window.history.pushState({}, '', '/battle/aim-drop')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
+  await projector.waitForSelector('.battle-title')
+
+  await page.click('text=Join Point to the Landmark')
+  await page.waitForSelector('.calibrate', { timeout: 10_000 })
+  check('after joining, it asks for a figure-8 calibration', /figure 8/.test(await page.textContent('.calibrate')))
+  await page.click('.calibrate button')
+
+  const rounds = async () =>
+    (await (await fetch(`${MOCK}/rest/v1/rpc/get_game_state`, { method: 'POST', body: JSON.stringify({ p_drop_id: 'aim-drop' }) })).json()).rounds
+  const offBy = [0, 20, 0]
+  const shown = []
+  for (const round of [1, 2, 3]) {
+    await page.waitForFunction((r) => {
+      const screen = document.querySelector('.aim-screen')
+      return screen?.dataset.stage === 'pointing' && screen.querySelector('.draw-round')?.textContent === `Round ${r} of 3`
+    }, round, { timeout: 20_000 })
+    const target = (await rounds())[round - 1]
+    await page.evaluate((h) => window.__aim(h), (target.bearing + offBy[round - 1]) % 360)
+    check(`round ${round} names the landmark (${target.landmark.name})`, (await page.textContent('.aim-target')) === target.landmark.name)
+    await page.waitForSelector('text=Locked in', { timeout: 4_000 })
+    if (round === 1) await page.screenshot({ path: SHOTS + 'landmark-locked.png' })
+    await page.evaluate(() => window.__aim(window.__heading + 90)) // turning after the lock changes nothing
+    await page.waitForSelector('.aim-screen[data-stage="reveal"]', { timeout: 6_000 })
+    shown.push((await page.textContent('.game-hero')).replace(/\s+/g, ' '))
+    if (round === 1) {
+      await page.screenshot({ path: SHOTS + 'landmark-reveal.png' })
+      const map = await (
+        await projector.waitForFunction(() => {
+          const count = (selector) => document.querySelectorAll(`.landmark-map ${selector}`).length
+          return count('.lm-arrow') === 4 && { arrows: 4, trueLine: count('.lm-true'), target: count('.lm-target'), buildings: count('.lm-building') }
+        }, null, { timeout: 8_000 })
+      ).jsonValue()
+      check('projector reveal: true line, landmark, real buildings, and all 4 arrows', map.trueLine === 1 && map.target === 1 && map.buildings > 20, map)
+      await projector.screenshot({ path: SHOTS + 'landmark-projector.png' })
+    }
+  }
+  check(`the phone shows each round's error (${shown.map((x) => x.match(/\d+°\s*off/)?.[0]).join(', ')})`, shown.every((x) => /\d+°\s*off/.test(x)), shown)
+  const state = await (await fetch(`${MOCK}/__state`)).json()
+  const mine = state.results.filter((r) => r.drop_id === 'aim-drop' && !r.player_id.startsWith('bot')).sort((a, b) => a.round - b.round)
+  check('the server scored my headings against the true bearing (~0°, ~20°, ~0°)', mine.length === 3 && mine[0].value < 3 && Math.abs(mine[1].value - 20) < 3 && mine[2].value < 3, mine)
+
+  await page.waitForSelector('.game-winners', { timeout: 20_000 })
+  await page.waitForTimeout(800) // let the result finish fading in
+  await page.screenshot({ path: SHOTS + 'landmark-result.png' })
+  const result = (await page.textContent('.game-screen')).replace(/\s+/g, ' ')
+  check('closer side wins: the winners and points are named', /Rayhan & Bot Ben win!\s*\+35 points each/.test(result), result)
+  check('MVP is the most accurate point', /MVP: Rayhan \(you\) · \d+° off/.test(result), result)
+  await projector.waitForSelector('.battle-winners', { timeout: 10_000 })
+  check('projector shows the result', /Rayhan & Bot Ben win!/.test(await projector.textContent('.battle-winners')))
+  check('no console errors', page.errors.length === 0 && projector.errors.length === 0, [...page.errors, ...projector.errors])
+  await page.evaluate(() => clearInterval(window.__compass))
+  await projector.context().close()
+  await page.context().close()
+}
+
 const mock = await startMockSupabase()
 const server = await buildAndServe()
 const browser = await chromium.launch({
@@ -429,6 +511,7 @@ try {
   await photoHuntScenario(browser)
   await shakeOffScenario(browser)
   await quickDrawScenario(browser)
+  await landmarkScenario(browser)
   await meetupScenario(browser)
 } catch (e) {
   failures++
