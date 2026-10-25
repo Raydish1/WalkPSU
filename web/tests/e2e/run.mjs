@@ -113,7 +113,8 @@ async function mapScenario(browser) {
       active: [...new Set(q(['buildings-active']).map((f) => f.properties.num))],
       heights: q(['buildings-base']).map((f) => f.properties.height),
       inRange: q(['claim-circles-in']).length,
-      me: q(['me-dot']).length,
+      // Player sprites are DOM markers (they breathe, blink and hop), so count them in the DOM, not the map's layers.
+      me: document.querySelectorAll('.sprite.is-me').length,
     }
   })
   check('opens on the player at zoom 17, pitch 45, bearing -17', Math.round(s.zoom) === 17 && s.pitch === 45 && Math.round(s.bearing) === -17, s)
@@ -121,7 +122,7 @@ async function mapScenario(browser) {
   check('only the compact attribution control', s.controls.length === 1 && /attrib/.test(s.controls[0]) && !/compact-show/.test(s.controls[0]), s.controls)
   check('building hosting the Shake-Off drop is highlighted', JSON.stringify(s.active) === '["0005000"]', s.active)
   check('extrusions are 10-15 m', s.heights.length > 0 && Math.min(...s.heights) >= 10 && Math.max(...s.heights) <= 15, [Math.min(...s.heights), Math.max(...s.heights)])
-  check('in-range claim circle and my dot render', s.inRange > 0 && s.me === 1, s)
+  check('in-range claim circle and my sprite render', s.inRange > 0 && s.me === 1, s)
 
   await tapFeature(page, 'drop-points', 'game-drop')
   await page.waitForSelector('.map-card')

@@ -13,7 +13,7 @@ Judging requirements: rivalry, phone motion, and the game working for **4+ playe
 ## Stack
 
 - **Frontend:** React 19 + Vite + TypeScript in `web/`, react-router, ESLint (no Prettier config: match existing style, single quotes, no semicolons).
-- **Map:** MapLibre GL 6 via `react-map-gl/maplibre` on OpenFreeMap Positron (no API key). The view is 2.5D Life360-style: pitch 45°, bearing −17°, `buildings.geojson` extruded 10–15 m, and buildings with an active drop in accent orange with a pulse. Everything drawn (claim circles, drops, players, my dot) is a GeoJSON source and layer, and taps open `Popup` cards.
+- **Map:** MapLibre GL 6 via `react-map-gl/maplibre` on OpenFreeMap Positron (no API key). The view is 2.5D Life360-style: pitch 45°, bearing −17°, `buildings.geojson` extruded 10–15 m, and buildings with an active drop in accent orange with a pulse. Claim circles and drops are GeoJSON sources and layers; tapping a drop opens `DropSheet` (a non-modal Vaul bottom sheet). Players, including me, are DOM `Marker` sprites (`PlayerSprite`): round faces in the player's color that breathe, blink, and hop-glide to each presence update (WAAPI/CSS transforms only, off under reduced motion). Tapping a sprite opens a `Popup` name tag.
 - **Buildings:** 958 University Park footprints from PASDA, simplified into the static `web/public/data/buildings.geojson` (`npm run fetch-buildings` regenerates it; never fetch PASDA at runtime). Buildings are keyed by PSU building number `num`; the DB stores only that.
 - **Backend:** Supabase: Postgres + RLS, Realtime (postgres_changes, broadcast, presence), Storage (`drop-hints` bucket).
 - **Auth:** Auth0 via Supabase third-party auth. Supabase verifies the Auth0 **ID token**, which an Auth0 Action stamps with `role: authenticated` and `app_role`. When `VITE_AUTH0_*` is empty, the app falls back to Supabase anonymous sign-in plus an "enter your name" screen. Both give RLS a JWT `sub`, so policies are identical.
@@ -33,7 +33,7 @@ web/
     game/              Shake-Off: shakeoff.ts (phase model, side math, names), useGame, useShakes,
                        useShakeBroadcast, TugBar, Results (winner headline + MVP)
     session/           SessionProvider (Auth0 or anonymous) + PresenceProvider (the only GPS watcher)
-    components/        CampusMap (MapLibre wrapper), BuildingPicker, DropQrList, BottomNav
+    components/        CampusMap (MapLibre wrapper), DropSheet, PlayerSprite, BuildingPicker, DropQrList, BottomNav
     map/               basemap.ts (declutter + landmarks), geometry.ts (geodesic circles, heights), worker.ts
     lib/               supabase.ts, api.ts (all DB calls), hooks.ts, geo.ts, buildings.ts, database.types.ts
 supabase/migrations/   SQL, applied in filename order
@@ -66,6 +66,8 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 
 - **MapLibre worker (do not remove).** MapLibre 6 loads its worker from a separate file, and `src/map/worker.ts` registers it (`setWorkerUrl` with a Vite `?worker&url` import). Without it, production shows a blank map ("Worker failed to load"). `npm run test:e2e` builds for production and fails if this breaks. `optimizeDeps.exclude: ['maplibre-gl']` in `vite.config.ts` is extra insurance for dev; MapLibre otherwise depends on Vite's dep cache being fresh.
 - After installing or removing deps while `npm run dev` runs, Vite's dep cache can go stale (504 "Outdated Optimize Dep", or imports of deleted packages) and the page goes blank. Stop the server, `rm -rf web/node_modules/.vite`, and restart.
+- **Vaul 1.1.2 + controlled `open`:** Vaul doesn't pass `modal={false}` to Radix, so opening the sheet from code leaves `pointer-events: none` on `<body>` (map untappable). `DropSheet` resets it; keep that effect.
+- **Sprites:** `PlayerSprite` FLIPs from the old screen position in a `useLayoutEffect` (react-map-gl moves the marker during render). Don't put CSS `filter`s on the breathing element; a drop-shadow there cost ~25% fps.
 - `map.loaded()` stays false forever because the highlight pulse keeps a paint transition running. Use `isStyleLoaded()` plus rendered features instead.
 - react-map-gl's `Map` takes no `className`; `CampusMap` wraps it in a sized `div`. `maxBounds` must be a flat `[w, s, e, n]`.
 - `campusBounds` deliberately ignores far-off PASDA property (Ag Progress Days, the airport) by keeping buildings within 2.5 km of the median building, then pads by 1.6 km.

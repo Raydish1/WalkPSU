@@ -4,15 +4,16 @@ import { Layer, Popup, Source, type MapLayerMouseEvent } from 'react-map-gl/mapl
 import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
+import PlayerSprite from '../components/PlayerSprite'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useBuildings, useClaimRadius, useDrops } from '../lib/hooks'
 import { circlePolygon } from '../map/geometry'
-import { usePresence } from '../session/presence'
+import { usePresence, type LivePlayer } from '../session/presence'
+import { useReadySession } from '../session/session'
 
 const IN_RANGE = '#16a34a'
-const ME = '#2563eb'
 /** How close a tapped drop is framed: about a block across, so its claim circle and building are both visible. */
 const DROP_ZOOM = 17
 
@@ -22,6 +23,7 @@ function MapPage() {
   const buildings = useBuildings()
   const radius = useClaimRadius()
   const { position, others } = usePresence()
+  const { player } = useReadySession()
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
   // The sheet keeps its drop while it slides away, so closing never flashes empty content.
   const [sheet, setSheet] = useState<{ drop: DropRow; open: boolean } | null>(null)
@@ -54,16 +56,13 @@ function MapPage() {
     }),
     [drops],
   )
-  const playerPoints = useMemo<FeatureCollection<Point>>(
-    () => ({
-      type: 'FeatureCollection',
-      features: others.map((p) => ({ type: 'Feature', properties: { id: p.playerId, color: p.color }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } })),
-    }),
-    [others],
-  )
-  const me = useMemo<FeatureCollection<Point>>(
-    () => ({ type: 'FeatureCollection', features: here ? [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [here.longitude, here.latitude] } }] : [] }),
-    [here],
+  // Everyone on the map as sprites; me last so my sprite draws on top.
+  const sprites = useMemo<LivePlayer[]>(
+    () => [
+      ...others,
+      ...(here ? [{ playerId: player.id, name: player.display_name, color: player.color, lat: here.latitude, lng: here.longitude }] : []),
+    ],
+    [others, here, player],
   )
 
   const closeSheet = () => setSheet((s) => s && { ...s, open: false })
@@ -80,9 +79,6 @@ function MapPage() {
       const zoom = Math.max(e.target.getZoom(), DROP_ZOOM)
       const zooming = zoom - e.target.getZoom() > 0.25
       e.target.easeTo({ center: [drop.lng, drop.lat], zoom, offset: [0, -170], duration: zooming ? 800 : 450 })
-    } else if (hit?.layer.id === 'players' && id) {
-      closeSheet()
-      setSelectedPlayerId(id)
     } else {
       closeSheet()
       setSelectedPlayerId(null)
@@ -92,11 +88,11 @@ function MapPage() {
   // Track the live row; a drop that vanishes (claimed, expired) closes its sheet.
   const sheetDrop = sheet && (drops.find((d) => d.id === sheet.drop.id) ?? sheet.drop)
   const sheetOpen = !!sheet?.open && drops.some((d) => d.id === sheet.drop.id)
-  const selectedPlayer = selectedPlayerId ? others.find((p) => p.playerId === selectedPlayerId) : undefined
+  const selectedPlayer = selectedPlayerId ? sprites.find((p) => p.playerId === selectedPlayerId) : undefined
 
   return (
     <div className="map-wrap">
-      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points', 'players']} onClick={onClick}>
+      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points']} onClick={onClick}>
         <Source id="claim-circles" type="geojson" data={circles}>
           <Layer
             id="claim-circles-fill"
@@ -113,19 +109,27 @@ function MapPage() {
             paint={{ 'circle-radius': 11, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 }}
           />
         </Source>
-        <Source id="players" type="geojson" data={playerPoints}>
-          <Layer id="players" type="circle" paint={{ 'circle-radius': 7, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 }} />
-        </Source>
-        <Source id="me" type="geojson" data={me}>
-          <Layer id="me-halo" type="circle" paint={{ 'circle-radius': 18, 'circle-color': ME, 'circle-opacity': 0.18 }} />
-          <Layer id="me-dot" type="circle" paint={{ 'circle-radius': 8, 'circle-color': ME, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 }} />
-        </Source>
+        {sprites.map((p) => (
+          <PlayerSprite
+            key={p.playerId}
+            id={p.playerId}
+            name={p.name}
+            color={p.color}
+            lng={p.lng}
+            lat={p.lat}
+            me={p.playerId === player.id}
+            onTap={() => {
+              closeSheet()
+              setSelectedPlayerId(p.playerId)
+            }}
+          />
+        ))}
 
         {selectedPlayer && (
-          <Popup longitude={selectedPlayer.lng} latitude={selectedPlayer.lat} anchor="bottom" offset={12} closeButton={false} onClose={() => setSelectedPlayerId(null)} className="map-card is-player">
+          <Popup longitude={selectedPlayer.lng} latitude={selectedPlayer.lat} anchor="bottom" offset={selectedPlayer.playerId === player.id ? 48 : 40} closeButton={false} onClose={() => setSelectedPlayerId(null)} className="map-card is-player">
             <span className="player-tag">
               <Avatar name={selectedPlayer.name} color={selectedPlayer.color} />
-              <span className="truncate">{selectedPlayer.name}</span>
+              <span className="truncate">{selectedPlayer.playerId === player.id ? `${selectedPlayer.name} (you)` : selectedPlayer.name}</span>
             </span>
           </Popup>
         )}
