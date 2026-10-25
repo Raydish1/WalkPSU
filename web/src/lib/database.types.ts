@@ -4,7 +4,7 @@
 export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'meetup'
 export type DropStatus = 'active' | 'claimed' | 'expired'
 /** Which mini-game a 'minigame' drop runs. */
-export type MinigameKind = 'shake_off' | 'quick_draw' | 'needle_rain'
+export type MinigameKind = 'shake_off' | 'quick_draw' | 'needle_rain' | 'landmark'
 
 type Player = {
   id: string
@@ -86,6 +86,18 @@ export type ShakeOffSettings = {
   submit_grace_seconds: number
 }
 
+/** Point to the Landmark's extra settings. */
+export type LandmarkSettings = {
+  rounds: number
+  round_seconds: number
+  point_seconds: number
+  steady_ms: number
+  steady_degrees: number
+  lock_after_ms: number
+  min_landmark_m: number
+  miss_degrees: number
+}
+
 /** Timed games' extra settings (Quick Draw). Lower round values win. */
 export type TimedSettings = {
   rounds: number
@@ -101,13 +113,21 @@ export type TimedSettings = {
 export type NeedleRainSettings = ShakeOffSettings & { max_dodges_per_second: number }
 
 /** Mirrors SQL minigame_settings(kind): the shared lobby settings plus the kind's own (game_seconds per kind). */
-export type MinigameSettings = ShakeOffSettings & Partial<TimedSettings> & Partial<Pick<NeedleRainSettings, 'max_dodges_per_second'>>
+export type MinigameSettings = ShakeOffSettings & Partial<TimedSettings> & Partial<LandmarkSettings> & Partial<Pick<NeedleRainSettings, 'max_dodges_per_second'>>
 
-/** One round of a timed game. Quick Draw: `signal_at` is when every phone shows "DRAW!". */
-export type GameRound = { round: number; starts_at: string; signal_at: string }
+export type Landmark = { num: string; name: string; lat: number; lng: number }
 
-/** A player's result for one round. Quick Draw: `value` is the reaction in ms; null with false_start = too early. */
-export type RoundResult = { player_id: string; round: number; value: number | null; false_start: boolean }
+/**
+ * One round of a timed game. Quick Draw: `signal_at` is when every phone shows "DRAW!".
+ * Point to the Landmark: the round's `landmark` and the true `bearing` (degrees) to it from the drop.
+ */
+export type GameRound = { round: number; starts_at: string; signal_at?: string; landmark?: Landmark; bearing?: number }
+
+/**
+ * A player's result for one round; lower `value` is better. Quick Draw: the reaction in ms, null with false_start =
+ * too early. Point to the Landmark: the error in degrees, with the locked true `heading`.
+ */
+export type RoundResult = { player_id: string; round: number; value: number | null; false_start: boolean; heading?: number | null }
 
 type GameResultRow = RoundResult & { drop_id: string; created_at: string }
 
@@ -159,6 +179,7 @@ export type Database = {
       games: { Row: Game & { seed: string }; Insert: never; Update: never; Relationships: [] }
       game_players: { Row: GamePlayerRow; Insert: never; Update: never; Relationships: [] }
       game_results: { Row: GameResultRow; Insert: never; Update: never; Relationships: [] }
+      campus_landmarks: { Row: Landmark; Insert: never; Update: never; Relationships: [] }
       /** Fog-of-war: hexes (web/src/map/hexgrid.ts ids, "q:r") a player has walked into. Own rows only. */
       discovered_areas: { Row: { player_id: string; hex_id: string }; Insert: { player_id: string; hex_id: string }; Update: never; Relationships: [] }
     }
@@ -202,6 +223,8 @@ export type Database = {
       submit_ghost: { Args: { p_drop_id: string; p_count: number }; Returns: number }
       /** Quick Draw. p_reaction_ms omitted = flicked before the signal. */
       submit_reaction: { Args: { p_drop_id: string; p_round: number; p_reaction_ms?: number }; Returns: GameResultRow }
+      /** Point to the Landmark: a round's locked true heading in degrees, [0, 360). */
+      submit_heading: { Args: { p_drop_id: string; p_round: number; p_heading: number }; Returns: GameResultRow }
       finish_game: { Args: { p_drop_id: string }; Returns: GameState }
       is_admin: { Args: Record<string, never>; Returns: boolean }
     }

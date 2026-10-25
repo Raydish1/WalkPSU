@@ -1,12 +1,15 @@
 import type { GamePlayer, GameState, Side } from '../lib/database.types'
+import { bestPoint, formatDeg, sideByAccuracy } from './landmark'
 import { fastestDraw, formatMs, sideByBestTime } from './quickdraw'
 import { joinNames, mvp, sidePlayers } from './shakeoff'
 
 const NO_LIVE: ReadonlyMap<string, number> = new Map()
 
-/** The winning side, best player first: top shaker in a Shake-Off, fastest best time in a Quick Draw. */
+/** The winning side, best player first: top shaker, fastest best time, or lowest average error. */
 function winnersOf(state: GameState, winner: Side) {
-  return state.kind === 'quick_draw' ? sideByBestTime(state, winner) : sidePlayers(state.players, winner, NO_LIVE)
+  if (state.kind === 'quick_draw') return sideByBestTime(state, winner)
+  if (state.kind === 'landmark') return sideByAccuracy(state, winner, state.rounds.length)
+  return sidePlayers(state.players, winner, NO_LIVE)
 }
 
 /** "Rayhan, Alex & Sam win! +30 points each", best player first. */
@@ -26,8 +29,12 @@ export function WinnerHeadline({ state, winner, points, className }: { state: Ga
   )
 }
 
-/** Shake-Off: the top shaker across both sides. Quick Draw: the fastest single draw. */
+/** Shake-Off: the top shaker across both sides. Quick Draw: the fastest single draw. Landmark: the closest point. */
 function mvpOf(state: GameState): { player: GamePlayer; detail: string } | null {
+  if (state.kind === 'landmark') {
+    const top = bestPoint(state)
+    return top && { player: top.player, detail: `${formatDeg(top.degrees)} off` }
+  }
   if (state.kind === 'quick_draw') {
     const top = fastestDraw(state)
     return top && { player: top.player, detail: `${formatMs(top.ms)} draw` }

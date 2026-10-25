@@ -129,6 +129,11 @@ export async function submitReaction(dropId: string, round: number, reactionMs: 
   return unwrap(await supabase.rpc('submit_reaction', { p_drop_id: dropId, p_round: round, ...(reactionMs !== null && { p_reaction_ms: reactionMs }) }))
 }
 
+/** Point to the Landmark: a round's locked heading (degrees from true north). The server scores the error. */
+export async function submitHeading(dropId: string, round: number, heading: number) {
+  return unwrap(await supabase.rpc('submit_heading', { p_drop_id: dropId, p_round: round, p_heading: heading }))
+}
+
 /** Idempotent; any participant may call it once the submit grace period has passed. */
 export async function finishGame(dropId: string) {
   return unwrap(await supabase.rpc('finish_game', { p_drop_id: dropId }))

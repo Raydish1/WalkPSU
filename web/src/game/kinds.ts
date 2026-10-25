@@ -14,6 +14,10 @@ export const MINIGAMES: Record<MinigameKind, { name: string; blurb: string }> = 
     name: 'Needle Rain',
     blurb: 'One shared storm. Tilt to dodge the needles. Last one standing takes the points.',
   },
+  landmark: {
+    name: 'Point to the Landmark',
+    blurb: 'Point your phone at a famous campus landmark you can’t see. Three rounds. The team that’s closer on average wins.',
+  },
 }
 
 export const minigameOf = (game: MinigameKind | null | undefined) => MINIGAMES[game ?? 'shake_off']

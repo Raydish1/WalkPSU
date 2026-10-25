@@ -4,7 +4,7 @@
 -- dodge count and pays nothing.
 
 alter table drops drop constraint drops_game_check;
-alter table drops add constraint drops_game_check check (game in ('shake_off', 'quick_draw', 'needle_rain'));
+alter table drops add constraint drops_game_check check (game in ('shake_off', 'quick_draw', 'landmark', 'needle_rain'));
 
 alter table games add column round_seed text;
 alter table games add column ghost_seed text not null default replace(gen_random_uuid()::text, '-', '');
@@ -31,6 +31,12 @@ language sql immutable set search_path = public as $$
       'min_reaction_ms', 100, 'max_reaction_ms', 1500,
       'clock_tolerance_ms', 1000
     )
+    when 'landmark' then jsonb_build_object(
+      'game_seconds', 42, 'rounds', 3, 'round_seconds', 14, 'point_seconds', 8,
+      'steady_ms', 1000, 'steady_degrees', 6, 'lock_after_ms', 1500,
+      'min_landmark_m', 200,
+      'miss_degrees', 180
+    )
     when 'needle_rain' then (select to_jsonb(n) from needle_rain_settings() n)
     else '{}'::jsonb
   end
@@ -39,7 +45,12 @@ $$;
 
 create or replace function minigame_label(p_game text) returns text
 language sql immutable as $$
-  select case p_game when 'quick_draw' then 'Quick Draw' when 'needle_rain' then 'Needle Rain' else 'Shake-Off' end;
+  select case p_game
+    when 'quick_draw' then 'Quick Draw'
+    when 'landmark' then 'Landmark game'
+    when 'needle_rain' then 'Needle Rain'
+    else 'Shake-Off'
+  end;
 $$;
 
 -- As Quick Draw's state, plus dodge columns, the public round seed (only after a start is set), and the ghost record.
@@ -69,18 +80,31 @@ language sql stable security definer set search_path = public as $$
       left join game_sides(p_drop_id) s on s.player_id = gp.player_id
       where gp.drop_id = p_drop_id
     ), '[]'::jsonb),
-    'rounds', coalesce((
-      select jsonb_agg(jsonb_build_object(
-        'round', r,
-        'starts_at', g.started_at + make_interval(secs => (r - 1) * (minigame_settings(d.game)->>'round_seconds')::integer),
-        'signal_at', quick_draw_signal_at(g, r)
-      ) order by r)
-      from g, d, generate_series(1, (minigame_settings(d.game)->>'rounds')::integer) r
-      where d.game = 'quick_draw' and g.started_at is not null
-    ), '[]'::jsonb),
+    'rounds', coalesce(
+      (
+        select jsonb_agg(jsonb_build_object(
+          'round', r,
+          'starts_at', g.started_at + make_interval(secs => (r - 1) * (minigame_settings(d.game)->>'round_seconds')::integer),
+          'signal_at', quick_draw_signal_at(g, r)
+        ) order by r)
+        from g, d, generate_series(1, (minigame_settings(d.game)->>'rounds')::integer) r
+        where d.game = 'quick_draw' and g.started_at is not null
+      ),
+      (
+        select jsonb_agg(jsonb_build_object(
+          'round', l.round,
+          'starts_at', g.started_at + make_interval(secs => (l.round - 1) * (minigame_settings(d.game)->>'round_seconds')::integer),
+          'landmark', jsonb_build_object('num', l.num, 'name', l.name, 'lat', l.lat, 'lng', l.lng),
+          'bearing', l.bearing
+        ) order by l.round)
+        from g, d, landmark_rounds(g) l
+        where d.game = 'landmark' and g.started_at is not null
+      ),
+      '[]'::jsonb
+    ),
     'results', coalesce((
       select jsonb_agg(jsonb_build_object(
-        'player_id', r.player_id, 'round', r.round, 'value', r.value, 'false_start', r.false_start
+        'player_id', r.player_id, 'round', r.round, 'value', r.value, 'false_start', r.false_start, 'heading', r.heading
       ) order by r.round, r.value nulls last)
       from game_results r where r.drop_id = p_drop_id
     ), '[]'::jsonb)

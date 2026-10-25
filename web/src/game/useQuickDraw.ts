@@ -53,7 +53,7 @@ export function useQuickDraw({ dropId, rounds, settings, offset, serverNow, acti
     if (!active) return
     const timers: ReturnType<typeof setTimeout>[] = []
     for (const r of rounds) {
-      const delay = Date.parse(r.signal_at) - offset - Date.now()
+      const delay = Date.parse(r.signal_at!) - offset - Date.now()
       if (delay < -settings.max_reaction_ms || resultsRef.current[r.round]) continue
       timers.push(
         setTimeout(() => {

@@ -1040,3 +1040,195 @@ mark.me {
   margin: 0;
   font-weight: 650;
 }
+
+/* Point to the Landmark. */
+
+.aim-screen[data-stage='pointing'],
+.aim-screen[data-stage='waiting'] {
+  background: var(--psu-navy);
+  color: #ffffff;
+}
+
+.aim-prompt {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.aim-target {
+  margin: 0 0 8px;
+  max-width: 14ch;
+  font-size: clamp(36px, 11vw, 64px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.aim-status {
+  max-width: 30ch;
+  margin: 8px 0 0;
+  opacity: 0.8;
+}
+
+.aim-dial {
+  width: min(62vw, 260px);
+  height: auto;
+}
+
+.aim-dial-track {
+  fill: none;
+  stroke: color-mix(in srgb, currentColor 18%, transparent);
+  stroke-width: 6;
+}
+
+.aim-dial-steady {
+  fill: none;
+  stroke: var(--drop);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 100ms linear;
+}
+
+.aim-dial-steady[data-locked] {
+  stroke: #22c55e;
+}
+
+.aim-dial-north {
+  fill: currentColor;
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.aim-dial-needle {
+  fill: currentColor;
+}
+
+.aim-locked {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aim-locked li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--fill);
+  font-size: clamp(16px, 2.2vw, 26px);
+}
+
+.aim-locked li[data-locked] {
+  background: color-mix(in srgb, #22c55e 30%, transparent);
+}
+
+.aim-locked .muted {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.landmark-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 900px);
+}
+
+.landmark-map {
+  width: min(100%, 320px);
+  height: auto;
+  border-radius: var(--radius-card);
+  background: #f5f5f2;
+}
+
+.landmark-map-big {
+  width: min(100%, 62vh, 640px);
+}
+
+.lm-building {
+  fill: #e7e5e4;
+  stroke: #d6d3d1;
+  stroke-width: 1;
+}
+
+/* The truth is green: the landmark's footprint, the line to it, and its dot. Players' arrows use their colors. */
+.lm-target {
+  fill: #86efac;
+  stroke: #16a34a;
+  stroke-width: 2;
+}
+
+.lm-true {
+  stroke: #16a34a;
+  stroke-linecap: round;
+}
+
+.lm-target-dot {
+  fill: #16a34a;
+}
+
+.lm-drop {
+  fill: #111827;
+}
+
+.lm-label,
+.lm-north {
+  fill: #111827;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.lm-north {
+  text-anchor: start;
+}
+
+.lm-arrow line {
+  stroke-linecap: round;
+}
+
+.calibrate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.figure-eight {
+  width: 140px;
+  height: 70px;
+}
+
+.figure-eight path {
+  fill: none;
+  stroke: var(--separator);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.figure-eight-dot {
+  fill: var(--drop);
+  offset-path: path('M60 30 C 75 5, 110 5, 110 30 S 75 55, 60 30 S 10 5, 10 30 S 45 55, 60 30');
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .figure-eight-dot {
+    animation: figure-eight 2.4s linear infinite;
+  }
+}
+
+@keyframes figure-eight {
+  to {
+    offset-distance: 100%;
+  }
+}
