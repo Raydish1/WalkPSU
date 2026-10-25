@@ -3,12 +3,31 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { MathPrompt } from '../components/MathPrompt'
 import { claimDrop } from '../lib/api'
-import { DROP_TYPES } from '../lib/campus'
+import { CAMPUS_CENTER, DROP_TYPES } from '../lib/campus'
+import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useClaimRadius, useDrops } from '../lib/hooks'
 import { generateMathRound, MATH_NEEDED } from '../math/problems'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
+
+/** Always-available practice run — no Supabase `math` enum / admin drop required. */
+export const MATH_PRACTICE_ID = 'practice'
+
+const PRACTICE_DROP: DropRow = {
+  id: MATH_PRACTICE_ID,
+  title: 'Old Main Mental Math',
+  type: 'math',
+  lat: CAMPUS_CENTER[0],
+  lng: CAMPUS_CENTER[1],
+  points: 20,
+  status: 'active',
+  hint_photo_url: null,
+  building_num: '0001000',
+  created_by: null,
+  created_at: new Date().toISOString(),
+  expires_at: null,
+}
 
 function MathPage() {
   useReadySession()
@@ -16,26 +35,46 @@ function MathPage() {
   const [params] = useSearchParams()
   const code = params.get('key')
   const navigate = useNavigate()
+  const practice = dropId === MATH_PRACTICE_ID
   const { data: drops, refresh } = useDrops()
   const radius = useClaimRadius()
   const { position } = usePresence()
-  const drop = drops.find((d) => d.id === dropId)
+  const drop = practice ? PRACTICE_DROP : drops.find((d) => d.id === dropId)
 
-  const problems = useMemo(() => generateMathRound(`${dropId}:math`, MATH_NEEDED), [dropId])
+  const [roundSeed, setRoundSeed] = useState(0)
+  const problems = useMemo(
+    () => generateMathRound(`${dropId}:math:${roundSeed}`, MATH_NEEDED),
+    [dropId, roundSeed],
+  )
   const [index, setIndex] = useState(0)
   const [guess, setGuess] = useState('')
   const [solved, setSolved] = useState(0)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
 
+  function playAgain() {
+    setRoundSeed((s) => s + 1)
+    setIndex(0)
+    setGuess('')
+    setSolved(0)
+    setBusy(false)
+    setDone(false)
+  }
+
   const problem = problems[index]
   const distance =
-    drop && position ? distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng) : null
+    drop && position && !practice ? distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng) : null
   const inRange = radius !== null && distance !== null && distance <= radius
-  const canClaim = Boolean(code) || inRange
+  const canClaim = practice || Boolean(code) || inRange
 
   async function finishClaim() {
     if (!drop) return
+    if (practice) {
+      navigator.vibrate?.(40)
+      toast.success('Practice complete!', { description: 'Nice mental math. Live drops will award real points.' })
+      setDone(true)
+      return
+    }
     setBusy(true)
     try {
       const proof = code
@@ -92,7 +131,10 @@ function MathPage() {
     return (
       <section className="page stack">
         <h1>Math challenge</h1>
-        <p className="muted">Loading drop…</p>
+        <p className="muted">{drops.length === 0 ? 'Loading drop…' : 'That drop wasn’t found.'}</p>
+        <Link className="button primary" to={`/math/${MATH_PRACTICE_ID}`}>
+          Try practice math
+        </Link>
         <Link className="button" to="/challenges">
           Back to challenges
         </Link>
@@ -112,13 +154,13 @@ function MathPage() {
     )
   }
 
-  if (drop.status !== 'active') {
+  if (!practice && drop.status !== 'active') {
     return (
       <section className="page stack">
         <h1>Already claimed</h1>
         <p className="muted">{drop.title} is no longer available.</p>
-        <Link className="button primary" to="/challenges">
-          More challenges
+        <Link className="button primary" to={`/math/${MATH_PRACTICE_ID}`}>
+          Try practice math
         </Link>
       </section>
     )
@@ -128,12 +170,12 @@ function MathPage() {
     <section className="page stack math-page">
       <header className="stack-sm">
         <p className="muted footnote" style={{ margin: 0, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--accent)' }}>
-          Mental math
+          {practice ? 'Practice · Mental math' : 'Mental math'}
         </p>
         <h1>{drop.title}</h1>
         <p className="muted">
-          Solve {MATH_NEEDED} problems (−, ÷, √, fractions). Answers are whole numbers. +{drop.points} pts when you finish
-          {canClaim ? '' : ' and you’re in range'}.
+          Solve {MATH_NEEDED} problems (−, ÷, √, fractions). Answers are whole numbers.
+          {practice ? ' No GPS needed — this run is for testing.' : ` +${drop.points} pts when you finish${canClaim ? '' : ' and you’re in range'}.`}
         </p>
         <div className="math-progress" aria-label={`Solved ${solved} of ${MATH_NEEDED}`}>
           {Array.from({ length: MATH_NEEDED }, (_, i) => (
@@ -144,17 +186,22 @@ function MathPage() {
 
       {done && solved >= MATH_NEEDED ? (
         <div className="card empty-state">
-          <strong>{canClaim || drop.status !== 'active' ? 'Challenge complete' : 'Solved — get in range'}</strong>
+          <strong>{practice ? 'Practice complete' : canClaim ? 'Challenge complete' : 'Solved — get in range'}</strong>
           <p className="muted footnote">
-            {canClaim
-              ? 'Points are on the board. Keep exploring campus.'
-              : `Move within ${radius ?? '…'} m of the drop or scan its QR, then tap claim.`}
+            {practice
+              ? 'Ready for a live campus drop once an admin places a Mental math challenge.'
+              : canClaim
+                ? 'Points are on the board. Keep exploring campus.'
+                : `Move within ${radius ?? '…'} m of the drop or scan its QR, then tap claim.`}
           </p>
-          {!canClaim && (
+          {!practice && !canClaim && (
             <button className="button primary" disabled={busy || !canClaim} onClick={() => void finishClaim()}>
               {busy ? 'Claiming…' : 'Claim points'}
             </button>
           )}
+          <button className="button primary" onClick={playAgain}>
+            Play again
+          </button>
           <button className="button" onClick={() => navigate('/challenges')}>
             Back to challenges
           </button>
@@ -182,13 +229,15 @@ function MathPage() {
             Check
           </button>
           <p className="muted footnote">
-            {code
-              ? 'QR unlocked — finish the set to claim from here.'
-              : inRange
-                ? 'You’re in range to claim when you finish.'
-                : distance === null
-                  ? 'Waiting for GPS…'
-                  : `${Math.round(distance)} m away · need ≤ ${radius ?? '…'} m (or scan QR).`}
+            {practice
+              ? 'Practice mode — finish all 3 to complete the run.'
+              : code
+                ? 'QR unlocked — finish the set to claim from here.'
+                : inRange
+                  ? 'You’re in range to claim when you finish.'
+                  : distance === null
+                    ? 'Waiting for GPS…'
+                    : `${Math.round(distance)} m away · need ≤ ${radius ?? '…'} m (or scan QR).`}
           </p>
         </form>
       ) : null}

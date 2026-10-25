@@ -6,6 +6,7 @@ import { difficultyForPoints } from '../lib/progress'
 import { useDrops } from '../lib/hooks'
 import { distanceM } from '../lib/geo'
 import { usePresence } from '../session/presence'
+import { MATH_PRACTICE_ID } from './MathPage'
 
 function ChallengesPage() {
   const { data: drops, error } = useDrops()
@@ -21,14 +22,31 @@ function ChallengesPage() {
         <p className="muted">Race to campus landmarks, run challenges, and cash in points.</p>
       </header>
 
+      <div className="card stack-sm" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+          <span className="chip" style={{ '--player': DROP_TYPES.math.color } as CSSProperties}>
+            <span className="color-dot" aria-hidden />
+            Mental math
+          </span>
+          <span className="diff-pill diff-medium">Practice</span>
+        </div>
+        <h2 style={{ margin: 0, fontSize: 18 }}>Old Main Mental Math</h2>
+        <p className="muted" style={{ margin: 0 }}>
+          3 problems · √ − ÷ fractions · no GPS needed
+        </p>
+        <Link className="button primary" to={`/math/${MATH_PRACTICE_ID}`}>
+          Start Challenge
+        </Link>
+      </div>
+
       {error && <p className="error">{error}</p>}
 
       {drops.length === 0 ? (
         <div className="card empty-state">
           <StarIcon size={40} strokeWidth={1.6} />
-          <strong>No active challenges</strong>
-          <p className="muted footnote">When admins drop events on the map, they’ll show up here.</p>
-          <Link className="button primary" to="/">
+          <strong>No live campus drops yet</strong>
+          <p className="muted footnote">Try the practice math challenge above, or wait for an admin drop.</p>
+          <Link className="button" to="/">
             Open map
           </Link>
         </div>
