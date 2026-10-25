@@ -396,6 +396,14 @@
   overflow: visible;
 }
 
+/* Pastel body: the player's color mixed with white, still recognizably theirs. The outline is a deeper shade of
+   the same hue so pale faces keep a clear edge on the light map. */
+.sprite-face {
+  fill: color-mix(in oklab, var(--c) 45%, #ffffff);
+  stroke: color-mix(in oklab, var(--c) 70%, #1e1828);
+  stroke-opacity: 0.55;
+}
+
 .sprite-ring {
   fill: none;
 }

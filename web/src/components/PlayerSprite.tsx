@@ -176,7 +176,7 @@ function Face({ variant }: { variant: number }) {
       {/* Drawn-in contact shadow instead of a CSS drop-shadow filter, which is costly on a breathing layer. */}
       <circle cx="20" cy="22.2" r="17" fill="rgba(30, 24, 40, 0.18)" />
       <circle className="sprite-ring" cx="20" cy="21" r="19" />
-      <circle cx="20" cy="21" r="16" fill="var(--c)" stroke="rgba(30, 24, 40, 0.28)" strokeWidth="1.2" />
+      <circle className="sprite-face" cx="20" cy="21" r="16" strokeWidth="1.4" />
       {/* Soft top-left highlight so the face reads as a little ball, not a flat disc. */}
       <ellipse cx="14" cy="13.5" rx="6" ry="3.6" fill="#ffffff" opacity="0.28" transform="rotate(-20 14 13.5)" />
       <ellipse cx="10.8" cy="24.4" rx="3.2" ry="2" fill="#ff8fab" opacity="0.6" />
