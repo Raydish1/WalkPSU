@@ -18,6 +18,7 @@ const PRACTICE_DROP: DropRow = {
   id: MATH_PRACTICE_ID,
   title: 'Old Main Mental Math',
   type: 'math',
+  category: 'academics',
   lat: CAMPUS_CENTER[0],
   lng: CAMPUS_CENTER[1],
   points: 20,

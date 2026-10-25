@@ -34,7 +34,14 @@ export async function getDrops() {
 
 /** Admin only (enforced by RLS). */
 export async function createDrop(drop: NewDrop) {
-  return unwrap(await supabase.from('drops').insert(drop).select().single())
+  const first = await supabase.from('drops').insert(drop).select().single()
+  if (!first.error) return first.data
+  // Older projects may not have run the category migration yet — retry without it.
+  if (drop.category != null && /category/i.test(first.error.message)) {
+    const { category: _omit, ...rest } = drop
+    return unwrap(await supabase.from('drops').insert(rest).select().single())
+  }
+  return unwrap(first)
 }
 
 /** Admin only. Returns the public URL to store as the drop's hint_photo_url. */

@@ -35,6 +35,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | `id` | uuid | |
 | `title` | text | |
 | `type` | `minigame` \| `photo_hunt` \| `checkin` \| `math` \| `chemistry` | `math` = mental-math at `/math/:dropId`; `chemistry` = element/formula quiz at `/chem/:dropId` (claim after solving) |
+| `category` | text (nullable) | Event theme for search/filter: `sports` \| `culture` \| `academics` \| `social` \| `campus`. Null → client infers from title |
 | `lat`, `lng` | double precision | |
 | `points` | integer | > 0, default 10 |
 | `status` | `active` \| `claimed` \| `expired` | default `active`; becomes `claimed` via `claim_drop` |

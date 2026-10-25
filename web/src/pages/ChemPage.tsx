@@ -18,6 +18,7 @@ const PRACTICE_DROP: DropRow = {
   id: CHEM_PRACTICE_ID,
   title: 'Osmond Lab Chemistry',
   type: 'chemistry',
+  category: 'academics',
   lat: CAMPUS_CENTER[0],
   lng: CAMPUS_CENTER[1],
   points: 20,

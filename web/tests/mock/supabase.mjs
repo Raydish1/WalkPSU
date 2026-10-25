@@ -27,16 +27,19 @@ function seed() {
   for (const [i, name] of ['Bot Ana', 'Bot Ben', 'Bot Cal'].entries()) {
     players.push({ id: `bot${i}`, auth_id: `bot${i}`, display_name: name, color: PALETTE[i + 1], is_admin: false, created_at: now() })
   }
-  const drop = (id, title, type, lat, lng, points, building_num) =>
-    ({ id, title, type, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null })
+  const drop = (id, title, type, lat, lng, points, building_num, category = null) =>
+    ({ id, title, type, category, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null })
   const drops = [
-    drop('center-drop', 'Old Main lawn', 'checkin', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng, 15, null),
+    drop('center-drop', 'Old Main lawn', 'checkin', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng, 15, null, 'campus'),
     // ~30 m east of the lawn drop, at the HUB (so the map highlights building 0005000).
-    drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
+    drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000', 'social'),
     // ~25 m west — mental math at Old Main.
-    drop('math-drop', 'Old Main Mental Math', 'math', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng - 25 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 20, '0001000'),
+    drop('math-drop', 'Old Main Mental Math', 'math', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng - 25 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 20, '0001000', 'academics'),
     // ~40 m north — chemistry quiz (Osmond Lab area).
-    drop('chem-drop', 'Osmond Lab Chemistry', 'chemistry', OLD_MAIN_LAWN.lat + 40 / 111_195, OLD_MAIN_LAWN.lng, 20, '0015000'),
+    drop('chem-drop', 'Osmond Lab Chemistry', 'chemistry', OLD_MAIN_LAWN.lat + 40 / 111_195, OLD_MAIN_LAWN.lng, 20, '0015000', 'academics'),
+    // Sports / culture samples for Challenges search filters.
+    drop('bball-drop', 'Basketball Night at the BJC', 'checkin', OLD_MAIN_LAWN.lat - 50 / 111_195, OLD_MAIN_LAWN.lng + 20 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 25, '0045000', 'sports'),
+    drop('culture-drop', 'Culture Fest at the HUB', 'photo_hunt', OLD_MAIN_LAWN.lat + 20 / 111_195, OLD_MAIN_LAWN.lng + 35 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 20, '0005000', 'culture'),
   ]
   return {
     players,

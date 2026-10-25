@@ -18,6 +18,8 @@ type Drop = {
   id: string
   title: string
   type: DropType
+  /** Event theme for search/filter: sports, culture, academics, social, campus. */
+  category?: string | null
   lat: number
   lng: number
   points: number
@@ -68,7 +70,7 @@ export type Database = {
       drops: {
         Row: Drop
         Insert: Pick<Drop, 'title' | 'type' | 'lat' | 'lng'> &
-          Partial<Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at'>>
+          Partial<Pick<Drop, 'category' | 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at'>>
         Update: Partial<Omit<Drop, 'id' | 'created_at'>>
         Relationships: []
       }

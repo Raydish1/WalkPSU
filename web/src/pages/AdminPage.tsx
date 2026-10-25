@@ -10,6 +10,7 @@ import { createDrop, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropType, NewDrop } from '../lib/database.types'
+import { EVENT_CATEGORIES, type EventCategoryId } from '../lib/events'
 import { useBuildings, useDrops } from '../lib/hooks'
 import { useReadySession } from '../session/session'
 
@@ -34,6 +35,7 @@ function AdminPage() {
   const [target, setTarget] = useState<Target | null>(null)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<DropType>('minigame')
+  const [category, setCategory] = useState<EventCategoryId>('campus')
   const [points, setPoints] = useState(10)
   const [minutes, setMinutes] = useState(30)
   const [photo, setPhoto] = useState<File | null>(null)
@@ -86,6 +88,7 @@ function AdminPage() {
       async () => ({
         title: title.trim(),
         type,
+        category,
         points,
         lat: target.lat,
         lng: target.lng,
@@ -97,6 +100,7 @@ function AdminPage() {
     )
     if (ok) {
       setTitle('')
+      setCategory('campus')
       setPhoto(null)
       setTarget(null)
     }
@@ -114,7 +118,11 @@ function AdminPage() {
     const { latitude: lat, longitude: lng } = position.coords
     const building = findBuildingAt(buildings, lat, lng)
     const label = building ? `Demo: ${building.properties.name}` : 'Demo drop'
-    await drop(() => ({ title: label, type: 'checkin', points: 10, lat, lng, building_num: building?.properties.num ?? null }), label, toastId)
+    await drop(
+      () => ({ title: label, type: 'checkin', category: 'campus', points: 10, lat, lng, building_num: building?.properties.num ?? null }),
+      label,
+      toastId,
+    )
   }
 
   return (
@@ -157,6 +165,16 @@ function AdminPage() {
             {Object.entries(DROP_TYPES).map(([value, { label }]) => (
               <option key={value} value={value}>
                 {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          Event theme
+          <select className="input" value={category} onChange={(e) => setCategory(e.target.value as EventCategoryId)}>
+            {(Object.keys(EVENT_CATEGORIES) as EventCategoryId[]).map((id) => (
+              <option key={id} value={id}>
+                {EVENT_CATEGORIES[id].label}
               </option>
             ))}
           </select>
