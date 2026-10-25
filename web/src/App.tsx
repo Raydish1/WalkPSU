@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router'
 import { Toaster } from 'sonner'
 import BottomNav from './components/BottomNav'
 import DropAlerts from './components/DropAlerts'
+import PassToast from './components/PassToast'
 import AdminPage from './pages/AdminPage'
 import BattlePage from './pages/BattlePage'
 import ClaimPage from './pages/ClaimPage'
@@ -52,6 +53,7 @@ function Screens() {
             </main>
             {!fullScreen && <BottomNav />}
             {!fullScreen && <DropAlerts />}
+            <PassToast />
           </div>
         </DiscoveryProvider>
       </TrailProvider>

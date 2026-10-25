@@ -846,6 +846,201 @@ mark.me {
   opacity: 0.75;
 }
 
+/* Needle Rain. The field is the game, so it fills the screen; needles still move under reduced motion. */
+
+.needle-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  height: 100%;
+  background: #0b1220;
+  color: #f8fafc;
+  padding: calc(var(--safe-top) + 12px) var(--gutter-r) max(16px, var(--safe-bottom)) var(--gutter-l);
+}
+
+.needle-play {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 8px;
+}
+
+.needle-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.needle-hud {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.needle-screen.is-big .needle-hud {
+  font-size: clamp(36px, 5vw, 64px);
+}
+
+.needle-field {
+  position: relative;
+  flex: 1;
+  min-height: 240px;
+  overflow: hidden;
+  touch-action: none;
+  border-radius: 20px;
+  background:
+    linear-gradient(#334155, #334155) left var(--player-y, 78%) / 100% 2px no-repeat,
+    #0f172a;
+}
+
+.needle-screen.is-big .needle-field {
+  min-height: 62vh;
+}
+
+.needle {
+  position: absolute;
+  width: 3px;
+  height: 14%;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(#cbd5e1, #f8fafc);
+  pointer-events: none;
+}
+
+.needle-screen.is-big .needle {
+  width: 6px;
+  margin-left: -3px;
+}
+
+.needle-actor {
+  position: absolute;
+  top: var(--player-y, 78%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.needle-face {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #4363d8;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.needle-screen.is-big .needle-face,
+.needle-actor[data-big] .needle-face {
+  width: 88px;
+  height: 88px;
+  font-size: 36px;
+}
+
+.needle-name,
+.needle-count {
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 0 1px 2px #000;
+}
+
+.needle-screen.is-big .needle-name,
+.needle-actor[data-big] .needle-name {
+  font-size: 28px;
+}
+
+.needle-actor.is-out .needle-face {
+  opacity: 0.35;
+}
+
+.needle-out,
+.needle-note,
+.needle-pay {
+  margin: 0;
+  text-align: center;
+}
+
+.needle-pay {
+  font-family: var(--font-display);
+  font-size: 32px;
+}
+
+.needle-screen.is-big .needle-pay {
+  font-size: clamp(40px, 6vw, 72px);
+}
+
+.needle-stick {
+  position: relative;
+  align-self: center;
+  width: 148px;
+  height: 148px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 8%);
+  touch-action: none;
+}
+
+.needle-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.needle-result {
+  align-items: center;
+  text-align: center;
+  overflow: auto;
+}
+
+.needle-result h1 {
+  margin: 0;
+  font-size: clamp(36px, 8vw, 72px);
+}
+
+.needle-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 520px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.needle-scores li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.needle-screen.is-big .needle-scores li {
+  font-size: 32px;
+}
+
+.needle-scores strong {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.needle-record,
+.needle-rival {
+  margin: 0;
+  font-weight: 650;
+}
+
 /* Point to the Landmark. */
 
 .aim-screen[data-stage='pointing'],

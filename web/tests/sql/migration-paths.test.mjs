@@ -7,6 +7,8 @@ const beforeIndividual = MIGRATIONS[MIGRATIONS.indexOf(INDIVIDUAL) - 1]
 const beforeRemoval = MIGRATIONS[MIGRATIONS.indexOf(REMOVE_CAPTURE) - 1]
 const PHOTO_HUNT = MIGRATIONS.find((m) => m.includes('photo_hunt'))
 const beforePhotoHunt = MIGRATIONS[MIGRATIONS.indexOf(PHOTO_HUNT) - 1]
+const NEEDLE = MIGRATIONS.find((m) => m.includes('needle_rain'))
+const beforeNeedle = MIGRATIONS[MIGRATIONS.indexOf(NEEDLE) - 1]
 const QUICK_DRAW = MIGRATIONS.find((m) => m.includes('quick_draw'))
 const beforeQuickDraw = MIGRATIONS[MIGRATIONS.indexOf(QUICK_DRAW) - 1]
 
@@ -89,6 +91,21 @@ const beforeQuickDraw = MIGRATIONS[MIGRATIONS.indexOf(QUICK_DRAW) - 1]
   const s = (await as('a', {}, `select get_game_state($1) as s`, [game])).rows[0].s
   check('a Shake-Off in progress keeps its players, sides and shakes', s.kind === 'shake_off' && s.players.length === 2 && s.players.every((p) => p.side) && s.players.some((p) => p.shakes === 30), s)
   check('and still takes shakes', !(await as('b', {}, `select submit_shakes($1, 10)`, [game])).error)
+}
+
+// --- Needle Rain widens the game check without retconning existing rows.
+{
+  const db = await createDb()
+  await migrate(db, { until: beforeNeedle })
+  const as = actor(db)
+  const su = superuser(db)
+  const shake = (await as('admin', { app_role: 'admin' }, `insert into drops (title, type, lat, lng, points) values ('s', 'minigame', $1, $2, 10) returning id`, [LAT, LNG])).rows[0].id
+  const draw = (await as('admin', { app_role: 'admin' }, `insert into drops (title, type, game, lat, lng, points) values ('q', 'minigame', 'quick_draw', $1, $2, 10) returning id`, [LAT, LNG])).rows[0].id
+  const plain = (await as('admin', { app_role: 'admin' }, `insert into drops (title, type, lat, lng) values ('c', 'checkin', $1, $2) returning id`, [LAT, LNG])).rows[0].id
+
+  await migrate(db, { from: NEEDLE, until: NEEDLE })
+  const kinds = await su(`select id, game from drops`)
+  check('Needle Rain leaves existing games as they were', kinds.find((d) => d.id === shake).game === 'shake_off' && kinds.find((d) => d.id === draw).game === 'quick_draw' && kinds.find((d) => d.id === plain).game === null, kinds)
 }
 
 finish()

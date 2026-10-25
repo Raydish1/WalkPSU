@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router'
 import Avatar from '../components/Avatar'
 import { ChevronIcon } from '../components/icons'
 import GameIcon from '../game/GameIcon'
+import NeedleBattle from '../game/NeedleBattle'
 import { MINIGAMES } from '../game/kinds'
 import { LandmarkBoard, LandmarkSides } from '../game/LandmarkScreens'
 import { DrawSides, RoundBoard } from '../game/QuickDrawScreens'
@@ -58,7 +59,9 @@ function BattleScreen({ dropId }: { dropId: string }) {
   const game = MINIGAMES[kind]
   const title = drop?.title ?? game.name
 
-  if (phase.kind === 'finished') {
+  if (kind === 'needle_rain') return <NeedleBattle dropId={dropId} drop={drop} state={state} phase={phase} refresh={refresh} />
+
+  if (phase.kind === 'finished' && phase.winner) {
     const winner = SIDES[phase.winner]
     return (
       <section className="battle battle-result" style={{ '--side': winner.color, '--side-ink': winner.ink } as CSSProperties}>

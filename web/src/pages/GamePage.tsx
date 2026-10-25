@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import Avatar from '../components/Avatar'
 import { ChevronIcon } from '../components/icons'
 import GameIcon from '../game/GameIcon'
+import NeedleRainGame from '../game/NeedleRainGame'
 import { MINIGAMES } from '../game/kinds'
 import { useCompass, type CompassStatus } from '../game/compass'
 import { LandmarkBoard, LandmarkPlay, LandmarkSides } from '../game/LandmarkScreens'
@@ -52,7 +53,7 @@ function GamePage() {
   const buzzed = useRef<string | null>(null)
   const points = drop?.points
   useEffect(() => {
-    if (!me) return
+    if (!me || kind === 'needle_rain') return
     if (phase.kind === 'playing' && buzzed.current !== 'start') {
       buzzed.current = 'start'
       vibrate(400)
@@ -61,7 +62,7 @@ function GamePage() {
         description: { shake_off: 'Shake as fast as you can!', quick_draw: 'Hold still and wait for the flash.', landmark: 'Point at the landmark it names.' }[kind],
         duration: 2500,
       })
-    } else if (phase.kind === 'finished' && buzzed.current !== 'end') {
+    } else if (phase.kind === 'finished' && phase.winner && buzzed.current !== 'end') {
       buzzed.current = 'end'
       vibrate([150, 80, 150, 80, 300])
       const won = me.side === phase.winner
@@ -85,7 +86,24 @@ function GamePage() {
   const title = drop?.title ?? game.name
   const side = me?.side ? SIDES[me.side] : null
 
-  if (phase.kind === 'finished') {
+  if (kind === 'needle_rain') {
+    return (
+      <NeedleRainGame
+        dropId={dropId}
+        code={key}
+        drop={drop}
+        player={player}
+        isAdmin={isAdmin}
+        state={state}
+        phase={phase}
+        error={error}
+        refresh={refresh}
+        offset={offset}
+      />
+    )
+  }
+
+  if (phase.kind === 'finished' && phase.winner) {
     const won = me?.side === phase.winner
     return (
       <section className="game-screen game-result" style={sideStyle(phase.winner)}>
@@ -239,6 +257,7 @@ function JoinButton({ dropId, drop, code, label, onJoined }: { dropId: string; d
 const READY: Record<MinigameKind, string> = {
   shake_off: 'Hold your phone tight. When it starts, shake it as fast as you can.',
   quick_draw: 'When it starts, hold your phone still. Flick it the instant it flashes DRAW!',
+  needle_rain: 'Tilt your phone to slide between the needles.',
   landmark: 'When it starts, hold your phone flat and point its top edge at the landmark it names.',
 }
 

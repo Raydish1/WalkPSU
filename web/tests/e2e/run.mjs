@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { HUNT_SPOT, MOCK_PORT, OLD_MAIN_LAWN, startMockSupabase } from '../mock/supabase.mjs'
+import { HUNT_SPOT, MOCK_PORT, NEEDLE_SPOT, OLD_MAIN_LAWN, startMockSupabase } from '../mock/supabase.mjs'
 
 const WEB_DIR = fileURLToPath(new URL('../../', import.meta.url))
 const PORT = Number(process.env.E2E_PORT ?? 5199)
@@ -199,7 +199,7 @@ async function mapScenario(browser) {
   }))
   check('admin tap-to-place resolves the building', admin.where === 'At Old Main' && admin.title === 'Old Main' && admin.target === 1, admin)
   const options = (await page.$$eval('.game-option', (els) => els.map((el) => el.textContent))).join(' | ')
-  check('a minigame drop offers a game picker with descriptions', /Shake-Off.*shake.*\|.*Quick Draw.*DRAW!/.test(options), options)
+  check('a minigame drop offers a game picker with descriptions', /Shake-Off.*shake.*\|.*Quick Draw.*DRAW!/.test(options) && /Needle Rain/.test(options) && /Point to the Landmark/.test(options), options)
   await page.check('.game-option input[value="quick_draw"]')
   await page.click('form button.primary')
   await page.waitForFunction(() => document.querySelector('form input.input')?.value === '')
@@ -422,6 +422,31 @@ async function quickDrawScenario(browser) {
   await page.context().close()
 }
 
+async function needleRainScenario(browser) {
+  console.log('\n# Needle Rain (1 bot already in; joining starts a short shared storm)')
+  const page = await newPhone(browser, NEEDLE_SPOT)
+  await page.waitForSelector('.bottom-nav')
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/game/needle-drop')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
+  await page.waitForSelector('.needle-record', { timeout: 10_000 })
+  check('lobby shows the practice record', /Record to beat: Bot Ana · 12/.test(await page.textContent('.needle-record')))
+  await page.click('text=Join the Needle Rain')
+  await page.waitForSelector('.needle-field', { timeout: 10_000 })
+  await page.keyboard.down('ArrowRight')
+  await page.waitForSelector('.needle-result', { timeout: 25_000 })
+  await page.keyboard.up('ArrowRight')
+  const state = await (await fetch(`${MOCK}/__state`)).json()
+  const claims = state.claims.filter((c) => c.drop_id === 'needle-drop')
+  const mine = state.gamePlayers.find((gp) => gp.drop_id === 'needle-drop' && !gp.player_id.startsWith('bot'))
+  const drop = state.drops.find((d) => d.id === 'needle-drop')
+  check('one payout, the drop points, and the drop is claimed', claims.length === 1 && claims[0].points === 40 && drop.status === 'claimed', { claims, status: drop.status })
+  check('stored dodges stay inside the cap', mine.dodges <= 32, mine)
+  check('no console errors', page.errors.length === 0, page.errors)
+  await page.context().close()
+}
+
 async function landmarkScenario(browser) {
   console.log('\n# Point to the Landmark (3 bots in the lobby; joining makes 4; 3 rounds)')
   const spot = { lat: OLD_MAIN_LAWN.lat, lng: OLD_MAIN_LAWN.lng - 30 / (M_PER_DEG_LAT * Math.cos((OLD_MAIN_LAWN.lat * Math.PI) / 180)) }
@@ -539,6 +564,7 @@ try {
   await photoHuntScenario(browser)
   await shakeOffScenario(browser)
   await quickDrawScenario(browser)
+  await needleRainScenario(browser)
   await landmarkScenario(browser)
   await meetupScenario(browser)
 } catch (e) {

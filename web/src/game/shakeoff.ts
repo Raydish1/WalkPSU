@@ -5,13 +5,13 @@ export type Phase =
   | { kind: 'lobby'; startsInMs: number | null }
   | { kind: 'playing'; remainingMs: number }
   | { kind: 'tallying'; finishableInMs: number }
-  | { kind: 'finished'; winner: Side }
+  | { kind: 'finished'; winner: Side | null }
 
 /** Derives the phase from server timestamps; `serverNow` is the device clock corrected by the server offset. */
 export function phaseAt(state: GameState, serverNow: number): Phase {
   const { game, settings } = state
   if (!game) return { kind: 'empty' }
-  if (game.finished_at && game.winner_side) return { kind: 'finished', winner: game.winner_side }
+  if (game.finished_at) return { kind: 'finished', winner: game.winner_side }
   if (!game.started_at) return { kind: 'lobby', startsInMs: null }
   const start = Date.parse(game.started_at)
   const end = start + settings.game_seconds * 1000

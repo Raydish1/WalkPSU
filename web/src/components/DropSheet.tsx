@@ -8,6 +8,9 @@ import { useGame } from '../game/useGame'
 import { claimDrop, closeDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
+import { distanceM } from '../lib/geo'
+import { useLeaderboard } from '../lib/hooks'
+import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 import { ClockIcon, PinIcon } from './icons'
 import PhotoHuntCard from './PhotoHuntCard'
@@ -115,7 +118,7 @@ function DropCard({ drop, distance, radius, position, onClaimed }: CardProps) {
         </span>
       )}
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
-      {drop.type === 'minigame' && <GameLine drop={drop} />}
+      {drop.type === 'minigame' && <GameLine drop={drop} radius={radius} />}
       <span className="range" data-in={inRange || undefined}>
         <PinIcon size={16} />
         {range}
@@ -194,16 +197,46 @@ function ClearDrop({ drop, onCleared }: { drop: DropRow; onCleared: () => void }
 }
 
 /** Which mini-game this lobby plays, so players know what they're walking into. */
-function GameLine({ drop }: { drop: DropRow }) {
+function GameLine({ drop, radius }: { drop: DropRow; radius: number | null }) {
   const game = minigameOf(drop.game)
+  const needle = drop.game === 'needle_rain'
   return (
     <div className="game-line">
       <p className="game-kind">
         <GameIcon kind={drop.game ?? 'shake_off'} />
         <strong>{game.name}</strong>
       </p>
-      <p className="muted">{game.blurb} Every winner gets the points.</p>
+      <p className="muted">
+        {game.blurb}
+        {needle ? '' : ' Every winner gets the points.'}
+      </p>
+      {needle && drop.status === 'active' && <NeedleRival drop={drop} radius={radius} />}
     </div>
+  )
+}
+
+/** Someone ahead on points, inside this drop's claim radius, with map sharing on. Presence only: nothing is stored. */
+function NeedleRival({ drop, radius }: { drop: DropRow; radius: number | null }) {
+  const { player } = useReadySession()
+  const { others } = usePresence()
+  const { data: scores } = useLeaderboard()
+  if (radius === null) return null
+  const mine = scores.find((row) => row.player_id === player.id)
+  if (!mine) return null
+  const here = others
+    .flatMap((other) => {
+      const score = scores.find((row) => row.player_id === other.playerId)
+      if (!score || score.points <= mine.points) return []
+      const dist = distanceM(other.lat, other.lng, drop.lat, drop.lng)
+      if (dist > radius) return []
+      return [{ name: other.name, gap: score.points - mine.points, dist }]
+    })
+    .sort((a, b) => a.gap - b.gap || a.dist - b.dist)[0]
+  if (!here) return null
+  return (
+    <p className="needle-rival">
+      {here.name} is here. You’re {here.gap} pts behind.
+    </p>
   )
 }
 
