@@ -12,8 +12,10 @@ import { distanceM } from '../lib/geo'
 import { useLeaderboard } from '../lib/hooks'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
+import { eventTime } from '../lib/eventTime'
 import { ClockIcon, PinIcon } from './icons'
 import PhotoHuntCard from './PhotoHuntCard'
+import { useNonModalSheet } from './useNonModalSheet'
 
 type Props = {
   drop: DropRow | null
@@ -31,13 +33,7 @@ type Props = {
 
 /** A drop's details in a bottom sheet the player can drag away. Non-modal, so the map stays live behind it. */
 function DropSheet({ drop, open, onClose, onCleared, ...card }: Props) {
-  // Vaul 1.1.2 doesn't pass `modal` on to Radix, so Radix still blocks the page with `pointer-events: none` on
-  // <body>. Vaul undoes that only when it opens the drawer itself; this sheet is opened by map taps, so undo it here.
-  useEffect(() => {
-    if (!open) return
-    const frame = requestAnimationFrame(() => (document.body.style.pointerEvents = 'auto'))
-    return () => cancelAnimationFrame(frame)
-  }, [open])
+  useNonModalSheet(open)
 
   return (
     <Drawer.Root open={open && drop !== null} onOpenChange={(next) => !next && onClose()} modal={false}>
@@ -142,19 +138,6 @@ function DropCard({ drop, distance, radius, position, onClaimed }: CardProps) {
       )}
     </div>
   )
-}
-
-const timeRange = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' })
-const dayLabel = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
-
-/** "Happening now · until 9:00 PM", "Today · 7:00 – 9:00 PM", or "Tue, Oct 27 · 7:00 – 9:00 PM". */
-function eventTime(startsAt: string, endsAt: string) {
-  const start = new Date(startsAt)
-  const end = new Date(endsAt)
-  const now = new Date()
-  if (start <= now) return `Happening now · until ${timeRange.format(end)}`
-  const day = start.toDateString() === now.toDateString() ? 'Today' : dayLabel.format(start)
-  return `${day} · ${timeRange.formatRange(start, end)}`
 }
 
 /**

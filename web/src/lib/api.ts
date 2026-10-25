@@ -82,6 +82,35 @@ export async function submitHuntPhoto(dropId: string, image: string, position: {
   return body as PhotoVerdict
 }
 
+/** A Penn State Discover event picked by /api/search-events. Mirrors EventResult in api/search-events.ts. */
+export type EventResult = {
+  id: string
+  title: string
+  organization: string | null
+  theme: string | null
+  starts_at: string
+  ends_at: string
+  location: string | null
+  /** Null for online or vaguely located events: they get no map pin. */
+  building: { num: string; name: string; lat: number; lng: number } | null
+  /** Gemini's one-line "why this fits". */
+  reason: string
+}
+
+/** Natural-language event search. Throws a user-facing message (busy, rate limited, offline). */
+export async function searchEvents(query: string) {
+  const token = await getAccessToken()
+  const response = await fetch('/api/search-events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) },
+    body: JSON.stringify({ query }),
+  }).catch(() => null)
+  if (!response) throw new Error('Couldn’t reach the event finder. Check your connection')
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(body.error ?? `Search failed (${response.status})`)
+  return (body as { results: EventResult[] }).results
+}
+
 export async function getDrop(id: string) {
   return unwrap(await supabase.from('drops').select('*').eq('id', id).maybeSingle())
 }

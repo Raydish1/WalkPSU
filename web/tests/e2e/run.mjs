@@ -265,6 +265,73 @@ async function photoHuntScenario(browser) {
   await page.context().close()
 }
 
+async function searchScenario(browser) {
+  console.log('\n# AI event search (the mock stands in for /api/search-events and Gemini)')
+  const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat, lng: OLD_MAIN_LAWN.lng })
+  // vite preview doesn't run web/api, so route the app's request to the mock's fixed results.
+  await page.route('**/api/search-events', async (route) => {
+    const res = await fetch(`${MOCK}/__search-events`, { method: 'POST', headers: route.request().headers(), body: route.request().postData() })
+    await route.fulfill({ status: res.status, contentType: 'application/json', body: await res.text() })
+  })
+  await mapReady(page)
+  await page.waitForTimeout(800)
+  const sheetText = async () => (await page.textContent('.search-sheet')).replace(/\s+/g, ' ')
+
+  await page.click('.search-pill')
+  await page.waitForSelector('.search-sheet .example-chip')
+  check('search shows example prompts', (await page.locator('.search-sheet .example-chip').allTextContents()).join('|') === 'free food|something for CS majors|music tonight')
+  await page.click('.search-sheet .example-chip:has-text("free food")')
+  await page.waitForSelector('.search-sheet .search-result')
+  let text = await sheetText()
+  check('results show title, organization, place, and Gemini’s reason', /Late Night Pancakes.*Library Programming.*Pattee Library.*free pancakes at Pattee/.test(text), text)
+  check('an online event is listed with its location and no building', /Virtual Study Hall.*Online/.test(text), text)
+  check('a result that is one of our drops says it’s claimable', /Lawn Picnic.*Claimable · 15 pts/.test(text), text)
+  await page.screenshot({ path: SHOTS + 'search-results.png' })
+
+  await page.click('.search-result:has-text("Late Night Pancakes")')
+  await page.waitForSelector('.event-sheet h3', { timeout: 5000 })
+  await page.waitForTimeout(1200) // the map's glide
+  const view = await page.evaluate(() => {
+    const map = window.__walkpsuMap
+    return {
+      card: document.querySelector('.event-sheet').textContent.replace(/\s+/g, ' '),
+      glowing: [...new Set(map.queryRenderedFeatures({ layers: ['buildings-active'] }).map((f) => f.properties.num))],
+      // The glide puts the building above the sheet, so measure from where it's drawn, not the map center.
+      onScreen: (() => {
+        const p = map.project([-77.866229, 40.797799])
+        return p.x > 0 && p.x < 375 && p.y > 0 && p.y < 500
+      })(),
+    }
+  })
+  check('tapping a result opens its card', /Late Night Pancakes.*Library Programming.*Pattee Library.*free pancakes/.test(view.card), view.card)
+  check('the map flies to the building and lights it up', view.onScreen && view.glowing.includes('0003000'), view)
+  await page.screenshot({ path: SHOTS + 'search-event.png' })
+
+  await page.click('.search-pill')
+  await page.waitForSelector('.search-sheet .search-result')
+  check('reopening keeps the last results', /Late Night Pancakes/.test(await sheetText()))
+  await page.click('.search-result:has-text("Lawn Picnic")')
+  await page.waitForSelector('.drop-sheet:not(.search-sheet):not(.event-sheet) h3:has-text("Lawn Picnic")', { timeout: 5000 })
+  check('a claimable result opens the drop’s own card', /Claim/.test(await page.textContent('.drop-sheet:not(.search-sheet):not(.event-sheet)')))
+  const glowAfter = await page.evaluate(() => [...new Set(window.__walkpsuMap.queryRenderedFeatures({ layers: ['buildings-active'] }).map((f) => f.properties.num))])
+  check('the searched building stops glowing once its card closes', !glowAfter.includes('0003000'), glowAfter)
+
+  await page.click('.search-pill')
+  await page.waitForSelector('.search-sheet input')
+  await page.fill('.search-sheet input', 'zzz')
+  await page.press('.search-sheet input', 'Enter')
+  await page.waitForSelector('.search-sheet :text("Nothing matched")')
+  check('no matches says to try something broader', /Nothing matched — try something broader/.test(await sheetText()))
+  await page.fill('.search-sheet input', 'busy please')
+  await page.press('.search-sheet input', 'Enter')
+  await page.waitForSelector('.search-sheet [role="alert"]')
+  text = await sheetText()
+  check('a busy Gemini shows a friendly error and a retry', /busy/.test(text) && /Try again/.test(text), text)
+  // The 503 from the stand-in is expected; anything else isn't.
+  check('no console errors', page.errors.filter((e) => !/503 POST .*api\/search-events/.test(e)).length === 0, page.errors)
+  await page.context().close()
+}
+
 async function meetupScenario(browser) {
   console.log('\n# Meetups and clearing drops (runs last: it clears the revealed photo hunt)')
   const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat - 40 / M_PER_DEG_LAT, lng: OLD_MAIN_LAWN.lng })
@@ -566,6 +633,7 @@ try {
   await quickDrawScenario(browser)
   await needleRainScenario(browser)
   await landmarkScenario(browser)
+  await searchScenario(browser)
   await meetupScenario(browser)
 } catch (e) {
   failures++

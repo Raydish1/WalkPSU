@@ -653,3 +653,129 @@
   background: var(--danger);
   color: #ffffff;
 }
+
+/* AI event search */
+
+.search-pill {
+  width: min(100%, 420px);
+  justify-content: flex-start;
+  border: 0.5px solid var(--material-edge);
+  color: var(--muted);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  min-height: 44px;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+
+.search-pill svg {
+  color: var(--accent);
+}
+
+.search-pill:active {
+  transform: scale(0.98);
+}
+
+.search-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 85dvh;
+  padding-bottom: max(20px, var(--safe-bottom));
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: var(--radius-ctl);
+  background: var(--fill);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  /* 16px or more, or iOS zooms the page on focus. */
+  font-size: 17px;
+  appearance: none;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.example-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.example-chip {
+  min-height: 36px;
+  border: 0;
+  background: var(--accent-tint);
+  color: var(--accent);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+
+.example-chip:active {
+  transform: scale(0.96);
+}
+
+.search-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 8px;
+  text-align: center;
+}
+
+.search-results {
+  flex-shrink: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: none;
+}
+
+.search-result {
+  align-items: flex-start;
+}
+
+.search-result .list-row-main {
+  gap: 3px;
+}
+
+.search-result-title {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.search-result-meta {
+  color: var(--text);
+}
+
+.search-reason {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.claimable-chip {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--success);
+}

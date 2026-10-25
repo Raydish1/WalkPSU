@@ -16,9 +16,10 @@
    - `20261025020000_quick_draw.sql`
    - `20261025030000_landmark.sql`
    - `20261025030000_needle_rain.sql`
+   - `20261025040000_event_search.sql`
 3. Fallback login: go to **Authentication → Sign In / Providers** and turn on **Allow anonymous sign-ins**.
 4. Go to **Project Settings → API** and copy the Project URL and the anon (publishable) key into `web/.env`.
-5. Photo hunts: copy the `service_role` key from the same page into `SUPABASE_SERVICE_ROLE_KEY`, and get a Gemini key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) for `GEMINI_API_KEY`. Paste only the key, not AI Studio's example `curl` command. On Vercel, add both under **Settings → Environment Variables**.
+5. Photo hunts and AI event search: copy the `service_role` key from the same page into `SUPABASE_SERVICE_ROLE_KEY`, and get a Gemini key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) for `GEMINI_API_KEY`. Paste only the key, not AI Studio's example `curl` command. On Vercel, add both under **Settings → Environment Variables**.
 
 Make yourself an admin in fallback mode. Join the app first, then run this in the SQL editor:
 

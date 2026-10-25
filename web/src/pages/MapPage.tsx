@@ -1,14 +1,17 @@
 import type { FeatureCollection, Point, Polygon } from 'geojson'
-import { useMemo, useState } from 'react'
-import { Layer, Popup, Source, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
+import { useEffect, useMemo, useState } from 'react'
+import { Layer, Popup, Source, useMap, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
-import { PlusIcon } from '../components/icons'
+import EventSheet from '../components/EventSheet'
+import { PlusIcon, SearchIcon } from '../components/icons'
 import MeetupSheet from '../components/MeetupSheet'
 import FoundOverlay, { type Found } from '../components/FoundOverlay'
 import PlayerSprite from '../components/PlayerSprite'
+import SearchSheet from '../components/SearchSheet'
 import WalkLayers from '../components/WalkLayers'
+import type { EventResult } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
@@ -27,6 +30,27 @@ const DROP_ZOOM = 17
 /** A photo hunt nobody has found yet: its lat/lng is only the center of a search circle, so it gets no pin. */
 const isHiddenHunt = (d: DropRow) => d.type === 'photo_hunt' && !d.first_found_at
 const SHEET_CLOSE_MS = 500
+
+type MapInstance = MapLayerMouseEvent['target']
+
+/**
+ * Lifts a point into the top half of the screen, clear of a bottom sheet, zooming in if the player was zoomed out
+ * (never out, if they were closer). A longer glide when it zooms, so the jump reads as one move.
+ */
+function glideTo(map: MapInstance, lng: number, lat: number) {
+  const zoom = Math.max(map.getZoom(), DROP_ZOOM)
+  const zooming = zoom - map.getZoom() > 0.25
+  map.easeTo({ center: [lng, lat], zoom, offset: [0, -170], duration: zooming ? 800 : 450 })
+}
+
+/** Glides the map to `target` each time it changes (for things picked outside the map, like search results). */
+function FlyTo({ target }: { target: { lng: number; lat: number } | null }) {
+  const { current: map } = useMap()
+  useEffect(() => {
+    if (map && target) glideTo(map.getMap(), target.lng, target.lat)
+  }, [map, target])
+  return null
+}
 /** Layers whose features open a drop's sheet. Pins come first so they win over the circle underneath. */
 const TAPPABLE = ['drop-points', 'hunt-centers', 'hunt-areas']
 const pinColor = (d: DropRow) => (d.type === 'photo_hunt' ? REVEALED : DROP_TYPES[d.type].color)
@@ -42,10 +66,19 @@ function MapPage() {
   const [sheet, setSheet] = useState<{ drop: DropRow; open: boolean } | null>(null)
   const [found, setFound] = useState<Found | null>(null)
   const [composing, setComposing] = useState(false)
+  const [searching, setSearching] = useState(false)
+  // A searched event's card; like `sheet`, it keeps its event while sliding away.
+  const [event, setEvent] = useState<{ event: EventResult; open: boolean } | null>(null)
+  const [flyTarget, setFlyTarget] = useState<{ lng: number; lat: number } | null>(null)
 
   const here = position?.coords
   const distanceTo = (d: DropRow) => (here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null)
-  const highlighted = useMemo(() => new Set(drops.flatMap((d) => (d.building_num ? [d.building_num] : []))), [drops])
+  // Buildings with a live drop glow; so does the building of the searched event on screen.
+  const eventBuilding = event?.open ? event.event.building?.num : undefined
+  const highlighted = useMemo(
+    () => new Set([...drops.flatMap((d) => (d.building_num ? [d.building_num] : [])), ...(eventBuilding ? [eventBuilding] : [])]),
+    [drops, eventBuilding],
+  )
 
   const circles = useMemo<FeatureCollection<Polygon>>(
     () => ({
@@ -101,20 +134,37 @@ function MapPage() {
   )
 
   const closeSheet = () => setSheet((s) => s && { ...s, open: false })
+  const closeEvent = () => setEvent((s) => s && { ...s, open: false })
+
+  /** Seeded drops carry their Discover event id, so a search result can open the drop players can claim. */
+  const dropForEvent = (eventId: string) => drops.find((d) => d.source_id === `discover:${eventId}`)
+
+  const pickEvent = (result: EventResult, drop: DropRow | undefined) => {
+    setSearching(false)
+    // After the search sheet has slid away (Vaul's close takes 0.5 s), so the sheets don't overlap.
+    setTimeout(() => {
+      closeSheet()
+      closeEvent()
+      if (drop) {
+        setSheet({ drop, open: true })
+        setFlyTarget({ lng: drop.lng, lat: drop.lat })
+      } else {
+        setEvent({ event: result, open: true })
+        if (result.building) setFlyTarget({ lng: result.building.lng, lat: result.building.lat })
+      }
+    }, SHEET_CLOSE_MS)
+  }
 
   const onClick = (e: MapLayerMouseEvent) => {
     const hit = e.features?.[0]
     const id = hit?.properties?.id as string | undefined
     // An unfound photo hunt is tapped through its "?" pin or its search circle; its lat/lng is that circle's center.
     const drop = hit && TAPPABLE.includes(hit.layer.id) ? drops.find((d) => d.id === id) : undefined
+    closeEvent()
     if (drop) {
       setSelectedPlayerId(null)
       setSheet({ drop, open: true })
-      // Lift the tapped drop into the top half of the screen, clear of the sheet, zooming in if the player was
-      // zoomed out (never out, if they were closer). A longer glide when it zooms, so the jump reads as one move.
-      const zoom = Math.max(e.target.getZoom(), DROP_ZOOM)
-      const zooming = zoom - e.target.getZoom() > 0.25
-      e.target.easeTo({ center: [drop.lng, drop.lat], zoom, offset: [0, -170], duration: zooming ? 800 : 450 })
+      glideTo(e.target, drop.lng, drop.lat)
     } else {
       closeSheet()
       setSelectedPlayerId(null)
@@ -131,6 +181,7 @@ function MapPage() {
       <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={TAPPABLE} onClick={onClick}>
         {/* First, so trails draw under drops and claim circles; the fog places itself under the building glow. */}
         <WalkLayers />
+        <FlyTo target={flyTarget} />
         <Source id="hunt-areas" type="geojson" data={huntAreas}>
           <Layer id="hunt-areas" type="fill" paint={{ 'fill-color': DROP_TYPES.photo_hunt.color, 'fill-opacity': 0.14 }} />
           <Layer id="hunt-areas-line" type="line" paint={{ 'line-color': DROP_TYPES.photo_hunt.color, 'line-width': 2.5, 'line-dasharray': [1, 2] }} />
@@ -190,6 +241,10 @@ function MapPage() {
         )}
       </CampusMap>
       <div className="map-top">
+        <button type="button" className="map-pill glass search-pill" onClick={() => setSearching(true)}>
+          <SearchIcon size={18} />
+          Find events you’d like…
+        </button>
         <span className="map-pill glass" role="status">
           <span className="live-dot" data-off={drops.length === 0 || undefined} aria-hidden />
           {drops.length === 0 ? 'No live drops' : `${drops.length} live ${drops.length === 1 ? 'drop' : 'drops'}`}
@@ -200,6 +255,8 @@ function MapPage() {
         <PlusIcon size={18} />
         Meetup
       </button>
+      <SearchSheet open={searching} onOpenChange={setSearching} dropFor={dropForEvent} onPick={pickEvent} />
+      <EventSheet event={event?.event ?? null} open={!!event?.open} onClose={closeEvent} />
       <MeetupSheet
         open={composing}
         onOpenChange={setComposing}

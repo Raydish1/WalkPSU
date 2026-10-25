@@ -93,6 +93,14 @@ function seed() {
       search_radius_m: 125,
       hint_photo_url: `http://localhost:${MOCK_PORT}/__hint.png`,
     }),
+    // A check-in seeded from a Discover event (source_id), so AI search results can link to it. Open ground ~400 m
+    // southwest, so it highlights no building.
+    drop('event-drop', 'Lawn Picnic', 'checkin', OLD_MAIN_LAWN.lat - 280 / 111_195, OLD_MAIN_LAWN.lng - 280 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 15, null, {
+      subtitle: 'Penn State Picnic Club',
+      starts_at: new Date(Date.now() + 60 * 60_000).toISOString(),
+      expires_at: new Date(Date.now() + 3 * 60 * 60_000).toISOString(),
+      source_id: 'discover:e2e-linked',
+    }),
   ]
   const hunt = { hunt_lat: HUNT_SPOT.lat, hunt_lng: HUNT_SPOT.lng, hunt_building_num: null }
   return {
@@ -100,6 +108,7 @@ function seed() {
     drops,
     claims: [],
     discovered: [],
+    searchQuota: new Map(),
     secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
     games: (() => {
       const games = new Map(['game-drop', 'draw-drop', 'aim-drop', 'needle-drop'].map((id) => [id, newGame(id)]))
@@ -144,7 +153,7 @@ const filterRows = (rows, params) =>
 
 export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const db = seed()
-  const { players, drops, claims, discovered, secrets, games, gamePlayers, results, log } = db
+  const { players, drops, claims, discovered, searchQuota, secrets, games, gamePlayers, results, log } = db
   const kindOf = (dropId) => drops.find((d) => d.id === dropId)?.game ?? 'shake_off'
   const roundsOf = (dropId) => {
     const g = games.get(dropId)
@@ -254,6 +263,14 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const rpc = {
     claim_radius_m: () => [200, RADIUS_M],
     current_player_id: (json, me) => [200, me?.id ?? null],
+    use_search_quota: (json, me) => {
+      if (!me) return [400, { message: 'Join the game before searching' }]
+      const q = searchQuota.get(me.id)
+      const fresh = !q || Date.now() - q.windowStart > 10 * 60_000
+      const next = fresh ? { windowStart: Date.now(), used: 1 } : { ...q, used: q.used + 1 }
+      searchQuota.set(me.id, next)
+      return [200, next.used <= 10]
+    },
     create_meetup: (json, me) => {
       if (!me) return [400, { message: 'Join the game before posting a meetup' }]
       const text = String(json.p_text ?? '').trim()
@@ -493,6 +510,25 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       return send(200, { access_token: jwt(id), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock', user })
     }
     if (url.pathname.startsWith('/auth/v1/')) return send(200, {})
+    // Stands in for web/api/search-events.ts in e2e (the test routes the app's request here): fixed results, so the
+    // UI flow doesn't depend on the snapshot's dates. tests/api runs the real handler with Gemini faked.
+    if (url.pathname === '/__search-events') {
+      const query = String(json.query ?? '').toLowerCase()
+      if (query.includes('busy')) return send(503, { error: 'The event finder is busy right now. Try again in a minute' })
+      if (query.includes('zzz')) return send(200, { results: [] })
+      const at = (hours) => new Date(Date.now() + hours * 3600_000).toISOString()
+      return send(200, {
+        results: [
+          // Pattee, not the HUB: the HUB already glows for the Shake-Off drop, so the test couldn't see the search light it.
+          { id: 'e2e-pattee', title: 'Late Night Pancakes', organization: 'Library Programming', theme: 'Social', starts_at: at(1), ends_at: at(3), location: 'Pattee 103',
+            building: { num: '0003000', name: 'Pattee Library (Fred Lewis)', lat: 40.797799, lng: -77.866229 }, reason: 'Mock: free pancakes at Pattee.' },
+          { id: 'e2e-linked', title: 'Lawn Picnic', organization: 'Penn State Picnic Club', theme: 'Social', starts_at: at(1), ends_at: at(3), location: 'Old Main lawn',
+            building: { num: '0001000', name: 'Old Main', lat: 40.796443, lng: -77.862804 }, reason: 'Mock: a picnic with food.' },
+          { id: 'e2e-online', title: 'Virtual Study Hall', organization: 'World Campus', theme: 'Learning', starts_at: at(2), ends_at: at(4), location: 'Online',
+            building: null, reason: 'Mock: snacks not included, but good company.' },
+        ],
+      })
+    }
     if (url.pathname === '/__hint.png') {
       res.writeHead(200, { 'content-type': 'image/png' })
       return res.end(HINT_PNG)

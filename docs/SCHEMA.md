@@ -174,6 +174,17 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
 
 `drops`, `claims`, `games`, `game_players`, and `game_results` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete, which is enough to refresh the map. A photo hunt's later finders add claims without touching the drop, so the leaderboard listens to `claims`.
 
+## AI event search: `/api/search-events` and `search_quota`
+
+`POST /api/search-events { query }` (Vercel function, `web/api/search-events.ts`) searches the Penn State Discover snapshot bundled with it (`web/scripts/data/discover-events.json`, refreshed by `npm run import-events`):
+
+1. The caller must be a signed-in player (`current_player_id()` under their JWT). The query is 2–200 characters.
+2. `use_search_quota() → boolean` takes one search from the caller's allowance (10 per 10 minutes) and refuses with 429 past it. Runs as the caller; `search_quota (player_id, window_start, used)` has RLS with no policies, so only the function touches it. It stores a counter only: **queries are never stored or logged**.
+3. Gemini gets the upcoming events (the soonest 300: id, title, organization, theme and categories, start time, location) and the query, wrapped as data, and returns up to 6 `{ id, reason }`.
+4. Ids are checked against the snapshot (unknown, ended, and duplicate ids are dropped). The response is `{ results: [{ id, title, organization, theme, starts_at, ends_at, location, building | null, reason }] }`; `building` is null for online or vaguely located events.
+
+The app links a result to a seeded drop by `drops.source_id = 'discover:<event id>'`.
+
 ## Photo hunts and `/api/verify-photo`
 
 1. The player takes a photo. The client shrinks it to a 1280 px JPEG and POSTs `{ dropId, lat, lng, image }` (base64) to `/api/verify-photo` with their JWT as `Authorization: Bearer …` (`submitHuntPhoto`).

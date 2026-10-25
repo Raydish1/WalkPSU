@@ -207,6 +207,8 @@ export type Database = {
       create_meetup: { Args: { p_text: string; p_lat: number; p_lng: number; p_minutes?: number; p_building_num?: string | null }; Returns: Drop }
       /** Admins: any drop. Players: a meetup they started. Marks it expired; earned points stay. */
       close_drop: { Args: { p_drop_id: string }; Returns: undefined }
+      /** AI event search allowance (10 per 10 minutes); true if this search may run. Called by /api/search-events. */
+      use_search_quota: { Args: Record<string, never>; Returns: boolean }
       /** True if the area is new for the caller, false if already discovered. */
       discover_area: { Args: { p_hex_id: string }; Returns: boolean }
       /** Service role only. */
