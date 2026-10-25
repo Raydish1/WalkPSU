@@ -1,5 +1,6 @@
-import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
+import Avatar from '../components/Avatar'
+import { ChevronIcon } from '../components/icons'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 
@@ -9,25 +10,33 @@ function ProfilePage() {
 
   return (
     <section className="page stack">
-      <h1>
-        <span className="color-dot" style={{ '--player': player.color } as CSSProperties} aria-hidden />
-        {player.display_name}
-      </h1>
-      <label className="toggle-row">
-        <span className="stack-sm">
-          <strong>Show me on the map</strong>
-          <span className="muted">Other players see your name and live location while the app is open. It's never saved.</span>
-        </span>
-        <input type="checkbox" className="toggle" checked={sharing} onChange={(e) => setSharing(e.target.checked)} />
-      </label>
-      {isAdmin && (
-        <Link className="button" to="/admin">
-          Admin: drop events
-        </Link>
-      )}
-      <button className="button" onClick={signOut}>
-        Sign out
-      </button>
+      <div className="profile-head">
+        <Avatar name={player.display_name} color={player.color} large />
+        <h1>{player.display_name}</h1>
+        <span className="chip">{isAdmin ? 'Organizer' : 'Player'}</span>
+      </div>
+
+      <div className="list">
+        <label className="toggle-row">
+          <span className="stack-sm">
+            <strong>Show me on the map</strong>
+            <span className="muted footnote">Other players see your name and live location while the app is open. It’s never saved.</span>
+          </span>
+          <input type="checkbox" className="toggle" checked={sharing} onChange={(e) => setSharing(e.target.checked)} />
+        </label>
+      </div>
+
+      <div className="list">
+        {isAdmin && (
+          <Link className="list-row" to="/admin">
+            <span className="list-row-main">Admin: drop events</span>
+            <ChevronIcon className="chevron" />
+          </Link>
+        )}
+        <button className="list-row error" onClick={signOut}>
+          Sign out
+        </button>
+      </div>
     </section>
   )
 }

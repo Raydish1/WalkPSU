@@ -1,4 +1,6 @@
+import type { CSSProperties } from 'react'
 import { Route, Routes, useLocation } from 'react-router'
+import { Toaster } from 'sonner'
 import BottomNav from './components/BottomNav'
 import AdminPage from './pages/AdminPage'
 import BattlePage from './pages/BattlePage'
@@ -15,14 +17,23 @@ import { SessionProvider } from './session/SessionProvider'
 // Full-screen game views: no bottom nav to mis-tap while shaking or on the projector.
 const FULL_SCREEN = /^\/(game|battle)\//
 
+// Sonner reads these on the toaster; pointing them at our tokens makes toasts follow light/dark with the app.
+const TOAST_THEME = {
+  '--normal-bg': 'var(--material-strong)',
+  '--normal-border': 'var(--material-edge)',
+  '--normal-text': 'var(--text)',
+  '--border-radius': '18px',
+} as CSSProperties
+
 function Screens() {
   const session = useSession()
   const { pathname } = useLocation()
   if (session.status !== 'ready') return <JoinScreen />
+  const fullScreen = FULL_SCREEN.test(pathname)
 
   return (
     <PresenceProvider>
-      <div className="app">
+      <div className="app" data-chrome={fullScreen ? 'none' : 'tabs'}>
         <main className="app-main">
           <Routes>
             <Route path="/" element={<MapPage />} />
@@ -34,7 +45,7 @@ function Screens() {
             <Route path="/battle/:dropId" element={<BattlePage />} />
           </Routes>
         </main>
-        {!FULL_SCREEN.test(pathname) && <BottomNav />}
+        {!fullScreen && <BottomNav />}
       </div>
     </PresenceProvider>
   )
@@ -44,6 +55,14 @@ function App() {
   return (
     <SessionProvider>
       <Screens />
+      <Toaster
+        position="top-center"
+        theme="system"
+        gap={8}
+        mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 8px)', left: 12, right: 12 }}
+        toastOptions={{ className: 'toast' }}
+        style={TOAST_THEME}
+      />
     </SessionProvider>
   )
 }
