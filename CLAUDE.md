@@ -25,6 +25,7 @@ Judging requirements: rivalry, phone motion, and the game working for **4+ playe
 web/
   public/data/         buildings.geojson (generated, committed)
   scripts/             fetch-buildings.mjs (PASDA → simplified GeoJSON, mapshaper)
+  tests/               sql/ (PGlite), mock/ (fake Supabase), e2e/ (headless Edge on a production build)
   src/
     App.tsx            routes; bottom nav hidden on /game and /battle
     pages/             Map, Leaderboard, Profile, Admin (/admin), Claim (/claim/:dropId?key=), JoinScreen,
@@ -63,29 +64,37 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 
 ## Fragile: read before touching
 
-- **MapLibre worker (do not remove).** MapLibre 6 loads its worker from a separate file. `src/map/worker.ts` calls `setWorkerUrl` with a Vite `?worker&url` import, and `vite.config.ts` has `optimizeDeps.exclude: ['maplibre-gl']`. Remove either and GeoJSON sources never load: the map is blank in production ("Worker failed to load") or silently blank in dev.
-- After installing or removing deps while `npm run dev` runs, Vite's dep cache can point at deleted packages and the page goes blank. Stop the server, `rm -rf web/node_modules/.vite`, and restart.
+- **MapLibre worker (do not remove).** MapLibre 6 loads its worker from a separate file, and `src/map/worker.ts` registers it (`setWorkerUrl` with a Vite `?worker&url` import). Without it, production shows a blank map ("Worker failed to load"). `npm run test:e2e` builds for production and fails if this breaks. `optimizeDeps.exclude: ['maplibre-gl']` in `vite.config.ts` is extra insurance for dev; MapLibre otherwise depends on Vite's dep cache being fresh.
+- After installing or removing deps while `npm run dev` runs, Vite's dep cache can go stale (504 "Outdated Optimize Dep", or imports of deleted packages) and the page goes blank. Stop the server, `rm -rf web/node_modules/.vite`, and restart.
 - `map.loaded()` stays false forever because the highlight pulse keeps a paint transition running. Use `isStyleLoaded()` plus rendered features instead.
 - react-map-gl's `Map` takes no `className`; `CampusMap` wraps it in a sized `div`. `maxBounds` must be a flat `[w, s, e, n]`.
 - `campusBounds` deliberately ignores far-off PASDA property (Ag Progress Days, the airport) by keeping buildings within 2.5 km of the median building, then pads by 1.6 km.
 - In `game_sides`, `finish_game`, and `submit_shakes`, phase is derived from `started_at` (no server timer), and `finish_game` is idempotent and retried by every client. Keep both properties.
 - Building names in PASDA are formal ("Hetzel Union Building (Ralph Dorn)"). `BUILDING_NICKNAMES` in `lib/campus.ts` makes HUB, BJC, and IST searchable, and `LANDMARKS` in `map/basemap.ts` labels the map.
 
-## Testing approach
+## Tests (`web/tests/`)
 
-There is no automated test suite in the repo yet. The harnesses below lived in a session scratchpad and are **not committed**; rebuild them if needed.
+Run `npm test` in `web/` (SQL + e2e, about a minute), plus `npm run lint` and `npm run build`, before every commit.
 
-- **SQL:** `@electric-sql/pglite` (in-process Postgres). Stub Supabase first: roles `anon`/`authenticated`, schemas `auth`/`storage`, `auth.jwt()` reading `current_setting('request.jwt.claims')`, `storage.buckets`/`storage.objects`, and publication `supabase_realtime`. Apply the migrations in order, then grant table privileges as Supabase does by default. Impersonate a user with `set_config('request.jwt.claims', '{"sub":...}')` + `set role authenticated`. Time-travel Shake-Off by updating `games.started_at` as superuser.
-- **UI:** a small Node HTTP server that mocks Supabase REST/auth/RPC (anonymous signup returning a fake JWT, tables, `claim_drop`, the Shake-Off RPCs with bot players). Point a temporary `web/.env.local` (gitignored) at it, and delete it afterwards. It has no Realtime, which is why the `refresh()`/poll fallbacks matter.
-- **Map:** the in-app browser pane often stops firing `requestAnimationFrame`, so MapLibre never renders there. Use headless **Microsoft Edge** through `playwright-core` (`executablePath: C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`, args `--use-angle=swiftshader --enable-unsafe-swiftshader`). Emulate 375×812, DPR 2, touch, and a geolocation grant. A dev-only `window.__map` hook helps; remove it before committing. Measured about 78 fps on software GL.
-- Simulate shaking with `new DeviceMotionEvent('devicemotion', { acceleration: {x: 22, ...} })`. Delete `DeviceMotionEvent.requestPermission` first, because desktop Chromium has it and answers "denied".
-- Before every commit run `npm run lint` and `npm run build` in `web/`.
+- **`npm run test:sql`:** runs migrations in PGlite (in-process Postgres) and checks behavior through real RLS. `tests/sql/harness.mjs` stubs Supabase (`anon`/`authenticated` roles, `auth.jwt()` from `request.jwt.claims`, storage tables, the `supabase_realtime` publication, and Supabase's default table grants via `alter default privileges`). It also provides `actor(db)(sub, claims, sql)` to act as a user and `superuser(db)` for setup and time travel (move `games.started_at` into the past).
+  - `current-schema.test.mjs`: all migrations applied. Joining, RLS, claims, the 59 m/61 m boundary, QR codes, scores, and the full Shake-Off lifecycle.
+  - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal). Add a block here for any migration that rewrites data.
+  - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.
+- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers two scenarios:
+  - **Map:** camera, layers, highlight, claim in range, bounds, recenter, leaderboard, admin tap-to-place.
+  - **Shake-Off:** joins as the 4th player with 3 bots and shakes via synthetic `DeviceMotionEvent`s (after deleting `DeviceMotionEvent.requestPermission`, which desktop Chromium answers "denied"), then checks the named winners and MVP.
+
+  Screenshots land in `tests/e2e/screenshots/` (gitignored). It also prints frame rate (software WebGL, so a phone GPU will differ).
+- **`npm run mock`:** runs the mock alone on :54321 for manual testing with `VITE_SUPABASE_URL=http://localhost:54321 VITE_SUPABASE_ANON_KEY=mock npm run dev`. The mock mirrors the SQL rules (radius, QR, Shake-Off timing with a 4 s countdown, caps, 3 bots) but isn't authoritative; `tests/sql` is. It has **no Realtime**, which is why the app's `refresh()`/poll fallbacks matter. `GET /__state` dumps its data.
+- The map handle `window.__walkpsuMap` exists only in dev or a `VITE_E2E` build; normal production builds strip it. The in-app browser pane often stops firing `requestAnimationFrame`, so MapLibre never renders there. Use the e2e suite or a real browser instead.
+- Changing the schema or an RPC means updating the mock too, or the e2e run breaks.
 
 ## Windows environment gotchas
 
 - The shell is Git Bash on Windows. Long heredocs containing JSX or quotes sometimes fail ("unexpected EOF while looking for matching `'`"). Write the script to a file with the Write tool, or use Write/Edit directly.
 - Python's default encoding is cp1252, which corrupts or truncates files containing `→`, `…`, or emoji. Always use `PYTHONUTF8=1` and `open(..., encoding='utf-8')`.
 - Running `npx prettier` uses default config (double quotes, semicolons) and restyles files. Don't.
+- `git checkout -- <file>` reverts to the last commit and throws away uncommitted edits. To undo an experiment, edit it back instead.
 - Node can't import `C:/...` paths as ESM; use `file:///C:/...`. Node 24 runs `.ts` files directly (type stripping).
 - Git warns "LF will be replaced by CRLF" on every commit. It's harmless.
 - A teammate (shiyx1224-shi) also pushes to `main`. `git fetch` before pushing and merge (never force-push).
@@ -98,6 +107,8 @@ npm run dev              # dev server (5173, or 5174 if taken)
 npm run build            # typecheck + production build
 npm run lint
 npm run fetch-buildings  # regenerate public/data/buildings.geojson
+npm test                 # test:sql + test:e2e (needs Microsoft Edge, or E2E_BROWSER_CHANNEL=chrome)
+npm run mock             # mock Supabase on :54321 for manual UI testing
 ```
 
 Copy `web/.env.example` to `web/.env`. `VITE_*` vars ship to the browser; secrets must not use that prefix. Never commit `.env`.

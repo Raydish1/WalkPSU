@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# e2e test output
+tests/e2e/screenshots/

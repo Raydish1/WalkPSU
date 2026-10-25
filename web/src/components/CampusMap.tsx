@@ -3,7 +3,7 @@ import '../map/worker'
 import type { FeatureCollection, Point } from 'geojson'
 import type { ExpressionSpecification, FilterSpecification } from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { AttributionControl, Layer, Map, Source, useMap, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
+import { AttributionControl, Layer, Map, Source, useMap, type MapLayerMouseEvent, type MapRef } from 'react-map-gl/maplibre'
 import type { Building } from '../lib/buildings'
 import { CAMPUS_CENTER, DROP_ACCENT } from '../lib/campus'
 import { campusBounds, insideBounds, type Bounds } from '../lib/geo'
@@ -19,6 +19,11 @@ const NEUTRAL_BUILDING = '#e7e5e4'
 const PULSE_MS = 900
 
 const [OLD_MAIN_LAT, OLD_MAIN_LNG] = CAMPUS_CENTER
+
+/** Handle for tests/e2e (the map lives in WebGL, so tests query it directly). Only in dev or a VITE_E2E build. */
+const exposeForTests = (ref: MapRef | null) => {
+  if (ref) (window as unknown as { __walkpsuMap: unknown }).__walkpsuMap = ref.getMap()
+}
 
 type Props = {
   buildings: Building[]
@@ -50,6 +55,7 @@ function CampusMap({ buildings, highlighted, className, interactiveLayerIds, onC
   return (
     <div className={className}>
       <Map
+        ref={import.meta.env.DEV || import.meta.env.VITE_E2E ? exposeForTests : undefined}
         mapStyle={BASEMAP_STYLE}
         initialViewState={{ latitude: OLD_MAIN_LAT, longitude: OLD_MAIN_LNG, zoom: START_ZOOM, pitch: PITCH, bearing: BEARING }}
         maxBounds={bounds ? [...bounds[0], ...bounds[1]] : undefined}
