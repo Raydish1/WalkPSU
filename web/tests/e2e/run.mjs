@@ -352,22 +352,26 @@ async function quickDrawScenario(browser) {
   console.log('\n# Quick Draw (3 bots in the lobby; joining makes 4; 3 rounds)')
   const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat - 30 / M_PER_DEG_LAT, lng: OLD_MAIN_LAWN.lng })
   await page.waitForSelector('.bottom-nav')
-  await page.evaluate(() => Object.defineProperty(DeviceMotionEvent, 'requestPermission', { value: undefined, configurable: true }))
+  // A full page load, not in-app navigation: unmounting a loaded map races WalkLayers' fog layers (console errors).
+  await page.addInitScript(() => Object.defineProperty(DeviceMotionEvent, 'requestPermission', { value: undefined, configurable: true }))
+  await page.goto(`${BASE}/game/draw-drop`)
+  page.errors = [] // leaving the map page cancels its tile requests; only the game page's errors count
   await page.evaluate(() => {
-    window.history.pushState({}, '', '/game/draw-drop')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-    window.__motion = (x) => window.dispatchEvent(new DeviceMotionEvent('devicemotion', { acceleration: { x, y: 0, z: 0 }, accelerationIncludingGravity: { x, y: 9.81, z: 0 }, interval: 16 }))
-    window.__idle = setInterval(() => window.__motion(0.3), 100)
+    // Holding still: a little hand tremor in both acceleration and rotation, which must never count as a flick.
+    window.__motion = (x, spin = 0) =>
+      window.dispatchEvent(
+        new DeviceMotionEvent('devicemotion', { acceleration: { x, y: 0, z: 0 }, accelerationIncludingGravity: { x, y: 9.81, z: 0 }, rotationRate: { alpha: 0, beta: 0, gamma: spin }, interval: 16 }),
+      )
+    window.__idle = setInterval(() => window.__motion(0.4, 12), 100)
   })
   await page.waitForSelector('.game-kind')
   check('lobby names the game', /Quick Draw/.test(await page.textContent('.game-kind')))
   // The big screen loads first: booting a second app (and its software-rendered map) mid-round would slow the phone.
   const projector = await newPhone(browser, OLD_MAIN_LAWN)
+  // Let the map finish loading first: leaving it mid-load races its fog layers into console errors.
   await projector.waitForSelector('.bottom-nav')
-  await projector.evaluate(() => {
-    window.history.pushState({}, '', '/battle/draw-drop')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  })
+  await projector.goto(`${BASE}/battle/draw-drop`)
+  projector.errors = []
   await projector.waitForSelector('.battle-title')
   await page.click('text=Join the Quick Draw')
   await page.waitForSelector('.lobby-sides', { timeout: 10_000 })
@@ -378,13 +382,14 @@ async function quickDrawScenario(browser) {
     await page.waitForSelector('.draw-screen[data-stage="hold"]', { timeout: 5_000 })
     if (round === 1) await page.screenshot({ path: SHOTS + 'quick-draw-hold.png' })
     if (round === 2) {
-      // Jump the gun: a flick while it still says "Hold still…".
-      await page.evaluate(() => window.__motion(25))
+      // Jump the gun: a small flick while it still says "Hold still…".
+      await page.evaluate(() => window.__motion(4))
     } else {
       await page.waitForSelector('.draw-signal', { timeout: 5_000 })
       if (round === 1) await page.screenshot({ path: SHOTS + 'quick-draw-draw.png' })
       await page.waitForTimeout(150)
-      await page.evaluate(() => window.__motion(25))
+      // Gentle flicks must register: round 1 a light jolt (3.5 m/s²), round 3 a pure wrist twist (gyroscope only).
+      await page.evaluate((round) => (round === 1 ? window.__motion(3.5) : window.__motion(0, 140)), round)
     }
     await page.waitForSelector('.draw-screen[data-stage="done"]', { timeout: 5_000 })
     outcomes.push((await page.textContent('.game-hero')).replace(/\s+/g, ' ').trim())
@@ -424,26 +429,26 @@ async function landmarkScenario(browser) {
   await page.waitForSelector('.bottom-nav')
   // Behave like Android Chrome: no permission prompt, and a compass on deviceorientationabsolute. __aim(trueHeading)
   // points the phone; the app adds State College's -10.5° declination to the magnetic reading, so undo it here.
-  await page.evaluate(() => {
+  // Installed before the app loads, on a full page load (see the Quick Draw scenario for why).
+  await page.addInitScript(() => {
     Object.defineProperty(DeviceOrientationEvent, 'requestPermission', { value: undefined, configurable: true })
-    window.__heading = 0
+    window.__heading = 180
     window.__aim = (heading) => (window.__heading = heading)
     window.__compass = setInterval(() => {
       const magnetic = window.__heading + 10.5 + (Math.random() - 0.5)
       window.dispatchEvent(new DeviceOrientationEvent('deviceorientationabsolute', { alpha: (((360 - magnetic) % 360) + 360) % 360, beta: 0, gamma: 0, absolute: true }))
     }, 50)
-    window.history.pushState({}, '', '/game/aim-drop')
-    window.dispatchEvent(new PopStateEvent('popstate'))
   })
+  await page.goto(`${BASE}/game/aim-drop`)
+  page.errors = [] // leaving the map page cancels its tile requests; only the game page's errors count
   await page.waitForSelector('.game-kind')
   check('lobby names the game', /Point to the Landmark/.test(await page.textContent('.game-kind')))
 
   const projector = await newPhone(browser, OLD_MAIN_LAWN)
+  // Let the map finish loading first: leaving it mid-load races its fog layers into console errors.
   await projector.waitForSelector('.bottom-nav')
-  await projector.evaluate(() => {
-    window.history.pushState({}, '', '/battle/aim-drop')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  })
+  await projector.goto(`${BASE}/battle/aim-drop`)
+  projector.errors = []
   await projector.waitForSelector('.battle-title')
 
   await page.click('text=Join Point to the Landmark')
@@ -455,31 +460,54 @@ async function landmarkScenario(browser) {
     (await (await fetch(`${MOCK}/rest/v1/rpc/get_game_state`, { method: 'POST', body: JSON.stringify({ p_drop_id: 'aim-drop' }) })).json()).rounds
   const offBy = [0, 20, 0]
   const shown = []
+  let projectorReveal = Promise.resolve()
   for (const round of [1, 2, 3]) {
     await page.waitForFunction((r) => {
       const screen = document.querySelector('.aim-screen')
       return screen?.dataset.stage === 'pointing' && screen.querySelector('.draw-round')?.textContent === `Round ${r} of 3`
     }, round, { timeout: 20_000 })
     const target = (await rounds())[round - 1]
+    if (round === 1) {
+      // Reading the landmark's name with the phone held still must not lock in wherever it happens to face.
+      await page.waitForTimeout(2500)
+      check("holding still without turning doesn't lock", !/Locked in/.test(await page.textContent('.aim-status')))
+    }
+    // Turn like a player: swing past (120° away) and back, so the phone always turns, wherever it started.
+    await page.evaluate((h) => window.__aim((h + 120) % 360), target.bearing)
+    await page.waitForTimeout(400)
     await page.evaluate((h) => window.__aim(h), (target.bearing + offBy[round - 1]) % 360)
     check(`round ${round} names the landmark (${target.landmark.name})`, (await page.textContent('.aim-target')) === target.landmark.name)
-    await page.waitForSelector('text=Locked in', { timeout: 4_000 })
+    const early = await page.waitForSelector('text=Locked in', { timeout: 5_000 }).then(
+      () => true,
+      async () => {
+        const seen = await page.evaluate(() => ({ status: document.querySelector('.aim-status')?.textContent, dial: document.querySelector('.aim-dial')?.getAttribute('aria-label'), aimed: window.__heading }))
+        console.log(`INFO round ${round}: no early lock; target ${target.bearing.toFixed(1)}°, phone ${JSON.stringify(seen)}`)
+        // A time-out lock goes straight to the reveal, so wait for that instead of "Locked in".
+        await page.waitForSelector('.aim-screen[data-stage="reveal"]', { timeout: 4_000 })
+        return false
+      },
+    )
+    check(`round ${round} locks early once held steady`, early)
     if (round === 1) await page.screenshot({ path: SHOTS + 'landmark-locked.png' })
     await page.evaluate(() => window.__aim(window.__heading + 90)) // turning after the lock changes nothing
     await page.waitForSelector('.aim-screen[data-stage="reveal"]', { timeout: 6_000 })
     shown.push((await page.textContent('.game-hero')).replace(/\s+/g, ' '))
     if (round === 1) {
       await page.screenshot({ path: SHOTS + 'landmark-reveal.png' })
-      const map = await (
-        await projector.waitForFunction(() => {
+      // Checked alongside the phone: the slow software-rendered projector mustn't make the phone miss round 2.
+      projectorReveal = projector
+        .waitForFunction(() => {
           const count = (selector) => document.querySelectorAll(`.landmark-map ${selector}`).length
           return count('.lm-arrow') === 4 && { arrows: 4, trueLine: count('.lm-true'), target: count('.lm-target'), buildings: count('.lm-building') }
         }, null, { timeout: 8_000 })
-      ).jsonValue()
-      check('projector reveal: true line, landmark, real buildings, and all 4 arrows', map.trueLine === 1 && map.target === 1 && map.buildings > 20, map)
-      await projector.screenshot({ path: SHOTS + 'landmark-projector.png' })
+        .then(async (handle) => {
+          const map = await handle.jsonValue()
+          check('projector reveal: true line, landmark, real buildings, and all 4 arrows', map.trueLine === 1 && map.target === 1 && map.buildings > 20, map)
+          await projector.screenshot({ path: SHOTS + 'landmark-projector.png' })
+        })
     }
   }
+  await projectorReveal
   check(`the phone shows each round's error (${shown.map((x) => x.match(/\d+°\s*off/)?.[0]).join(', ')})`, shown.every((x) => /\d+°\s*off/.test(x)), shown)
   const state = await (await fetch(`${MOCK}/__state`)).json()
   const mine = state.results.filter((r) => r.drop_id === 'aim-drop' && !r.player_id.startsWith('bot')).sort((a, b) => a.round - b.round)

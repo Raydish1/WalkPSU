@@ -4,8 +4,17 @@ import { submitReaction } from '../lib/api'
 import type { GameRound, TimedSettings } from '../lib/database.types'
 import { useDeviceMotion } from './motion'
 
-// A wrist flick jolts far past holding a phone still (~0.5-2 m/s²).
-const FLICK = 14
+// Very sensitive on purpose: any deliberate flick counts. A phone held still reads ~0.1-0.5 m/s² and under ~15°/s;
+// a quick wrist flick passes 3 m/s² or 100°/s. Rotation matters most: a flick is mostly a twist, which linear
+// acceleration barely sees (especially on phones that only report acceleration including gravity).
+const FLICK_ACCELERATION = 3
+const FLICK_ROTATION = 100
+
+/** Fastest rotation in this reading, in degrees per second (0 without a gyroscope). */
+function spin(e: DeviceMotionEvent) {
+  const r = e.rotationRate
+  return r ? Math.max(Math.abs(r.alpha ?? 0), Math.abs(r.beta ?? 0), Math.abs(r.gamma ?? 0)) : 0
+}
 // Movement right after a round begins is still the last round's flick, so early flicks count from here.
 const ARM_MS = 1000
 
@@ -89,8 +98,8 @@ export function useQuickDraw({ dropId, rounds, settings, offset, serverNow, acti
     }
   }, [active, offset, record, settings.min_reaction_ms])
 
-  const motion = useDeviceMotion((magnitude) => {
-    if (magnitude >= FLICK) flick()
+  const motion = useDeviceMotion((magnitude, e) => {
+    if (magnitude >= FLICK_ACCELERATION || spin(e) >= FLICK_ROTATION) flick()
   })
 
   let stage: DrawStage = { kind: 'waiting' }

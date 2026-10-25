@@ -21,7 +21,8 @@ export function useGame(dropId: string) {
   const apply = useCallback((next: GameState, sentAt: number) => {
     const receivedAt = Date.now()
     const rtt = receivedAt - sentAt
-    if (rtt <= bestRtt.current) {
+    // Strictly better only: equal samples would nudge the offset every poll and restart everything timed by it.
+    if (rtt < bestRtt.current) {
       bestRtt.current = rtt
       setOffset(Date.parse(next.server_now) - (sentAt + receivedAt) / 2)
     }

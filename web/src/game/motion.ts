@@ -21,10 +21,10 @@ function jolt(e: DeviceMotionEvent) {
 }
 
 /**
- * Calls `onJolt(magnitude)` for every motion reading, handling iOS's permission prompt and desktops that expose
+ * Calls `onJolt(magnitude, event)` for every motion reading, handling iOS's permission prompt and desktops that expose
  * DeviceMotionEvent but never fire it. Shared by the Shake-Off (counting) and Quick Draw (one flick).
  */
-export function useDeviceMotion(onJolt: (magnitude: number) => void) {
+export function useDeviceMotion(onJolt: (magnitude: number, event: DeviceMotionEvent) => void) {
   const [permission, setPermission] = useState<MotionPermission>(initialPermission)
   const onJoltRef = useRef(onJolt)
 
@@ -42,7 +42,7 @@ export function useDeviceMotion(onJolt: (magnitude: number) => void) {
         sawSensor = true
         setPermission('granted')
       }
-      onJoltRef.current(magnitude)
+      onJoltRef.current(magnitude, e)
     }
     window.addEventListener('devicemotion', onMotion)
     // Desktops expose DeviceMotionEvent but never fire it; after a moment, fall back to tapping.
