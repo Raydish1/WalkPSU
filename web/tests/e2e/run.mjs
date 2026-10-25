@@ -132,7 +132,10 @@ async function mapScenario(browser) {
 
   await tapFeature(page, 'drop-points', 'center-drop')
   await page.waitForSelector('.map-card button.primary:not([disabled])')
+  await page.waitForTimeout(600) // let the sheet finish sliding up
   await page.screenshot({ path: SHOTS + 'card.png' })
+  const card = await page.textContent('.map-card')
+  check('event drop card shows its organization and time', /Penn State Outing Club/.test(card) && /Happening now · until/.test(card), card)
   await page.click('.map-card button.primary')
   await page.waitForFunction(() => /Claimed!/.test(document.querySelector('.map-card')?.textContent ?? '') || !document.querySelector('.map-card'))
   await page.waitForFunction(() => !window.__walkpsuMap.queryRenderedFeatures({ layers: ['drop-points'] }).some((f) => f.properties.id === 'center-drop'), null, { timeout: 10_000 })

@@ -6,7 +6,7 @@ import { useGame } from '../game/useGame'
 import { claimDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
-import { PinIcon } from './icons'
+import { ClockIcon, PinIcon } from './icons'
 
 type Props = {
   drop: DropRow | null
@@ -83,9 +83,18 @@ function DropCard({ drop, distance, radius, position, onClaimed }: CardProps) {
         </span>
         <span className="points-badge">{drop.points} pts</span>
       </div>
-      <Drawer.Title asChild>
-        <h3>{drop.title}</h3>
-      </Drawer.Title>
+      <div className="drop-card-title">
+        <Drawer.Title asChild>
+          <h3>{drop.title}</h3>
+        </Drawer.Title>
+        {drop.subtitle && <p className="drop-subtitle">{drop.subtitle}</p>}
+      </div>
+      {drop.starts_at && drop.expires_at && (
+        <span className="event-time">
+          <ClockIcon size={16} />
+          {eventTime(drop.starts_at, drop.expires_at)}
+        </span>
+      )}
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
       {drop.type === 'minigame' && <p className="muted">Two random teams race to shake the hardest. Every winner gets the points.</p>}
       <span className="range" data-in={inRange || undefined}>
@@ -109,6 +118,19 @@ function DropCard({ drop, distance, radius, position, onClaimed }: CardProps) {
       )}
     </div>
   )
+}
+
+const timeRange = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' })
+const dayLabel = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+
+/** "Happening now · until 9:00 PM", "Today · 7:00 – 9:00 PM", or "Tue, Oct 27 · 7:00 – 9:00 PM". */
+function eventTime(startsAt: string, endsAt: string) {
+  const start = new Date(startsAt)
+  const end = new Date(endsAt)
+  const now = new Date()
+  if (start <= now) return `Happening now · until ${timeRange.format(end)}`
+  const day = start.toDateString() === now.toDateString() ? 'Today' : dayLabel.format(start)
+  return `${day} · ${timeRange.formatRange(start, end)}`
 }
 
 /** Who's waiting in a Shake-Off, so players can decide whether it's worth the walk. */

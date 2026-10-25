@@ -47,6 +47,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 3. `20261024020000_individual_players.sql`: drops teams, adds `players.color`, `claim_radius_m()`, `player_scores`.
 4. `20261024030000_shake_off.sql`: `games`, `game_players`, Shake-Off functions, claims unique per (drop, player).
 5. `20261024040000_remove_building_capture.sql`: drops `building_control` and the capture logic.
+6. `20261024050000_event_drops.sql`: `drops.subtitle`, `starts_at`, `source_id` (drops seeded from Penn State Discover events).
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -109,6 +110,8 @@ npm run dev              # dev server (5173, or 5174 if taken)
 npm run build            # typecheck + production build
 npm run lint
 npm run fetch-buildings  # regenerate public/data/buildings.geojson
+npm run import-events    # snapshot Penn State Discover events → scripts/data/discover-events.json
+npm run seed-events      # seed 12 of them as check-in drops (service-role key; --dry-run, --clear)
 npm test                 # test:sql + test:e2e (needs Microsoft Edge, or E2E_BROWSER_CHANNEL=chrome)
 npm run mock             # mock Supabase on :54321 for manual UI testing
 ```

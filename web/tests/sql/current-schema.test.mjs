@@ -38,6 +38,23 @@ await su(`update players set is_admin = true where auth_id = 'p6'`)
 check('players.is_admin can insert drops', !!(await as('p6', {}, `insert into drops (title, type, lat, lng) values ('x', 'checkin', $1, $2) returning id`, [LAT, LNG])).rows)
 await su(`update players set is_admin = false where auth_id = 'p6'`)
 
+// --- Imported event drops (scripts/seed-event-drops.mjs)
+const eventDrop = (source) =>
+  admin(
+    `insert into drops (title, type, lat, lng, subtitle, starts_at, expires_at, source_id)
+     values ('Haunted House', 'checkin', $1, $2, 'Forensic Science Club', now() + interval '1 hour', now() + interval '3 hours', $3) returning id`,
+    [LAT, LNG, source],
+  )
+const imported = (await eventDrop('discover:1')).rows?.[0]?.id
+check('admin can insert an event drop with subtitle, start time and source', !!imported)
+r = await as('p1', {}, `select subtitle, starts_at < expires_at as ordered, source_id from drops where id = $1`, [imported])
+check('players read the subtitle and start time', r.rows?.[0]?.subtitle === 'Forensic Science Club' && r.rows[0].ordered && r.rows[0].source_id === 'discover:1', r)
+check('the same event cannot be imported twice', /unique|duplicate/.test((await eventDrop('discover:1')).error ?? ''))
+check('drops made in /admin have no source', (await su(`select count(*)::int as n from drops where source_id is null`))[0].n >= 2)
+check('players cannot clear imported drops', (await as('p1', {}, `delete from drops where source_id is not null returning id`)).rows?.length === 0)
+await admin(`delete from drops where source_id like 'discover:%'`)
+check('clearing imports leaves admin-made drops', (await su(`select count(*)::int as n from drops where source_id is not null`))[0].n === 0 && (await su(`select count(*)::int as n from drops`))[0].n >= 2)
+
 // --- Claiming
 check('claim_radius_m() = 60', (await as('p1', {}, `select claim_radius_m() as m`)).rows[0].m === 60)
 const plain = await mkDrop('checkin', { building: '0001000' })

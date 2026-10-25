@@ -27,6 +27,12 @@ type Drop = {
   created_by: string | null
   created_at: string
   expires_at: string | null
+  /** Shown under the title, e.g. the hosting organization of an imported campus event. */
+  subtitle: string | null
+  /** When the event behind the drop begins. null for drops made in /admin. */
+  starts_at: string | null
+  /** Set only on drops seeded from campus events (e.g. 'discover:12893409'), so they can be cleared. */
+  source_id: string | null
 }
 
 type Claim = { id: string; drop_id: string; player_id: string; created_at: string }
@@ -68,7 +74,9 @@ export type Database = {
       drops: {
         Row: Drop
         Insert: Pick<Drop, 'title' | 'type' | 'lat' | 'lng'> &
-          Partial<Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at'>>
+          Partial<
+            Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at' | 'subtitle' | 'starts_at' | 'source_id'>
+          >
         Update: Partial<Omit<Drop, 'id' | 'created_at'>>
         Relationships: []
       }

@@ -1,0 +1,6010 @@
+{
+  "source": "https://discover.psu.edu/events",
+  "fetched_at": "2026-10-25T03:23:05.287Z",
+  "events": [
+    {
+      "id": "12893409",
+      "title": "The Dollmaker's Cottage",
+      "organization": "Forensic Science Club at Penn State University Park",
+      "theme": "Fundraising",
+      "categories": [
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-24T23:00:00+00:00",
+      "ends_at": "2026-10-25T04:00:00+00:00",
+      "location": "Spruce Cottage",
+      "lat": 40.79985,
+      "lng": -77.86199,
+      "building": {
+        "num": "0025000",
+        "name": "Spruce Cottage",
+        "lat": 40.799914,
+        "lng": -77.861932,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12744647",
+      "title": "Adult First Aid, CPR/AED Blended Learning Course",
+      "organization": "Campus Recreation at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-10-25T15:00:00+00:00",
+      "ends_at": "2026-10-25T17:30:00+00:00",
+      "location": "McCoy Natatorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0820000",
+        "name": "McCoy Natatorium (Ernest B)",
+        "lat": 40.804428,
+        "lng": -77.860559,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12921438",
+      "title": "Service - THON™ 2027 5K",
+      "organization": "Business and Society House at University Park",
+      "theme": "CommunityService",
+      "categories": [],
+      "starts_at": "2026-10-25T12:00:00+00:00",
+      "ends_at": "2026-10-25T18:00:00+00:00",
+      "location": "Bryce Jordan Center",
+      "lat": 40.80854,
+      "lng": -77.85546,
+      "building": {
+        "num": "0045000",
+        "name": "Jordan Center (Bryce)",
+        "lat": 40.808639,
+        "lng": -77.855565,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12893973",
+      "title": "THON™ 2027 5K",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-10-25T12:00:00+00:00",
+      "ends_at": "2026-10-25T18:00:00+00:00",
+      "location": "Bryce Jordan Center",
+      "lat": 40.80906,
+      "lng": -77.85499,
+      "building": {
+        "num": "0045000",
+        "name": "Jordan Center (Bryce)",
+        "lat": 40.808639,
+        "lng": -77.855565,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12614550",
+      "title": "Volé Fall Showcase 2026",
+      "organization": "Volé at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-10-25T17:00:00+00:00",
+      "ends_at": "2026-10-25T19:30:00+00:00",
+      "location": "Eisenhower Auditorium",
+      "lat": 40.80159,
+      "lng": -77.86163,
+      "building": {
+        "num": "0011000",
+        "name": "Eisenhower Auditorium (Milton S)",
+        "lat": 40.801533,
+        "lng": -77.861707,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12921498",
+      "title": "TEDxPSU: Beyond What We Know",
+      "organization": "TEDx at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Lectures & Speaking Engagements"
+      ],
+      "starts_at": "2026-10-25T17:30:00+00:00",
+      "ends_at": "2026-10-25T20:30:00+00:00",
+      "location": "HUB Lion's Lair",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12502036",
+      "title": "US GP Watch Party",
+      "organization": "Nittany Motorsports at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-25T20:00:00+00:00",
+      "ends_at": "2026-10-25T22:00:00+00:00",
+      "location": "Westgate Cybertorium (W201)",
+      "lat": 40.79364,
+      "lng": -77.86833,
+      "building": {
+        "num": "0039000",
+        "name": "Westgate Building",
+        "lat": 40.79377,
+        "lng": -77.86791,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12711691",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-10-25T21:00:00+00:00",
+      "ends_at": "2026-10-26T00:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12615548",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-25T22:00:00+00:00",
+      "ends_at": "2026-10-26T00:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628956",
+      "title": "Virtual Yoga",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-10-26T16:15:00+00:00",
+      "ends_at": "2026-10-26T16:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12894142",
+      "title": "Dream Forward Picnic",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-10-26T15:00:00+00:00",
+      "ends_at": "2026-10-26T18:00:00+00:00",
+      "location": "HUB Lawn",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12921442",
+      "title": "Social - THON Dream Forward Picnic",
+      "organization": "Business and Society House at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-26T15:00:00+00:00",
+      "ends_at": "2026-10-26T18:00:00+00:00",
+      "location": "HUB Lawn",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12575920",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-26T20:00:00+00:00",
+      "ends_at": "2026-10-26T21:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79865,
+      "lng": -77.86711,
+      "building": null
+    },
+    {
+      "id": "12624463",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-26T21:00:00+00:00",
+      "ends_at": "2026-10-26T22:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12532023",
+      "title": "Mind Gym: Mentally Recovering from Injury",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-26T22:00:00+00:00",
+      "ends_at": "2026-10-26T23:00:00+00:00",
+      "location": "HUB Flex Theater",
+      "lat": 40.79821,
+      "lng": -77.86111,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12789046",
+      "title": "Journey Through God's Word",
+      "organization": "Campus Ministry International at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-10-26T23:00:00+00:00",
+      "ends_at": "2026-10-27T00:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12680237",
+      "title": "Learn How to Dance Lindy Hop, the Original Swing Dance!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-26T23:00:00+00:00",
+      "ends_at": "2026-10-27T01:00:00+00:00",
+      "location": "Municipal Building Room 201",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648124",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-10-27T13:00:00+00:00",
+      "ends_at": "2026-10-27T15:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12877434",
+      "title": "DiversiTEA",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-10-27T16:00:00+00:00",
+      "ends_at": "2026-10-27T17:00:00+00:00",
+      "location": "340 HHD",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12857215",
+      "title": "Donuts with the Deans",
+      "organization": "College of Education Student Council at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-27T17:00:00+00:00",
+      "ends_at": "2026-10-27T18:00:00+00:00",
+      "location": "Chambers Building Portico",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0602000",
+        "name": "Chambers Building (Will Grant)",
+        "lat": 40.798241,
+        "lng": -77.867715,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12529492",
+      "title": "Matters of Substance: Scary Situations",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-27T16:00:00+00:00",
+      "ends_at": "2026-10-27T18:30:00+00:00",
+      "location": "HUB Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12456475",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-27T18:00:00+00:00",
+      "ends_at": "2026-10-27T19:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12534587",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-10-27T19:15:00+00:00",
+      "ends_at": "2026-10-27T20:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12633714",
+      "title": "Thrive: Student Leadership and Success Summit",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-10-26T17:00:00+00:00",
+      "ends_at": "2026-10-27T20:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12888947",
+      "title": "Centre County Mobile Elections Van",
+      "organization": "Penn State Votes",
+      "theme": "CommunityService",
+      "categories": [],
+      "starts_at": "2026-10-27T13:30:00+00:00",
+      "ends_at": "2026-10-27T21:00:00+00:00",
+      "location": "Old Palmer Plaza",
+      "lat": 40.8037,
+      "lng": -77.86204,
+      "building": null
+    },
+    {
+      "id": "12624763",
+      "title": "Shinrin-Yoku, Forest Bathing",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-27T20:00:00+00:00",
+      "ends_at": "2026-10-27T21:30:00+00:00",
+      "location": "Sunset Park",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12503461",
+      "title": "Global Health Minor Info Session",
+      "organization": "HHD Engaged Learning at Penn State",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-10-27T21:00:00+00:00",
+      "ends_at": "2026-10-27T22:00:00+00:00",
+      "location": "401 Health & Human Development Building",
+      "lat": 40.79613,
+      "lng": -77.86016,
+      "building": {
+        "num": "0652000",
+        "name": "Health and Human Development",
+        "lat": 40.796144,
+        "lng": -77.860177,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12833512",
+      "title": "How to Build Flavor",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-27T21:00:00+00:00",
+      "ends_at": "2026-10-27T22:00:00+00:00",
+      "location": "Headhouse 1",
+      "lat": 40.80354,
+      "lng": -77.86383,
+      "building": {
+        "num": "0116000",
+        "name": "Agricultural Science & Industries Building",
+        "lat": 40.803529,
+        "lng": -77.86387,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12604978",
+      "title": "Around the World Hangout",
+      "organization": "Adult Learner Programs & Services",
+      "theme": "Social",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-10-27T21:00:00+00:00",
+      "ends_at": "2026-10-27T23:00:00+00:00",
+      "location": "Boucke 219",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0013000",
+        "name": "Boucke Building (Oswald Frederick)",
+        "lat": 40.799114,
+        "lng": -77.861596,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12711692",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-10-27T21:00:00+00:00",
+      "ends_at": "2026-10-28T00:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12675309",
+      "title": "German Film Series: Wings of Desire (1987)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Humanities and Social Sciences"
+      ],
+      "starts_at": "2026-10-27T22:00:00+00:00",
+      "ends_at": "2026-10-28T00:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79826,
+      "lng": -77.86553,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12649961",
+      "title": "RA Information Sessions (Virtual)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-10-27T22:30:00+00:00",
+      "ends_at": "2026-10-28T00:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12874006",
+      "title": "Halloween Crafts and Movie Night",
+      "organization": "Don't Be Strangers at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-27T22:00:00+00:00",
+      "ends_at": "2026-10-28T00:30:00+00:00",
+      "location": "Deike 025",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0503000",
+        "name": "Deike Building (George H, Sr)",
+        "lat": 40.794262,
+        "lng": -77.865466,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12787800",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-27T22:30:00+00:00",
+      "ends_at": "2026-10-28T00:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12676970",
+      "title": "English and American Culture Class",
+      "organization": "China Friends at University Park",
+      "theme": "Cultural",
+      "categories": [],
+      "starts_at": "2026-10-28T14:00:00+00:00",
+      "ends_at": "2026-10-28T15:00:00+00:00",
+      "location": "107 HUB",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12843584",
+      "title": "Phishing: Think Before You Click",
+      "organization": "Cross-Unit Events",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-10-28T16:00:00+00:00",
+      "ends_at": "2026-10-28T17:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624957",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-28T16:00:00+00:00",
+      "ends_at": "2026-10-28T17:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624625",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-28T16:30:00+00:00",
+      "ends_at": "2026-10-28T17:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12883497",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-10-28T18:00:00+00:00",
+      "ends_at": "2026-10-28T19:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12821294",
+      "title": "Feed The People Market Stand",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "CommunityService",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-28T18:00:00+00:00",
+      "ends_at": "2026-10-28T20:00:00+00:00",
+      "location": "HUB Info Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628569",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-28T19:00:00+00:00",
+      "ends_at": "2026-10-28T21:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12901713",
+      "title": "Pumpkin Craft",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-10-28T20:00:00+00:00",
+      "ends_at": "2026-10-28T21:00:00+00:00",
+      "location": "340 HHD",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12858037",
+      "title": "Penn State CEC - General Body Meeting",
+      "organization": "Council for Exceptional Children at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-10-28T22:00:00+00:00",
+      "ends_at": "2026-10-28T23:00:00+00:00",
+      "location": "214 Chambers Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0602000",
+        "name": "Chambers Building (Will Grant)",
+        "lat": 40.798241,
+        "lng": -77.867715,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12556681",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-10-28T22:00:00+00:00",
+      "ends_at": "2026-10-28T23:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12906078",
+      "title": "Queer Peers - Chills and Thrills: Halloween Horror Night with KateLynn Luzier",
+      "organization": "Center for Sexual and Gender Diversity at University Park",
+      "theme": "Social",
+      "categories": [
+        "Arts and Entertainment",
+        "Lectures & Speaking Engagements",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-28T21:30:00+00:00",
+      "ends_at": "2026-10-29T00:00:00+00:00",
+      "location": "Center for Sexual and Gender Diversity",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12684229",
+      "title": "West Ghost Swing Halloween Dance!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-28T23:00:00+00:00",
+      "ends_at": "2026-10-29T01:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12866266",
+      "title": "Join Phi Delta Phi - BEYOND THE CHAMBER: A Case Review of Christa Pike's Failed Execution",
+      "organization": "Phi Delta Phi at World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Honors",
+        "Humanities and Social Sciences",
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-10-29T00:00:00+00:00",
+      "ends_at": "2026-10-29T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12698226",
+      "title": "RA Information Sessions (In-Person)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted"
+      ],
+      "starts_at": "2026-10-09T16:00:00+00:00",
+      "ends_at": "2026-10-29T17:30:00+00:00",
+      "location": "HUB 132 - Flex Theater",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12568108",
+      "title": "Basics on Belief: Buddhisms  with Meido Anderson",
+      "organization": "Center for Spiritual and Ethical Development",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-10-29T17:30:00+00:00",
+      "ends_at": "2026-10-29T18:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12821300",
+      "title": "Nature Rx Craft Drop-In",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-29T17:30:00+00:00",
+      "ends_at": "2026-10-29T19:30:00+00:00",
+      "location": "HUB 112 Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12835543",
+      "title": "Stop the Flu, PSU",
+      "organization": "University Health Services",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-29T13:00:00+00:00",
+      "ends_at": "2026-10-29T20:00:00+00:00",
+      "location": "204 Student Health Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0053000",
+        "name": "Student Health Center",
+        "lat": 40.802843,
+        "lng": -77.86002,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12698225",
+      "title": "RA Information Sessions (In-Person)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted"
+      ],
+      "starts_at": "2026-09-23T19:00:00+00:00",
+      "ends_at": "2026-10-29T20:30:00+00:00",
+      "location": "HUB 132 - Flex Theater",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12894161",
+      "title": "Throwback Thursday Merch Sale",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-10-29T13:00:00+00:00",
+      "ends_at": "2026-10-29T21:00:00+00:00",
+      "location": "THON Store",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12698224",
+      "title": "RA Information Sessions (In-Person)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted"
+      ],
+      "starts_at": "2026-10-29T20:00:00+00:00",
+      "ends_at": "2026-10-29T21:30:00+00:00",
+      "location": "HUB 233A",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12861646",
+      "title": "Book Club",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "Social",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-29T20:30:00+00:00",
+      "ends_at": "2026-10-29T21:30:00+00:00",
+      "location": "Websters Bookstore Cafe",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12576656",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-10-29T22:00:00+00:00",
+      "ends_at": "2026-10-29T23:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12698227",
+      "title": "RA Information Sessions (In-Person)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted"
+      ],
+      "starts_at": "2026-10-13T22:30:00+00:00",
+      "ends_at": "2026-10-30T00:00:00+00:00",
+      "location": "HUB 132 - Flex Theater",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12698228",
+      "title": "RA Information Sessions (In-Person)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted"
+      ],
+      "starts_at": "2026-10-20T22:30:00+00:00",
+      "ends_at": "2026-10-30T00:00:00+00:00",
+      "location": "HUB 132 - Flex Theater",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12787825",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-29T22:30:00+00:00",
+      "ends_at": "2026-10-30T00:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12899795",
+      "title": "Scream Fest",
+      "organization": "Dark Storm Step Team at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-10-29T22:30:00+00:00",
+      "ends_at": "2026-10-30T00:30:00+00:00",
+      "location": "Heritage Hall",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12844677",
+      "title": "Mindful Magic: An Affirmation Potion Workshop",
+      "organization": "Active Minds at World Campus",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-10-30T00:00:00+00:00",
+      "ends_at": "2026-10-30T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12411916",
+      "title": "Fresh&Fit Dating Podcast",
+      "organization": "Uncensored America at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-10-30T00:00:00+00:00",
+      "ends_at": "2026-10-30T02:00:00+00:00",
+      "location": "Biobehavioral Health 022",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0654000",
+        "name": "Biobehavioral Health Building",
+        "lat": 40.796757,
+        "lng": -77.860744,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12649962",
+      "title": "RA Information Sessions (Virtual)",
+      "organization": "University Park Residence Life",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Workshops and Presentations",
+        "Residence Life Hosted",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-10-30T15:00:00+00:00",
+      "ends_at": "2026-10-30T16:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624645",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-30T16:00:00+00:00",
+      "ends_at": "2026-10-30T17:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12834073",
+      "title": "Book Club Discussion: The Inner Game of Tennis by Timothy Galley",
+      "organization": "Horn Society at Penn State University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2026-10-30T16:10:00+00:00",
+      "ends_at": "2026-10-30T17:25:00+00:00",
+      "location": "Esber Rehearsal Hall, Music Building 1",
+      "lat": 40.79926,
+      "lng": -77.8679,
+      "building": {
+        "num": "0752000",
+        "name": "Music Building",
+        "lat": 40.799443,
+        "lng": -77.867117,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607950",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-30T17:00:00+00:00",
+      "ends_at": "2026-10-30T18:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12919760",
+      "title": "Kickoff with Consent Tabling Series",
+      "organization": "R-VOICE: Relationship Violence Outreach, Intervention, and Community Education Center",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-30T16:00:00+00:00",
+      "ends_at": "2026-10-30T19:00:00+00:00",
+      "location": "HUB Table (Pollock Entrance)",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12908592",
+      "title": "Molly Gebrian Talk",
+      "organization": "Viola Society at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2026-10-30T19:30:00+00:00",
+      "ends_at": "2026-10-30T21:00:00+00:00",
+      "location": "Room 122, Music Building II",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0760000",
+        "name": "Music Building II",
+        "lat": 40.799656,
+        "lng": -77.867626,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12915775",
+      "title": "LLC Social Event",
+      "organization": "Arts and Architecture House at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2026-10-30T22:30:00+00:00",
+      "ends_at": "2026-10-31T00:30:00+00:00",
+      "location": "Leete Hall Basement",
+      "lat": 40.80271,
+      "lng": -77.86693,
+      "building": {
+        "num": "0213000",
+        "name": "Leete Hall (John H)",
+        "lat": 40.802726,
+        "lng": -77.866951,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12534437",
+      "title": "Sacred Scares Folk Horror Fest: Starve Acre",
+      "organization": "Center for Spiritual and Ethical Development",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Religious or Spiritual",
+        "Social Activities"
+      ],
+      "starts_at": "2026-10-30T23:00:00+00:00",
+      "ends_at": "2026-10-31T02:00:00+00:00",
+      "location": "106 Pasquerilla Harshbarger Room",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12904349",
+      "title": "Día de Muertos Celebration",
+      "organization": "Latin American Graduate Student Association at University Park",
+      "theme": "Social",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Off Campus Events"
+      ],
+      "starts_at": "2026-10-30T23:00:00+00:00",
+      "ends_at": "2026-10-31T03:30:00+00:00",
+      "location": "Manny's Live Performance Space",
+      "lat": 40.79738,
+      "lng": -77.85746,
+      "building": null
+    },
+    {
+      "id": "12846438",
+      "title": "World Campus All University Day Football Game Ticket Request",
+      "organization": "World Campus Student Affairs",
+      "theme": "Athletics",
+      "categories": [],
+      "starts_at": "2026-10-31T16:00:00+00:00",
+      "ends_at": "2026-10-31T16:01:00+00:00",
+      "location": "West Shore Home Field at Beaver Stadium",
+      "lat": 40.81132,
+      "lng": -77.85503,
+      "building": null
+    },
+    {
+      "id": "12107245",
+      "title": "Feral Botanica | Hidenori Ishii",
+      "organization": "HUB-Robeson Galleries",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-06-04T14:00:00+00:00",
+      "ends_at": "2026-10-31T22:00:00+00:00",
+      "location": "HUB Gallery",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12701974",
+      "title": "Fall Celebration of Recovery",
+      "organization": "Health Promotion and Wellness",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-10-31T23:00:00+00:00",
+      "ends_at": "2026-11-01T01:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12744648",
+      "title": "Adult First Aid, CPR/AED Blended Learning Course",
+      "organization": "Campus Recreation at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-01T16:00:00+00:00",
+      "ends_at": "2026-11-01T18:30:00+00:00",
+      "location": "McCoy Natatorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0820000",
+        "name": "McCoy Natatorium (Ernest B)",
+        "lat": 40.804428,
+        "lng": -77.860559,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12747831",
+      "title": "Fall Concert",
+      "organization": "Oriana Singers at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-11-01T18:00:00+00:00",
+      "ends_at": "2026-11-01T20:00:00+00:00",
+      "location": "Recital Hall",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711693",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-01T22:00:00+00:00",
+      "ends_at": "2026-11-02T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12615549",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-01T23:00:00+00:00",
+      "ends_at": "2026-11-02T01:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12502017",
+      "title": "HHD Leadership EDGE Program Info Session",
+      "organization": "HHD Engaged Learning at Penn State",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Leadership Development"
+      ],
+      "starts_at": "2026-11-02T18:30:00+00:00",
+      "ends_at": "2026-11-02T19:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12575921",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-02T21:00:00+00:00",
+      "ends_at": "2026-11-02T22:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12624464",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-02T22:00:00+00:00",
+      "ends_at": "2026-11-02T23:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12789047",
+      "title": "Journey Through God's Word",
+      "organization": "Campus Ministry International at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-03T00:00:00+00:00",
+      "ends_at": "2026-11-03T01:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648125",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-03T14:00:00+00:00",
+      "ends_at": "2026-11-03T16:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12566225",
+      "title": "Debt Management - A MoneyCounts Webinar",
+      "organization": "Sokolov-Miller Family Financial and Life Skills Center",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-03T17:00:00+00:00",
+      "ends_at": "2026-11-03T18:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12534588",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-11-03T20:15:00+00:00",
+      "ends_at": "2026-11-03T21:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12834260",
+      "title": "EHRA General Body Meetings",
+      "organization": "East Halls Residence Association at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-03T23:30:00+00:00",
+      "ends_at": "2026-11-04T00:30:00+00:00",
+      "location": "Findlay Commons Room 103",
+      "lat": 40.80644,
+      "lng": -77.86224,
+      "building": {
+        "num": "0277000",
+        "name": "Findlay Hall (William)",
+        "lat": 40.806432,
+        "lng": -77.862257,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12711694",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-03T22:00:00+00:00",
+      "ends_at": "2026-11-04T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787801",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-03T23:30:00+00:00",
+      "ends_at": "2026-11-04T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12676971",
+      "title": "English and American Culture Class",
+      "organization": "China Friends at University Park",
+      "theme": "Cultural",
+      "categories": [],
+      "starts_at": "2026-11-04T15:00:00+00:00",
+      "ends_at": "2026-11-04T16:00:00+00:00",
+      "location": "107 HUB",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624958",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-04T17:00:00+00:00",
+      "ends_at": "2026-11-04T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624626",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-04T17:30:00+00:00",
+      "ends_at": "2026-11-04T18:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12456476",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-03T19:00:00+00:00",
+      "ends_at": "2026-11-04T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12883498",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-11-04T19:00:00+00:00",
+      "ends_at": "2026-11-04T20:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12894790",
+      "title": "LinkedIn Learning Day",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-04T20:00:00+00:00",
+      "ends_at": "2026-11-04T21:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12628570",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-04T20:00:00+00:00",
+      "ends_at": "2026-11-04T22:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12556682",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-04T23:00:00+00:00",
+      "ends_at": "2026-11-05T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12874676",
+      "title": "Art Ed. Deep Study Roundtable - \"Borderlands Art Education\"",
+      "organization": "Graduate Art Education Association at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-04T23:30:00+00:00",
+      "ends_at": "2026-11-05T00:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12921271",
+      "title": "Study Session Midterms November 4th",
+      "organization": "Forensic Science Interest House at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-04T23:00:00+00:00",
+      "ends_at": "2026-11-05T01:00:00+00:00",
+      "location": "Ritner Study Room Floor 7",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12588558",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-05T00:00:00+00:00",
+      "ends_at": "2026-11-05T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12853251",
+      "title": "Cooknight",
+      "organization": "Culinary Medicine Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-04T22:30:00+00:00",
+      "ends_at": "2026-11-05T01:30:00+00:00",
+      "location": "007 Henderson",
+      "lat": 40.79755,
+      "lng": -77.86163,
+      "building": {
+        "num": "0651000",
+        "name": "Henderson Building (Grace M)",
+        "lat": 40.796977,
+        "lng": -77.861419,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12684230",
+      "title": "Learn How to Dance West Coast Swing!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-05T00:00:00+00:00",
+      "ends_at": "2026-11-05T02:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12602164",
+      "title": "Virtual Representatives Roundtable #2",
+      "organization": "World Campus Student Affairs",
+      "theme": "CommunityService",
+      "categories": [
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-05T01:00:00+00:00",
+      "ends_at": "2026-11-05T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12908318",
+      "title": "Sex Toy Bingo",
+      "organization": "Reproductive Justice Project at Penn State University Park",
+      "theme": "Social",
+      "categories": [
+        "Arts and Entertainment",
+        "Health and Wellness",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-05T00:30:00+00:00",
+      "ends_at": "2026-11-05T02:30:00+00:00",
+      "location": "Freeman Auditorium",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12762085",
+      "title": "Basics on Belief: Secularism with Marcelius Braxton",
+      "organization": "Center for Spiritual and Ethical Development",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-05T18:30:00+00:00",
+      "ends_at": "2026-11-05T19:30:00+00:00",
+      "location": "130 Pasquerilla Garden Room",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12824109",
+      "title": "DFA @ PSU Project Meeting",
+      "organization": "Design for America at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Graduate and Professional Students",
+        "Academically Focused",
+        "Community Service",
+        "Humanities and Social Sciences",
+        "Regular Meeting"
+      ],
+      "starts_at": "2026-11-05T18:30:00+00:00",
+      "ends_at": "2026-11-05T19:30:00+00:00",
+      "location": "HUB 229",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12835497",
+      "title": "Stop the Flu, PSU",
+      "organization": "University Health Services",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-05T14:00:00+00:00",
+      "ends_at": "2026-11-05T21:00:00+00:00",
+      "location": "Alumni Hall, HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12861647",
+      "title": "Book Club",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "Social",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-05T21:30:00+00:00",
+      "ends_at": "2026-11-05T22:30:00+00:00",
+      "location": "Websters Bookstore Cafe",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12576657",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-05T23:00:00+00:00",
+      "ends_at": "2026-11-06T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12728866",
+      "title": "November 5th Omotesenke Event",
+      "organization": "Traditional Japanese Tea Ceremony (Chanoyu) Club at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-11-05T23:00:00+00:00",
+      "ends_at": "2026-11-06T01:00:00+00:00",
+      "location": "Teaparker Teahouse",
+      "lat": 40.7997,
+      "lng": -77.86105,
+      "building": null
+    },
+    {
+      "id": "12787826",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-05T23:30:00+00:00",
+      "ends_at": "2026-11-06T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12894194",
+      "title": "2000 Degrees FTK",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-02T16:00:00+00:00",
+      "ends_at": "2026-11-06T02:00:00+00:00",
+      "location": "2000 Degrees",
+      "lat": 40.79338,
+      "lng": -77.8628,
+      "building": null
+    },
+    {
+      "id": "12624646",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-06T17:00:00+00:00",
+      "ends_at": "2026-11-06T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12853351",
+      "title": "Thanksgiving Meal Drive - Box Decoration",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-06T15:00:00+00:00",
+      "ends_at": "2026-11-06T19:00:00+00:00",
+      "location": "HUB 112 Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607951",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-06T18:00:00+00:00",
+      "ends_at": "2026-11-06T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12894195",
+      "title": "2000 Degrees FTK",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-06T16:00:00+00:00",
+      "ends_at": "2026-11-06T21:00:00+00:00",
+      "location": "2000 Degrees",
+      "lat": 40.79338,
+      "lng": -77.8628,
+      "building": null
+    },
+    {
+      "id": "12568201",
+      "title": "Community Shabbat: Sabbath for all with Hillel",
+      "organization": "Center for Spiritual and Ethical Development",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-06T23:00:00+00:00",
+      "ends_at": "2026-11-07T02:00:00+00:00",
+      "location": "Hillel at Penn State",
+      "lat": 40.79681,
+      "lng": -77.85608,
+      "building": null
+    },
+    {
+      "id": "12857907",
+      "title": "Good Day Café",
+      "organization": "Council for Exceptional Children at Penn State University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-07T15:30:00+00:00",
+      "ends_at": "2026-11-07T17:00:00+00:00",
+      "location": "Good Day Café",
+      "lat": 40.78691,
+      "lng": -77.85705,
+      "building": null
+    },
+    {
+      "id": "12893936",
+      "title": "E-House Spelling Bee!",
+      "organization": "EHouse at University Park",
+      "theme": "Fundraising",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-11-07T18:00:00+00:00",
+      "ends_at": "2026-11-07T20:00:00+00:00",
+      "location": "McKee Hall A-Floor Lounge",
+      "lat": 40.79585,
+      "lng": -77.86659,
+      "building": {
+        "num": "0206000",
+        "name": "McKee Hall (James Y)",
+        "lat": 40.79632,
+        "lng": -77.867898,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12745376",
+      "title": "Mountain Biking Day Trip",
+      "organization": "Campus Recreation at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-07T14:00:00+00:00",
+      "ends_at": "2026-11-07T23:00:00+00:00",
+      "location": "local outdoor trail",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12776785",
+      "title": "Global Sustainable Action Weekend (GSAW)",
+      "organization": "Penn State Global at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Sustainability",
+        "Leadership Development"
+      ],
+      "starts_at": "2026-11-07T21:30:00+00:00",
+      "ends_at": "2026-11-08T00:30:00+00:00",
+      "location": "Hyatt Place State College",
+      "lat": 40.79246,
+      "lng": -77.86209,
+      "building": null
+    },
+    {
+      "id": "12776786",
+      "title": "Global Sustainable Action Weekend (GSAW)",
+      "organization": "Penn State Global at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Sustainability",
+        "Leadership Development"
+      ],
+      "starts_at": "2026-11-08T14:00:00+00:00",
+      "ends_at": "2026-11-08T21:30:00+00:00",
+      "location": "Business Building",
+      "lat": 40.80308,
+      "lng": -77.86585,
+      "building": {
+        "num": "0023001",
+        "name": "Business Building",
+        "lat": 40.80385,
+        "lng": -77.865071,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12744879",
+      "title": "Lifeguard Recertification Course",
+      "organization": "Campus Recreation at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-07T16:00:00+00:00",
+      "ends_at": "2026-11-08T22:00:00+00:00",
+      "location": "McCoy Natatorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0820000",
+        "name": "McCoy Natatorium (Ernest B)",
+        "lat": 40.804428,
+        "lng": -77.860559,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12894321",
+      "title": "THON™ Pickleball Tournament at the Picklr",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-08T15:00:00+00:00",
+      "ends_at": "2026-11-08T22:00:00+00:00",
+      "location": "The Picklr",
+      "lat": 40.83454,
+      "lng": -77.80429,
+      "building": null
+    },
+    {
+      "id": "12749607",
+      "title": "Rock Climbing Day Trip",
+      "organization": "Campus Recreation at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-08T12:00:00+00:00",
+      "ends_at": "2026-11-09T00:00:00+00:00",
+      "location": "Donation Rocks",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711695",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-08T22:00:00+00:00",
+      "ends_at": "2026-11-09T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12615550",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-08T23:00:00+00:00",
+      "ends_at": "2026-11-09T01:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12670421",
+      "title": "Wellness Workshop: Grad Student Affinity Group Monthly Meeting (virtual)",
+      "organization": "Graduate Student Affinity Group at World Campus",
+      "theme": "Social",
+      "categories": [
+        "Graduate and Professional Students",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-09T17:00:00+00:00",
+      "ends_at": "2026-11-09T17:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12835498",
+      "title": "Stop the Flu, PSU",
+      "organization": "University Health Services",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-09T14:00:00+00:00",
+      "ends_at": "2026-11-09T21:00:00+00:00",
+      "location": "Alumni Hall, HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12575922",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-09T21:00:00+00:00",
+      "ends_at": "2026-11-09T22:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12624465",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-09T22:00:00+00:00",
+      "ends_at": "2026-11-09T23:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12532024",
+      "title": "Mind Gym: Overcoming Stress & Performance Stress",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-09T23:00:00+00:00",
+      "ends_at": "2026-11-10T00:00:00+00:00",
+      "location": "HUB Flex Theater",
+      "lat": 40.79821,
+      "lng": -77.86111,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12894396",
+      "title": "Get Air Benefitting THON™",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-09T23:00:00+00:00",
+      "ends_at": "2026-11-10T01:00:00+00:00",
+      "location": "Get Air",
+      "lat": 40.82198,
+      "lng": -77.81215,
+      "building": null
+    },
+    {
+      "id": "12875274",
+      "title": "National First-Gen Celebration",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-10T00:00:00+00:00",
+      "ends_at": "2026-11-10T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12789048",
+      "title": "Journey Through God's Word",
+      "organization": "Campus Ministry International at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-10T00:00:00+00:00",
+      "ends_at": "2026-11-10T01:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12502037",
+      "title": "Full Team Meeting",
+      "organization": "Nittany Motorsports at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-10T00:30:00+00:00",
+      "ends_at": "2026-11-10T01:30:00+00:00",
+      "location": "ECoRE 028",
+      "lat": 40.79271,
+      "lng": -77.87129,
+      "building": {
+        "num": "0310000",
+        "name": "Engineering Collaborative Research and Education (ECoRE) Building",
+        "lat": 40.792984,
+        "lng": -77.87058,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12628990",
+      "title": "Virtual Yoga",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-10T01:00:00+00:00",
+      "ends_at": "2026-11-10T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12905761",
+      "title": "November General Meeting",
+      "organization": "Neuroscience Club at World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-10T01:00:00+00:00",
+      "ends_at": "2026-11-10T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648126",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-10T14:00:00+00:00",
+      "ends_at": "2026-11-10T16:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12530301",
+      "title": "World Campus Career Services: AI & Future of Work",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-10T17:00:00+00:00",
+      "ends_at": "2026-11-10T17:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12456477",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-10T19:00:00+00:00",
+      "ends_at": "2026-11-10T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12835499",
+      "title": "Stop the Flu, PSU",
+      "organization": "University Health Services",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-10T14:00:00+00:00",
+      "ends_at": "2026-11-10T21:00:00+00:00",
+      "location": "Alumni Hall, HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12534589",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-11-10T20:15:00+00:00",
+      "ends_at": "2026-11-10T21:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12530293",
+      "title": "World Campus Career Services: Preparing for Graduate or Professional School",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-11T00:00:00+00:00",
+      "ends_at": "2026-11-11T00:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711696",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-10T22:00:00+00:00",
+      "ends_at": "2026-11-11T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787802",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-10T23:30:00+00:00",
+      "ends_at": "2026-11-11T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12894461",
+      "title": "State Theatre Movie Night",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-10T23:30:00+00:00",
+      "ends_at": "2026-11-11T02:00:00+00:00",
+      "location": "State Theatre",
+      "lat": 40.79359,
+      "lng": -77.86205,
+      "building": {
+        "num": "0998185",
+        "name": "State Theatre",
+        "lat": 40.793608,
+        "lng": -77.862117,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12676972",
+      "title": "English and American Culture Class",
+      "organization": "China Friends at University Park",
+      "theme": "Cultural",
+      "categories": [],
+      "starts_at": "2026-11-11T15:00:00+00:00",
+      "ends_at": "2026-11-11T16:00:00+00:00",
+      "location": "107 HUB",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624959",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-11T17:00:00+00:00",
+      "ends_at": "2026-11-11T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624627",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-11T17:30:00+00:00",
+      "ends_at": "2026-11-11T18:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12894496",
+      "title": "100 Days 'Til THON™",
+      "organization": "THON: IFC/Panhellenic Dance Marathon at University Park",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-11T16:00:00+00:00",
+      "ends_at": "2026-11-11T20:00:00+00:00",
+      "location": "HUB",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12883499",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-11-11T19:00:00+00:00",
+      "ends_at": "2026-11-11T20:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628571",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-11T20:00:00+00:00",
+      "ends_at": "2026-11-11T22:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12503496",
+      "title": "Global Health Minor Info Session",
+      "organization": "HHD Engaged Learning at Penn State",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-11-11T22:00:00+00:00",
+      "ends_at": "2026-11-11T23:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12858102",
+      "title": "Penn State CEC - General Body Meeting",
+      "organization": "Council for Exceptional Children at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-11T23:00:00+00:00",
+      "ends_at": "2026-11-12T00:00:00+00:00",
+      "location": "214 Chambers Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0602000",
+        "name": "Chambers Building (Will Grant)",
+        "lat": 40.798241,
+        "lng": -77.867715,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12556683",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-11T23:00:00+00:00",
+      "ends_at": "2026-11-12T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12853283",
+      "title": "Cooknight",
+      "organization": "Culinary Medicine Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-11T22:30:00+00:00",
+      "ends_at": "2026-11-12T01:30:00+00:00",
+      "location": "007 Henderson",
+      "lat": 40.79755,
+      "lng": -77.86163,
+      "building": {
+        "num": "0651000",
+        "name": "Henderson Building (Grace M)",
+        "lat": 40.796977,
+        "lng": -77.861419,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12684231",
+      "title": "Learn How to Dance West Coast Swing!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-12T00:00:00+00:00",
+      "ends_at": "2026-11-12T02:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12839350",
+      "title": "Student Parent Affinity - November Monthly Meeting",
+      "organization": "Student Parent Affinity Group at World Campus",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-12T01:00:00+00:00",
+      "ends_at": "2026-11-12T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12683942",
+      "title": "ARHS Traveling Cinemas - Thunderheart",
+      "organization": "Association of Residence Hall Students at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-11T23:45:00+00:00",
+      "ends_at": "2026-11-12T03:00:00+00:00",
+      "location": "West Halls - Waring Commons Study Lounge",
+      "lat": 40.79572,
+      "lng": -77.86726,
+      "building": {
+        "num": "0272000",
+        "name": "Waring Hall (William G)",
+        "lat": 40.795766,
+        "lng": -77.867358,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12853386",
+      "title": "Thanksgiving Meal Drive - Box Decoration",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-12T15:00:00+00:00",
+      "ends_at": "2026-11-12T19:00:00+00:00",
+      "location": "HUB 112 Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12915715",
+      "title": "Grow to Appreciate your Body: A Body Appreciation Week Event",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Social",
+      "categories": [
+        "Graduate and Professional Students",
+        "Sustainability",
+        "Health and Wellness",
+        "Humanities and Social Sciences",
+        "Workshops and Presentations",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-12T17:00:00+00:00",
+      "ends_at": "2026-11-12T19:00:00+00:00",
+      "location": "HUB Main Lounge Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12530815",
+      "title": "Life Hacks: LIVE!--Develop Your Narrative",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-12T21:00:00+00:00",
+      "ends_at": "2026-11-12T22:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12861648",
+      "title": "Book Club",
+      "organization": "Student Farm and Food Systems at University Park",
+      "theme": "Social",
+      "categories": [
+        "Sustainability",
+        "Health and Wellness",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-12T21:30:00+00:00",
+      "ends_at": "2026-11-12T22:30:00+00:00",
+      "location": "Websters Bookstore Cafe",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12617795",
+      "title": "Make and Take at OriginLabs - Wooden Music Box",
+      "organization": "Invent Penn State at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Workshops and Presentations",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-12T22:00:00+00:00",
+      "ends_at": "2026-11-13T00:00:00+00:00",
+      "location": "OriginLabs",
+      "lat": 40.7922,
+      "lng": -77.863,
+      "building": {
+        "num": "0054000",
+        "name": "Eric J. Barron Innovation Hub Building",
+        "lat": 40.792348,
+        "lng": -77.862913,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12576658",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-12T23:00:00+00:00",
+      "ends_at": "2026-11-13T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12876320",
+      "title": "General Body Meeting",
+      "organization": "Health Policy and Administration Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-12T23:00:00+00:00",
+      "ends_at": "2026-11-13T00:00:00+00:00",
+      "location": "Ford Building Room 110",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0023000",
+        "name": "Ford Building (Donald H)",
+        "lat": 40.799712,
+        "lng": -77.869554,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12809288",
+      "title": "Rolling Reading Series Presents: Morris Collins",
+      "organization": "Creative Writing Club at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2026-11-12T23:00:00+00:00",
+      "ends_at": "2026-11-13T00:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79851,
+      "lng": -77.8654,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12696420",
+      "title": "General Body Meeting #3",
+      "organization": "Latino Caucus at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-12T23:00:00+00:00",
+      "ends_at": "2026-11-13T00:00:00+00:00",
+      "location": "Nursing Sciences room 316",
+      "lat": 40.79654,
+      "lng": -77.85987,
+      "building": {
+        "num": "0653000",
+        "name": "Nursing Sciences Building",
+        "lat": 40.796553,
+        "lng": -77.85985,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12787827",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-12T23:30:00+00:00",
+      "ends_at": "2026-11-13T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12855545",
+      "title": "The Speakers of Singing Winds - Q&A Panel",
+      "organization": "World Campus Student Affairs",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-13T01:00:00+00:00",
+      "ends_at": "2026-11-13T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624647",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-13T17:00:00+00:00",
+      "ends_at": "2026-11-13T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12853447",
+      "title": "Thanksgiving Meal Drive - Box Decoration",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-13T15:00:00+00:00",
+      "ends_at": "2026-11-13T19:00:00+00:00",
+      "location": "HUB 112 Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607952",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-13T18:00:00+00:00",
+      "ends_at": "2026-11-13T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12611386",
+      "title": "Stadium Cleanup Fundraiser",
+      "organization": "Nittany Motorsports at University Park",
+      "theme": "CommunityService",
+      "categories": [
+        "Community Service"
+      ],
+      "starts_at": "2026-11-15T11:30:00+00:00",
+      "ends_at": "2026-11-15T12:30:00+00:00",
+      "location": "Beaver Stadium",
+      "lat": 40.81143,
+      "lng": -77.85606,
+      "building": {
+        "num": "0812000",
+        "name": "Beaver Stadium (James A) Football Stands",
+        "lat": 40.812537,
+        "lng": -77.855221,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12744689",
+      "title": "First Aid/CPR/AED for Professional Rescuers",
+      "organization": "Campus Recreation at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-15T16:00:00+00:00",
+      "ends_at": "2026-11-15T21:00:00+00:00",
+      "location": "McCoy Natatorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0820000",
+        "name": "McCoy Natatorium (Ernest B)",
+        "lat": 40.804428,
+        "lng": -77.860559,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12909949",
+      "title": "Friendsgiving",
+      "organization": "McElwain Hall",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-15T22:00:00+00:00",
+      "ends_at": "2026-11-16T00:00:00+00:00",
+      "location": "Mcelwain Hall- K-floor",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0240000",
+        "name": "McElwain Hall (Harriet)",
+        "lat": 40.800031,
+        "lng": -77.85912,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12711697",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-15T22:00:00+00:00",
+      "ends_at": "2026-11-16T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12615551",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-15T23:00:00+00:00",
+      "ends_at": "2026-11-16T01:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12920217",
+      "title": "Prabandha Gaan: Medieval Music of India",
+      "organization": "Society for Indian Music and Arts at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "UPAC Funded",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-15T23:30:00+00:00",
+      "ends_at": "2026-11-16T02:00:00+00:00",
+      "location": "HUB Flex Theater",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12758766",
+      "title": "BOUNCE 2026 FALL SHOWCASE",
+      "organization": "Bounce Dance Organization at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-11-16T00:30:00+00:00",
+      "ends_at": "2026-11-16T02:30:00+00:00",
+      "location": "State theater",
+      "lat": 41.20332,
+      "lng": -77.19452,
+      "building": null
+    },
+    {
+      "id": "12853484",
+      "title": "Thanksgiving Meal Drive - Box Decoration",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-16T15:00:00+00:00",
+      "ends_at": "2026-11-16T19:00:00+00:00",
+      "location": "HUB 112 Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12575923",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-16T21:00:00+00:00",
+      "ends_at": "2026-11-16T22:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12504644",
+      "title": "Facts & Snacks: Food Recovery Network",
+      "organization": "HHD Engaged Learning at Penn State",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Sustainability",
+        "Community Service",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-16T22:00:00+00:00",
+      "ends_at": "2026-11-16T23:00:00+00:00",
+      "location": "401 Health & Human Development Building",
+      "lat": 40.79613,
+      "lng": -77.86016,
+      "building": {
+        "num": "0652000",
+        "name": "Health and Human Development",
+        "lat": 40.796144,
+        "lng": -77.860177,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12624466",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-16T22:00:00+00:00",
+      "ends_at": "2026-11-16T23:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12561452",
+      "title": "Q.P.R Online Gatekeeper Suicide Prevention Training (Penn State World Campus Students)",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-16T23:00:00+00:00",
+      "ends_at": "2026-11-17T00:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12789049",
+      "title": "Journey Through God's Word",
+      "organization": "Campus Ministry International at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-17T00:00:00+00:00",
+      "ends_at": "2026-11-17T01:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648127",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-17T14:00:00+00:00",
+      "ends_at": "2026-11-17T16:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12566551",
+      "title": "Identity Theft + Protection - A MoneyCounts Webinar",
+      "organization": "Sokolov-Miller Family Financial and Life Skills Center",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-17T17:00:00+00:00",
+      "ends_at": "2026-11-17T18:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12456478",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-17T19:00:00+00:00",
+      "ends_at": "2026-11-17T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12534590",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-11-17T20:15:00+00:00",
+      "ends_at": "2026-11-17T21:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12853529",
+      "title": "Thanksgiving Meal Drive - Donation Collection",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-17T12:30:00+00:00",
+      "ends_at": "2026-11-18T00:00:00+00:00",
+      "location": "Alumni Hall",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12834261",
+      "title": "EHRA General Body Meetings",
+      "organization": "East Halls Residence Association at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-17T23:30:00+00:00",
+      "ends_at": "2026-11-18T00:30:00+00:00",
+      "location": "Findlay Commons Room 103",
+      "lat": 40.80644,
+      "lng": -77.86224,
+      "building": {
+        "num": "0277000",
+        "name": "Findlay Hall (William)",
+        "lat": 40.806432,
+        "lng": -77.862257,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12879963",
+      "title": "Psychology Club Research Showcase 2026",
+      "organization": "Psychology Club at World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-17T22:00:00+00:00",
+      "ends_at": "2026-11-18T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711698",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-17T22:00:00+00:00",
+      "ends_at": "2026-11-18T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12675473",
+      "title": "German Film Series: Pina (2011)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Humanities and Social Sciences"
+      ],
+      "starts_at": "2026-11-17T23:00:00+00:00",
+      "ends_at": "2026-11-18T01:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79826,
+      "lng": -77.86553,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12783376",
+      "title": "World Campus Benefitting THON™ General Membership Meeting",
+      "organization": "World Campus Benefitting THON™",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2026-11-18T00:00:00+00:00",
+      "ends_at": "2026-11-18T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12863313",
+      "title": "Advocacy and Activism: How to Safely and Legally Stand for What's Right",
+      "organization": "Students of Color Affinity at World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-11-18T00:00:00+00:00",
+      "ends_at": "2026-11-18T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787803",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-17T23:30:00+00:00",
+      "ends_at": "2026-11-18T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12347265",
+      "title": "Military Service Organization Monthly Meeting",
+      "organization": "Military Service Organization at World Campus",
+      "theme": "Social",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-11-18T01:00:00+00:00",
+      "ends_at": "2026-11-18T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12676973",
+      "title": "English and American Culture Class",
+      "organization": "China Friends at University Park",
+      "theme": "Cultural",
+      "categories": [],
+      "starts_at": "2026-11-18T15:00:00+00:00",
+      "ends_at": "2026-11-18T16:00:00+00:00",
+      "location": "107 HUB",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624960",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-18T17:00:00+00:00",
+      "ends_at": "2026-11-18T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624628",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-18T17:30:00+00:00",
+      "ends_at": "2026-11-18T18:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12883500",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-11-18T19:00:00+00:00",
+      "ends_at": "2026-11-18T20:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628572",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-18T20:00:00+00:00",
+      "ends_at": "2026-11-18T22:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12853542",
+      "title": "Thanksgiving Meal Drive - Donation Collection",
+      "organization": "SLI's Civic Life Team",
+      "theme": "CommunityService",
+      "categories": [
+        "Volunteer Opportunity",
+        "Civic Engagement"
+      ],
+      "starts_at": "2026-11-18T12:30:00+00:00",
+      "ends_at": "2026-11-19T00:00:00+00:00",
+      "location": "Alumni Hall",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12556686",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-18T23:00:00+00:00",
+      "ends_at": "2026-11-19T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12729152",
+      "title": "November 18th Urasenke Event",
+      "organization": "Traditional Japanese Tea Ceremony (Chanoyu) Club at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-11-19T00:00:00+00:00",
+      "ends_at": "2026-11-19T01:00:00+00:00",
+      "location": "Teaparker Teahouse",
+      "lat": 40.7997,
+      "lng": -77.86105,
+      "building": null
+    },
+    {
+      "id": "12624582",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-19T00:00:00+00:00",
+      "ends_at": "2026-11-19T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12684232",
+      "title": "Learn How to Dance West Coast Swing!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-19T00:00:00+00:00",
+      "ends_at": "2026-11-19T02:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12824110",
+      "title": "DFA @ PSU Project Meeting",
+      "organization": "Design for America at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Graduate and Professional Students",
+        "Academically Focused",
+        "Community Service",
+        "Humanities and Social Sciences",
+        "Regular Meeting"
+      ],
+      "starts_at": "2026-11-19T18:30:00+00:00",
+      "ends_at": "2026-11-19T19:30:00+00:00",
+      "location": "HUB 229",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12835544",
+      "title": "Stop the Flu, PSU",
+      "organization": "University Health Services",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-19T14:00:00+00:00",
+      "ends_at": "2026-11-19T21:00:00+00:00",
+      "location": "204 Student Health Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0053000",
+        "name": "Student Health Center",
+        "lat": 40.802843,
+        "lng": -77.86002,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12576659",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-11-19T23:00:00+00:00",
+      "ends_at": "2026-11-20T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12695793",
+      "title": "Students of Color Affinity Group Monthly Meeting",
+      "organization": "Students of Color Affinity at World Campus",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-20T00:00:00+00:00",
+      "ends_at": "2026-11-20T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787828",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-19T23:30:00+00:00",
+      "ends_at": "2026-11-20T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12586393",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2026-11-20T01:00:00+00:00",
+      "ends_at": "2026-11-20T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624648",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-20T17:00:00+00:00",
+      "ends_at": "2026-11-20T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607953",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-20T18:00:00+00:00",
+      "ends_at": "2026-11-20T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711699",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-22T22:00:00+00:00",
+      "ends_at": "2026-11-23T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12629076",
+      "title": "Virtual Yoga",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-23T17:00:00+00:00",
+      "ends_at": "2026-11-23T17:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711700",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-24T22:00:00+00:00",
+      "ends_at": "2026-11-25T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787804",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-24T23:30:00+00:00",
+      "ends_at": "2026-11-25T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12851116",
+      "title": "Fall Break Service Trip",
+      "organization": "Penn State Alternative Breaks",
+      "theme": "CommunityService",
+      "categories": [
+        "Community Service"
+      ],
+      "starts_at": "2026-11-21T14:00:00+00:00",
+      "ends_at": "2026-11-25T20:00:00+00:00",
+      "location": "Various Locations",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12783529",
+      "title": "Fall Break Mountain Biking Adventure",
+      "organization": "Campus Recreation at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-21T12:00:00+00:00",
+      "ends_at": "2026-11-26T00:00:00+00:00",
+      "location": "West Virginia's New River Gorge",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12783599",
+      "title": "Fall Break Rock Climbing at New River Gorge",
+      "organization": "Campus Recreation at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-11-21T12:00:00+00:00",
+      "ends_at": "2026-11-26T00:00:00+00:00",
+      "location": "New River Gorge in West Virginia",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12556687",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-11-25T23:00:00+00:00",
+      "ends_at": "2026-11-26T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12787829",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-26T23:30:00+00:00",
+      "ends_at": "2026-11-27T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12711701",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-11-29T22:00:00+00:00",
+      "ends_at": "2026-11-30T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12615552",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-11-29T23:00:00+00:00",
+      "ends_at": "2026-11-30T01:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12575924",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-30T21:00:00+00:00",
+      "ends_at": "2026-11-30T22:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12624467",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-11-30T22:00:00+00:00",
+      "ends_at": "2026-11-30T23:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12789050",
+      "title": "Journey Through God's Word",
+      "organization": "Campus Ministry International at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-12-01T00:00:00+00:00",
+      "ends_at": "2026-12-01T01:30:00+00:00",
+      "location": "Pasquerilla Spiritual Center",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648128",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-12-01T14:00:00+00:00",
+      "ends_at": "2026-12-01T16:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12566558",
+      "title": "Saving and Investing - A MoneyCounts Webinar",
+      "organization": "Sokolov-Miller Family Financial and Life Skills Center",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-12-01T17:00:00+00:00",
+      "ends_at": "2026-12-01T18:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12456479",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-01T19:00:00+00:00",
+      "ends_at": "2026-12-01T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12534591",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-12-01T20:15:00+00:00",
+      "ends_at": "2026-12-01T21:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12914002",
+      "title": "Martin Luther King Jr.: 50 Day Celebration",
+      "organization": "Martin Luther King, (MLK) Jr. Commemoration Student Committee at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-12-01T23:00:00+00:00",
+      "ends_at": "2026-12-02T00:30:00+00:00",
+      "location": "Heritage Hall",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12834262",
+      "title": "EHRA General Body Meetings",
+      "organization": "East Halls Residence Association at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-01T23:30:00+00:00",
+      "ends_at": "2026-12-02T00:30:00+00:00",
+      "location": "Findlay Commons Room 103",
+      "lat": 40.80644,
+      "lng": -77.86224,
+      "building": {
+        "num": "0277000",
+        "name": "Findlay Hall (William)",
+        "lat": 40.806432,
+        "lng": -77.862257,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12711702",
+      "title": "World Campus Virtual Study Hall",
+      "organization": "Chaiken Center for Student Success at Penn State World Campus",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-12-01T22:00:00+00:00",
+      "ends_at": "2026-12-02T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12787805",
+      "title": "Salsa Tuesdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-01T23:30:00+00:00",
+      "ends_at": "2026-12-02T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12676974",
+      "title": "English and American Culture Class",
+      "organization": "China Friends at University Park",
+      "theme": "Cultural",
+      "categories": [],
+      "starts_at": "2026-12-02T15:00:00+00:00",
+      "ends_at": "2026-12-02T16:00:00+00:00",
+      "location": "107 HUB",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624961",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-02T17:00:00+00:00",
+      "ends_at": "2026-12-02T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624629",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-02T17:30:00+00:00",
+      "ends_at": "2026-12-02T18:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12883501",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-12-02T19:00:00+00:00",
+      "ends_at": "2026-12-02T20:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628573",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-02T20:00:00+00:00",
+      "ends_at": "2026-12-02T22:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12858141",
+      "title": "Penn State CEC - General Body Meeting",
+      "organization": "Council for Exceptional Children at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-12-02T23:00:00+00:00",
+      "ends_at": "2026-12-03T00:00:00+00:00",
+      "location": "214 Chambers Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0602000",
+        "name": "Chambers Building (Will Grant)",
+        "lat": 40.798241,
+        "lng": -77.867715,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12556688",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-12-02T23:00:00+00:00",
+      "ends_at": "2026-12-03T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12729199",
+      "title": "December 2nd In-Person Urasenke Event",
+      "organization": "Traditional Japanese Tea Ceremony (Chanoyu) Club at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-12-03T00:00:00+00:00",
+      "ends_at": "2026-12-03T01:00:00+00:00",
+      "location": "Teaparker Teahouse",
+      "lat": 40.7997,
+      "lng": -77.86105,
+      "building": null
+    },
+    {
+      "id": "12588559",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2026-12-03T00:00:00+00:00",
+      "ends_at": "2026-12-03T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624583",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-12-03T00:00:00+00:00",
+      "ends_at": "2026-12-03T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12684233",
+      "title": "Learn How to Dance West Coast Swing!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-03T00:00:00+00:00",
+      "ends_at": "2026-12-03T02:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12824111",
+      "title": "DFA @ PSU Project Meeting",
+      "organization": "Design for America at Penn State University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Graduate and Professional Students",
+        "Academically Focused",
+        "Community Service",
+        "Humanities and Social Sciences",
+        "Regular Meeting"
+      ],
+      "starts_at": "2026-12-03T18:30:00+00:00",
+      "ends_at": "2026-12-03T19:30:00+00:00",
+      "location": "HUB 229",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12617816",
+      "title": "Make and Take at OriginLabs - 3D Printed Ornaments",
+      "organization": "Invent Penn State at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Workshops and Presentations",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-03T22:00:00+00:00",
+      "ends_at": "2026-12-04T00:00:00+00:00",
+      "location": "OriginLabs",
+      "lat": 40.7922,
+      "lng": -77.863,
+      "building": {
+        "num": "0054000",
+        "name": "Eric J. Barron Innovation Hub Building",
+        "lat": 40.792348,
+        "lng": -77.862913,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12576660",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-12-03T23:00:00+00:00",
+      "ends_at": "2026-12-04T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12728920",
+      "title": "December 3rd Omotesenke Event",
+      "organization": "Traditional Japanese Tea Ceremony (Chanoyu) Club at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-12-03T23:00:00+00:00",
+      "ends_at": "2026-12-04T01:00:00+00:00",
+      "location": "Teaparker Teahouse",
+      "lat": 40.7997,
+      "lng": -77.86105,
+      "building": null
+    },
+    {
+      "id": "12787830",
+      "title": "Bachata Thursdays - Class & Social",
+      "organization": "Salsa and Bachata Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Off Campus Events",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-03T23:30:00+00:00",
+      "ends_at": "2026-12-04T01:30:00+00:00",
+      "location": "State College Borough Municipal Building",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12602368",
+      "title": "December Dash Bash",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [
+        "Social Activities",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-12-04T00:00:00+00:00",
+      "ends_at": "2026-12-04T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624649",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-04T17:00:00+00:00",
+      "ends_at": "2026-12-04T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607954",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-04T18:00:00+00:00",
+      "ends_at": "2026-12-04T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12683943",
+      "title": "ARHS Traveling Cinemas - A Christmas Carol",
+      "organization": "Association of Residence Hall Students at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-05T23:45:00+00:00",
+      "ends_at": "2026-12-06T03:00:00+00:00",
+      "location": "West Halls - Waring Commons Study Lounge",
+      "lat": 40.79572,
+      "lng": -77.86726,
+      "building": {
+        "num": "0272000",
+        "name": "Waring Hall (William G)",
+        "lat": 40.795766,
+        "lng": -77.867358,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12502038",
+      "title": "Abu Dhabi GP Watch Party",
+      "organization": "Nittany Motorsports at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-06T13:00:00+00:00",
+      "ends_at": "2026-12-06T15:00:00+00:00",
+      "location": "Westgate Cybertorium (W201)",
+      "lat": 40.79364,
+      "lng": -77.86833,
+      "building": {
+        "num": "0039000",
+        "name": "Westgate Building",
+        "lat": 40.79377,
+        "lng": -77.86791,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12744649",
+      "title": "Adult First Aid, CPR/AED Blended Learning Course",
+      "organization": "Campus Recreation at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2026-12-06T16:00:00+00:00",
+      "ends_at": "2026-12-06T18:30:00+00:00",
+      "location": "McCoy Natatorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0820000",
+        "name": "McCoy Natatorium (Ernest B)",
+        "lat": 40.804428,
+        "lng": -77.860559,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12747832",
+      "title": "Mosaic",
+      "organization": "Oriana Singers at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-12-06T17:00:00+00:00",
+      "ends_at": "2026-12-06T21:00:00+00:00",
+      "location": "Eisenhower Auditorium",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0011000",
+        "name": "Eisenhower Auditorium (Milton S)",
+        "lat": 40.801533,
+        "lng": -77.861707,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12615553",
+      "title": "Argentine Tango Beginner Lesson Series",
+      "organization": "Argentine Tango at Penn State University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Arts and Entertainment",
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-06T23:00:00+00:00",
+      "ends_at": "2026-12-07T01:00:00+00:00",
+      "location": "HUB-Robeson Center RM 232",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12575925",
+      "title": "SMART Recovery",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-07T21:00:00+00:00",
+      "ends_at": "2026-12-07T22:00:00+00:00",
+      "location": "104 Pasquerilla",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12624468",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-07T22:00:00+00:00",
+      "ends_at": "2026-12-07T23:00:00+00:00",
+      "location": "107 Pasquerilla Spiritual Center (Memorial Lounge)",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12502040",
+      "title": "Full Team Meeting",
+      "organization": "Nittany Motorsports at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-08T00:30:00+00:00",
+      "ends_at": "2026-12-08T01:30:00+00:00",
+      "location": "ECoRE 028",
+      "lat": 40.79271,
+      "lng": -77.87129,
+      "building": {
+        "num": "0310000",
+        "name": "Engineering Collaborative Research and Education (ECoRE) Building",
+        "lat": 40.792984,
+        "lng": -77.87058,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12629117",
+      "title": "Virtual Yoga",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [
+        "Health and Wellness",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2026-12-08T01:00:00+00:00",
+      "ends_at": "2026-12-08T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12850422",
+      "title": "Debate - Fall 2026",
+      "organization": "Uncensored America at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Lectures & Speaking Engagements",
+        "UPAC Funded"
+      ],
+      "starts_at": "2026-12-08T01:00:00+00:00",
+      "ends_at": "2026-12-08T02:30:00+00:00",
+      "location": "Heritage Hall",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12648129",
+      "title": "Focus Together Tuesdays",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-12-08T14:00:00+00:00",
+      "ends_at": "2026-12-08T16:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12456480",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-08T19:00:00+00:00",
+      "ends_at": "2026-12-08T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12534592",
+      "title": "Career Services Weekly Workshops",
+      "organization": "Career Services at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Workshops and Presentations"
+      ],
+      "starts_at": "2026-12-08T20:15:00+00:00",
+      "ends_at": "2026-12-08T21:00:00+00:00",
+      "location": "103 Bank of America Career Services Building",
+      "lat": 40.80311,
+      "lng": -77.86043,
+      "building": {
+        "num": "0042000",
+        "name": "Bank of America Career Services Center",
+        "lat": 40.803101,
+        "lng": -77.860448,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12530322",
+      "title": "World Campus Career Services: Manage \"Your Next Mission\" Navigating the Civilian Job Market",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-12-09T00:00:00+00:00",
+      "ends_at": "2026-12-09T00:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624962",
+      "title": "Breathe into Balance",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-09T17:00:00+00:00",
+      "ends_at": "2026-12-09T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624630",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-09T17:30:00+00:00",
+      "ends_at": "2026-12-09T18:30:00+00:00",
+      "location": "Palmer Museum",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12883502",
+      "title": "Kaffeestunde (German Conversation Hour)",
+      "organization": "German Graduate Student Association at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation"
+      ],
+      "starts_at": "2026-12-09T19:00:00+00:00",
+      "ends_at": "2026-12-09T20:00:00+00:00",
+      "location": "157 Burrowes Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0601000",
+        "name": "Burrowes Building (Thomas Henry)",
+        "lat": 40.797609,
+        "lng": -77.864908,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12628574",
+      "title": "Well-being Wednesday",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-09T20:00:00+00:00",
+      "ends_at": "2026-12-09T22:00:00+00:00",
+      "location": "IM Building Lobby",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12556689",
+      "title": "Weekly Organization Meeting",
+      "organization": "Academic Journal Society at University Park",
+      "theme": "Social",
+      "categories": [
+        "Academically Focused"
+      ],
+      "starts_at": "2026-12-09T23:00:00+00:00",
+      "ends_at": "2026-12-10T00:30:00+00:00",
+      "location": "Osmond 103",
+      "lat": 40.79862,
+      "lng": -77.86234,
+      "building": {
+        "num": "0401000",
+        "name": "Osmond Laboratory (I Thornton)",
+        "lat": 40.79846,
+        "lng": -77.862438,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12684234",
+      "title": "Learn How to Dance West Coast Swing!",
+      "organization": "Swing Dance Club at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Athletics and Recreation",
+        "Cultural Appreciation",
+        "Health and Wellness",
+        "Regular Meeting",
+        "Recruiting New Members",
+        "Social Activities"
+      ],
+      "starts_at": "2026-12-10T00:00:00+00:00",
+      "ends_at": "2026-12-10T02:00:00+00:00",
+      "location": "The Press: Cider & Craft Beverage Taphouse",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12839418",
+      "title": "Student Parent Affinity - December Monthly Meeting - Celebrating the end of the semester and the Holidays",
+      "organization": "Student Parent Affinity Group at World Campus",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-10T01:00:00+00:00",
+      "ends_at": "2026-12-10T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12747837",
+      "title": "Our Gift in Song",
+      "organization": "Oriana Singers at University Park",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-12-10T22:00:00+00:00",
+      "ends_at": "2026-12-11T00:00:00+00:00",
+      "location": "Recital Hall",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12576661",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-12-10T23:00:00+00:00",
+      "ends_at": "2026-12-11T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79865,
+      "lng": -77.86711,
+      "building": null
+    },
+    {
+      "id": "12624650",
+      "title": "Yoga & Meditation",
+      "organization": "Health Promotion and Wellness",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Athletics and Recreation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-11T17:00:00+00:00",
+      "ends_at": "2026-12-11T18:00:00+00:00",
+      "location": "232 HUB-Robeson Center",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12607955",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-11T18:00:00+00:00",
+      "ends_at": "2026-12-11T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12617940",
+      "title": "Kith & Kin, A Rewilding of Sound and Form | Melissa Foss",
+      "organization": "HUB-Robeson Galleries",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-10-15T14:00:00+00:00",
+      "ends_at": "2026-12-14T01:00:00+00:00",
+      "location": "Exhibition Cases",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12456481",
+      "title": "Let's Talk",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2026-12-15T19:00:00+00:00",
+      "ends_at": "2026-12-15T20:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12347266",
+      "title": "Military Service Organization Monthly Meeting",
+      "organization": "Military Service Organization at World Campus",
+      "theme": "Social",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance"
+      ],
+      "starts_at": "2026-12-16T01:00:00+00:00",
+      "ends_at": "2026-12-16T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12576662",
+      "title": "Evening Prayer Worship Begins",
+      "organization": "Lutheran Student Community at University Park",
+      "theme": "Spirituality",
+      "categories": [
+        "Religious or Spiritual"
+      ],
+      "starts_at": "2026-12-17T23:00:00+00:00",
+      "ends_at": "2026-12-18T00:00:00+00:00",
+      "location": "Pasquerilla Spiritual Center Worship Hall",
+      "lat": 40.79896,
+      "lng": -77.8667,
+      "building": {
+        "num": "0006000",
+        "name": "Eisenhower Chapel (Helen Eakin)",
+        "lat": 40.799036,
+        "lng": -77.866614,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12586400",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2026-12-18T01:00:00+00:00",
+      "ends_at": "2026-12-18T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12607956",
+      "title": "Culture Connect",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "Cultural",
+      "categories": [
+        "Cultural Appreciation",
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-12-18T18:00:00+00:00",
+      "ends_at": "2026-12-18T19:30:00+00:00",
+      "location": "Register in advance for location information: https://forms.office.com/r/HzzFNKL69j",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12816299",
+      "title": "\"What's Stressing You?\" Board",
+      "organization": "Health and Human Development (HHD) Office for Diversity and Inclusion",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2026-09-28T13:00:00+00:00",
+      "ends_at": "2026-12-18T21:00:00+00:00",
+      "location": "Office for Diversity and Inclusion",
+      "lat": 40.79606,
+      "lng": -77.8601,
+      "building": {
+        "num": "0652000",
+        "name": "Health and Human Development",
+        "lat": 40.796144,
+        "lng": -77.860177,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "11825722",
+      "title": "NOW HIRING: Education Policy Studies Work-Study Office Assistant",
+      "organization": "Education and Public Policy Undergraduate Student Association at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [],
+      "starts_at": "2025-10-25T16:00:00+00:00",
+      "ends_at": "2027-01-01T18:00:00+00:00",
+      "location": "Education Policy Studies, Rackley Building",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0603000",
+        "name": "Rackley Building (J Ralph)",
+        "lat": 40.798185,
+        "lng": -77.868602,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12521702",
+      "title": "Feeding the Fire, Filling the Tank, Igniting a Pathway - World Campus",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-01-06T17:00:00+00:00",
+      "ends_at": "2027-01-06T18:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12588560",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2027-01-07T00:00:00+00:00",
+      "ends_at": "2027-01-07T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12521703",
+      "title": "Feeding the Fire, Filling the Tank, Igniting a Pathway - World Campus",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-01-08T01:00:00+00:00",
+      "ends_at": "2027-01-08T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12617605",
+      "title": "Recipes | Christine Sajecki",
+      "organization": "HUB-Robeson Galleries",
+      "theme": "Arts",
+      "categories": [
+        "Arts and Entertainment"
+      ],
+      "starts_at": "2026-08-24T14:00:00+00:00",
+      "ends_at": "2027-01-08T22:00:00+00:00",
+      "location": "Art Alley",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12783375",
+      "title": "World Campus Benefitting THON™ General Membership Meeting",
+      "organization": "World Campus Benefitting THON™",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2027-01-13T00:00:00+00:00",
+      "ends_at": "2027-01-13T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12477414",
+      "title": "Spring 2027 Involvement Fair",
+      "organization": "Student Leadership and Involvement, a unit of Student Affairs at University Park",
+      "theme": "Social",
+      "categories": [
+        "Welcome Week at University Park!"
+      ],
+      "starts_at": "2027-01-12T16:00:00+00:00",
+      "ends_at": "2027-01-13T22:00:00+00:00",
+      "location": "Heritage and Alumni Hall",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12525060",
+      "title": "World Campus Career Services: First Semester Career Moves",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-01-14T17:15:00+00:00",
+      "ends_at": "2027-01-14T17:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624584",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-01-21T00:00:00+00:00",
+      "ends_at": "2027-01-21T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12586403",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2027-01-22T01:00:00+00:00",
+      "ends_at": "2027-01-22T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12521704",
+      "title": "Feeding the Fire, Filling the Tank, Igniting a Pathway - World Campus",
+      "organization": "World Campus Student Affairs",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-01-22T01:00:00+00:00",
+      "ends_at": "2027-01-22T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12781407",
+      "title": "With These Hands: A Collaborative Poetry Experience, a Virtual Workshop with Penn State Laureate",
+      "organization": "Cross-Unit Events",
+      "theme": "Arts",
+      "categories": [
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-01-27T17:15:00+00:00",
+      "ends_at": "2027-01-27T18:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12876321",
+      "title": "General Body Meeting",
+      "organization": "Health Policy and Administration Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-01-28T23:00:00+00:00",
+      "ends_at": "2027-01-29T00:00:00+00:00",
+      "location": "Ford Building Room 110",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0023000",
+        "name": "Ford Building (Donald H)",
+        "lat": 40.799712,
+        "lng": -77.869554,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12588561",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2027-02-04T00:00:00+00:00",
+      "ends_at": "2027-02-04T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12791321",
+      "title": "Empower 2027 Conference - Many Paths, One Future",
+      "organization": "Graduate Women in Science at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "Leadership Development",
+        "Lectures & Speaking Engagements",
+        "Off Campus Events"
+      ],
+      "starts_at": "2027-02-06T13:30:00+00:00",
+      "ends_at": "2027-02-06T21:30:00+00:00",
+      "location": "The Nittany Lion Inn",
+      "lat": 40.79731,
+      "lng": -77.87087,
+      "building": {
+        "num": "0091000",
+        "name": "The Nittany Lion Inn",
+        "lat": 40.796948,
+        "lng": -77.871064,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12529493",
+      "title": "Matters of Substance: Wanna Bet",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2027-02-09T17:00:00+00:00",
+      "ends_at": "2027-02-09T19:30:00+00:00",
+      "location": "HUB Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12783374",
+      "title": "World Campus Benefitting THON™ General Membership Meeting",
+      "organization": "World Campus Benefitting THON™",
+      "theme": "Fundraising",
+      "categories": [],
+      "starts_at": "2027-02-12T00:00:00+00:00",
+      "ends_at": "2027-02-12T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624585",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-02-18T00:00:00+00:00",
+      "ends_at": "2027-02-18T01:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12876322",
+      "title": "General Body Meeting",
+      "organization": "Health Policy and Administration Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-02-18T23:00:00+00:00",
+      "ends_at": "2027-02-19T00:00:00+00:00",
+      "location": "Ford Building Room 110",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0023000",
+        "name": "Ford Building (Donald H)",
+        "lat": 40.799712,
+        "lng": -77.869554,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12586406",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2027-02-19T01:00:00+00:00",
+      "ends_at": "2027-02-19T02:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12809290",
+      "title": "Rolling Reading Series Presents: Ruben Reyes Jr.",
+      "organization": "Creative Writing Club at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2027-02-25T23:00:00+00:00",
+      "ends_at": "2027-02-26T00:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79851,
+      "lng": -77.8654,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12618009",
+      "title": "Threading the Future: Textiles and Technology | Annet Couwenberg",
+      "organization": "HUB-Robeson Galleries",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2026-11-14T15:00:00+00:00",
+      "ends_at": "2027-03-01T23:00:00+00:00",
+      "location": "HUB Gallery",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12529494",
+      "title": "Matters of Substance: Safe Spring Break",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2027-03-02T17:00:00+00:00",
+      "ends_at": "2027-03-02T19:30:00+00:00",
+      "location": "HUB Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12485494",
+      "title": "Spring 2027 New Organization Mini-Fair",
+      "organization": "Student Leadership and Involvement, a unit of Student Affairs at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-02-23T15:00:00+00:00",
+      "ends_at": "2027-03-02T21:00:00+00:00",
+      "location": "Big TV Lounge",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12588562",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2027-03-04T00:00:00+00:00",
+      "ends_at": "2027-03-04T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12525126",
+      "title": "World Campus Career Services: Transferable Skills & Career Pivots",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-03-09T17:15:00+00:00",
+      "ends_at": "2027-03-09T17:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12624586",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-03-17T23:00:00+00:00",
+      "ends_at": "2027-03-18T00:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12876323",
+      "title": "General Body Meeting",
+      "organization": "Health Policy and Administration Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-03-18T22:00:00+00:00",
+      "ends_at": "2027-03-18T23:00:00+00:00",
+      "location": "Ford Building Room 110",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0023000",
+        "name": "Ford Building (Donald H)",
+        "lat": 40.799712,
+        "lng": -77.869554,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12586407",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2027-03-19T00:00:00+00:00",
+      "ends_at": "2027-03-19T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12812303",
+      "title": "Fisher Family Writer-in-Residence Reading: Emily Mitchell",
+      "organization": "Creative Writing Club at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2027-03-25T22:00:00+00:00",
+      "ends_at": "2027-03-25T23:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79851,
+      "lng": -77.8654,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12812347",
+      "title": "Rolling Reading Series Presents: Shara McCallum & Andrew Bode-Lang",
+      "organization": "Creative Writing Club at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2027-04-01T22:00:00+00:00",
+      "ends_at": "2027-04-01T23:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79851,
+      "lng": -77.8654,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12588563",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2027-04-07T23:00:00+00:00",
+      "ends_at": "2027-04-08T00:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12812358",
+      "title": "Rolling Reading Series Presents: Evie Shockley",
+      "organization": "Creative Writing Club at University Park",
+      "theme": "Arts",
+      "categories": [],
+      "starts_at": "2027-04-08T22:00:00+00:00",
+      "ends_at": "2027-04-08T23:00:00+00:00",
+      "location": "Foster Auditorium",
+      "lat": 40.79851,
+      "lng": -77.8654,
+      "building": {
+        "num": "0003003",
+        "name": "Paterno Library (Suzanne P and Joseph V)",
+        "lat": 40.79851,
+        "lng": -77.865369,
+        "matched_by": "coordinates"
+      }
+    },
+    {
+      "id": "12876324",
+      "title": "General Body Meeting",
+      "organization": "Health Policy and Administration Club at University Park",
+      "theme": "Social",
+      "categories": [],
+      "starts_at": "2027-04-15T22:00:00+00:00",
+      "ends_at": "2027-04-15T23:00:00+00:00",
+      "location": "Ford Building Room 110",
+      "lat": null,
+      "lng": null,
+      "building": {
+        "num": "0023000",
+        "name": "Ford Building (Donald H)",
+        "lat": 40.799712,
+        "lng": -77.869554,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12586409",
+      "title": "Disability and Neurodivergence Affinity (DNA) Monthly Meeting",
+      "organization": "Disability and Neurodivergence Affinity Group at World Campus",
+      "theme": "GroupBusiness",
+      "categories": [],
+      "starts_at": "2027-04-16T00:00:00+00:00",
+      "ends_at": "2027-04-16T01:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12529495",
+      "title": "Matters of Substance: 420",
+      "organization": "Counseling and Psychological Services (CAPS) at University Park",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Health and Wellness"
+      ],
+      "starts_at": "2027-04-20T16:00:00+00:00",
+      "ends_at": "2027-04-20T18:30:00+00:00",
+      "location": "HUB Tables",
+      "lat": 40.79811,
+      "lng": -77.86121,
+      "building": {
+        "num": "0005000",
+        "name": "Hetzel Union Building (Ralph Dorn)",
+        "lat": 40.798261,
+        "lng": -77.861197,
+        "matched_by": "location text"
+      }
+    },
+    {
+      "id": "12624587",
+      "title": "WCSGA General Assembly Meeting",
+      "organization": "World Campus Student Government Association",
+      "theme": "GroupBusiness",
+      "categories": [
+        "Regular Meeting",
+        "Online or Virtual Attendance",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-04-21T23:00:00+00:00",
+      "ends_at": "2027-04-22T00:30:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12588564",
+      "title": "First-Gen Affinity - Monthly Zoom Meet-Up",
+      "organization": "First-Gen Affinity at World Campus",
+      "theme": "Social",
+      "categories": [
+        "World Campus Events"
+      ],
+      "starts_at": "2027-05-05T23:00:00+00:00",
+      "ends_at": "2027-05-06T00:00:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12525162",
+      "title": "World Campus Career Services: Internship & Summer Success",
+      "organization": "World Campus Student Affairs",
+      "theme": "ThoughtfulLearning",
+      "categories": [
+        "Career Exploration",
+        "World Campus Events"
+      ],
+      "starts_at": "2027-05-13T16:15:00+00:00",
+      "ends_at": "2027-05-13T16:45:00+00:00",
+      "location": "Online",
+      "lat": null,
+      "lng": null,
+      "building": null
+    },
+    {
+      "id": "12673545",
+      "title": "Weekly Love feast and Bible Study",
+      "organization": "Christians on Campus at University Park",
+      "theme": "Spirituality",
+      "categories": [],
+      "starts_at": "2026-08-31T16:00:00+00:00",
+      "ends_at": "2027-08-31T17:00:00+00:00",
+      "location": "The church in State College",
+      "lat": 40.79868,
+      "lng": -77.91138,
+      "building": null
+    }
+  ]
+}

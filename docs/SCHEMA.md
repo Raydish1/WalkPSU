@@ -43,6 +43,9 @@ Every signed-in user can read all players. A player can insert and update only t
 | `created_by` | uuid → `players` | |
 | `created_at` | timestamptz | |
 | `expires_at` | timestamptz | null = never. Past this time the drop can't be claimed even if `status` is still `active` |
+| `subtitle` | text | optional line under the title; the hosting organization for imported campus events |
+| `starts_at` | timestamptz | optional; when the event behind the drop begins. The drop card shows it with `expires_at` |
+| `source_id` | text | unique. Set only on drops seeded from campus events (`discover:<event id>`, by `web/scripts/seed-event-drops.mjs`); null for drops made in `/admin` |
 
 Only admins can insert, update, or delete. Everyone signed in can read.
 

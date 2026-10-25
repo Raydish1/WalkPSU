@@ -223,6 +223,34 @@
   overflow-wrap: anywhere;
 }
 
+.drop-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drop-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.event-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.event-time svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
 .points-badge {
   flex-shrink: 0;
   padding: 4px 10px;

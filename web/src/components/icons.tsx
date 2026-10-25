@@ -38,6 +38,13 @@ export const PinIcon = (p: IconProps) => (
   </Icon>
 )
 
+export const ClockIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </Icon>
+)
+
 export const LocateIcon = (p: IconProps) => (
   <Icon {...p} fill="currentColor" stroke="none">
     <path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z" />

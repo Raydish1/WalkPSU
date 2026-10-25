@@ -27,10 +27,18 @@ function seed() {
   for (const [i, name] of ['Bot Ana', 'Bot Ben', 'Bot Cal'].entries()) {
     players.push({ id: `bot${i}`, auth_id: `bot${i}`, display_name: name, color: PALETTE[i + 1], is_admin: false, created_at: now() })
   }
-  const drop = (id, title, type, lat, lng, points, building_num) =>
-    ({ id, title, type, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null })
+  const drop = (id, title, type, lat, lng, points, building_num, event = {}) => ({
+    id, title, type, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null,
+    subtitle: null, starts_at: null, source_id: null, ...event,
+  })
   const drops = [
-    drop('center-drop', 'Old Main lawn', 'checkin', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng, 15, null),
+    // Shaped like a drop seeded from a Penn State Discover event, so the card shows its organization and time.
+    drop('center-drop', 'Old Main lawn', 'checkin', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng, 15, null, {
+      subtitle: 'Penn State Outing Club',
+      starts_at: new Date(Date.now() - 30 * 60_000).toISOString(),
+      expires_at: new Date(Date.now() + 90 * 60_000).toISOString(),
+      source_id: 'discover:mock',
+    }),
     // ~30 m east of the lawn drop, at the HUB (so the map highlights building 0005000).
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
   ]
@@ -202,7 +210,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       return reply([p])
     }
     if (req.method === 'POST' && path === 'drops') {
-      const d = { id: randomUUID(), status: 'active', points: 10, hint_photo_url: null, building_num: null, expires_at: null, created_at: now(), ...json }
+      const d = { id: randomUUID(), status: 'active', points: 10, hint_photo_url: null, building_num: null, expires_at: null, subtitle: null, starts_at: null, source_id: null, created_at: now(), ...json }
       drops.push(d)
       secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', '') })
       return reply([d])

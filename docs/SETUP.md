@@ -44,3 +44,15 @@ Once `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID` are set, the app switches to
 1. Import the GitHub repo and set **Root Directory** to `web`. The framework preset (Vite) is detected.
 2. Add every non-empty variable from `web/.env` under **Settings → Environment Variables**.
 3. Deploy. Add the deployed URL to the Auth0 app's callback, logout, and origin lists.
+
+## 4. Demo drops from real campus events (optional)
+
+`web/scripts/data/discover-events.json` is a committed snapshot of upcoming public events from [Penn State Discover](https://discover.psu.edu/events), each matched to a campus building where possible.
+
+1. Apply migration `20261024050000_event_drops.sql` (adds `drops.subtitle`, `starts_at`, `source_id`).
+2. Add `SUPABASE_SERVICE_ROLE_KEY=<service_role key from Supabase → Project Settings → API>` to `web/.env`. No `VITE_` prefix: it bypasses RLS and must never reach the browser.
+3. From `web/`:
+   - `npm run import-events` refreshes the snapshot (4 requests to Discover's public event search).
+   - `npm run seed-events -- --dry-run` shows the 12 picks: events starting in the next 48 h (widened a day at a time, up to a week, when there aren't 12 buildings), one per building, spread over campus, mixed themes, never in ECoRE.
+   - `npm run seed-events` inserts them as check-in drops that expire when the event ends.
+   - `npm run seed-events -- --clear` deletes only the drops it created (`source_id like 'discover:%'`) and their claims.
