@@ -97,18 +97,33 @@ export type EventResult = {
   reason: string
 }
 
-/** Natural-language event search. Throws a user-facing message (busy, rate limited, offline). */
-export async function searchEvents(query: string) {
+/** A live drop as search sees it: only what the map already shows, never its coordinates. */
+export type SearchableDrop = { id: string; title: string; at?: string }
+export type SearchAnswer = { results: EventResult[]; dropIds: string[] }
+
+// Same request over the same drops: reuse the answer instead of spending another Gemini call (and search quota).
+const searchCache = new Map<string, SearchAnswer>()
+
+/**
+ * Natural-language search: campus events from the Discover snapshot, plus which live drops fit, in one Gemini call.
+ * Throws a user-facing message (busy, rate limited, offline).
+ */
+export async function searchEvents(query: string, drops: SearchableDrop[]) {
+  const key = `${query.trim().toLowerCase()}|${drops.map((d) => d.id).join(',')}`
+  const cached = searchCache.get(key)
+  if (cached) return cached
   const token = await getAccessToken()
   const response = await fetch('/api/search-events', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, drops }),
   }).catch(() => null)
   if (!response) throw new Error('Couldn’t reach the event finder. Check your connection')
   const body = await response.json().catch(() => ({}))
   if (!response.ok) throw new Error(body.error ?? `Search failed (${response.status})`)
-  return (body as { results: EventResult[] }).results
+  const answer: SearchAnswer = { results: body.results ?? [], dropIds: body.dropIds ?? [] }
+  searchCache.set(key, answer)
+  return answer
 }
 
 export async function getDrop(id: string) {

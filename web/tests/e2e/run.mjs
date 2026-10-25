@@ -279,13 +279,24 @@ async function searchScenario(browser) {
 
   await page.click('.search-pill')
   await page.waitForSelector('.search-sheet .example-chip')
-  check('search shows example prompts', (await page.locator('.search-sheet .example-chip').allTextContents()).join('|') === 'free food|something for CS majors|music tonight')
+  const chips = (await page.locator('.search-sheet .example-chip').allTextContents()).map((c) => c.trim())
+  check(
+    'search shows example prompts and category picks',
+    chips.slice(0, 3).join('|') === 'free food|something for CS majors|music tonight' && ['Sports', 'Music', 'Food', 'Arts', 'Games'].every((c) => chips.some((chip) => chip.endsWith(c))),
+    chips,
+  )
   await page.click('.search-sheet .example-chip:has-text("free food")')
   await page.waitForSelector('.search-sheet .search-result')
   let text = await sheetText()
   check('results show title, organization, place, and Gemini’s reason', /Late Night Pancakes.*Library Programming.*Pattee Library.*free pancakes at Pattee/.test(text), text)
   check('an online event is listed with its location and no building', /Virtual Study Hall.*Online/.test(text), text)
-  check('a result that is one of our drops says it’s claimable', /Lawn Picnic.*Claimable · 15 pts/.test(text), text)
+  check('matching live drops come first, under "Live on the map"', /Live on the map\s*Lawn Picnic.*Check-in · 15 pts.*Campus events/.test(text), text)
+  check('a campus event already listed as a live drop isn’t repeated', (text.match(/Lawn Picnic/g) ?? []).length === 1, text)
+  const narrowed = await page.evaluate(() => ({
+    pill: document.querySelector('.map-top [role="status"]').textContent,
+    pins: window.__walkpsuMap.getSource('drops').serialize().data.features.map((f) => f.properties.id),
+  }))
+  check('the map narrows to the matching drops', /Showing 1 of \d+ · “free food”/.test(narrowed.pill) && JSON.stringify(narrowed.pins) === '["event-drop"]', narrowed)
   await page.screenshot({ path: SHOTS + 'search-results.png' })
 
   await page.click('.search-result:has-text("Late Night Pancakes")')
@@ -327,6 +338,19 @@ async function searchScenario(browser) {
   await page.waitForSelector('.search-sheet [role="alert"]')
   text = await sheetText()
   check('a busy Gemini shows a friendly error and a retry', /busy/.test(text) && /Try again/.test(text), text)
+
+  // The "zzz" search left the map narrowed to nothing; the ✕ in the status pill brings every drop back.
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(700)
+  check('a search with no live matches says so in the pill', /No drops match “zzz”/.test(await page.textContent('.map-top [role="status"]')))
+  await page.click('.pill-clear')
+  await page.waitForTimeout(300)
+  const restored = await page.evaluate(() => ({
+    pill: document.querySelector('.map-top [role="status"]').textContent,
+    pins: window.__walkpsuMap.getSource('drops').serialize().data.features.length,
+  }))
+  const live = (await (await fetch(`${MOCK}/__state`)).json()).drops.filter((d) => d.status === 'active' && !(d.type === 'photo_hunt' && !d.first_found_at)).length
+  check('clearing the search shows every drop again', /live drops?$/.test(restored.pill) && restored.pins === live, { restored, live })
   // The 503 from the stand-in is expected; anything else isn't.
   check('no console errors', page.errors.filter((e) => !/503 POST .*api\/search-events/.test(e)).length === 0, page.errors)
   await page.context().close()

@@ -741,6 +741,24 @@ a.list-row:active {
   letter-spacing: 0;
 }
 
+/* Achievement badges, just before a score. */
+.badges {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--fill);
+  font-size: 14px;
+  line-height: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .leaderboard > li {
     animation: rise-in 420ms var(--ease-out) both;

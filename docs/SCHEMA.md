@@ -180,8 +180,8 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
 
 1. The caller must be a signed-in player (`current_player_id()` under their JWT). The query is 2–200 characters.
 2. `use_search_quota() → boolean` takes one search from the caller's allowance (10 per 10 minutes) and refuses with 429 past it. Runs as the caller; `search_quota (player_id, window_start, used)` has RLS with no policies, so only the function touches it. It stores a counter only: **queries are never stored or logged**.
-3. Gemini gets the upcoming events (the soonest 300: id, title, organization, theme and categories, start time, location) and the query, wrapped as data, and returns up to 6 `{ id, reason }`.
-4. Ids are checked against the snapshot (unknown, ended, and duplicate ids are dropped). The response is `{ results: [{ id, title, organization, theme, starts_at, ends_at, location, building | null, reason }] }`; `building` is null for online or vaguely located events.
+3. Gemini gets the upcoming events (the soonest 300: id, title, organization, theme and categories, start time, location), the live drops the client sent (`drops: [{ id, title, at? }]`, up to 150; titles and building names only, never coordinates), and the query, wrapped as data. It returns up to 6 event `{ id, reason }` and the `drop_ids` that fit.
+4. Ids are checked against the snapshot and the sent drops (unknown, ended, and duplicate ids are dropped). The response is `{ results: [{ id, title, organization, theme, starts_at, ends_at, location, building | null, reason }], dropIds: string[] }`; `building` is null for online or vaguely located events.
 
 The app links a result to a seeded drop by `drops.source_id = 'discover:<event id>'`.
 

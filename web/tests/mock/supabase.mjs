@@ -515,9 +515,13 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     if (url.pathname === '/__search-events') {
       const query = String(json.query ?? '').toLowerCase()
       if (query.includes('busy')) return send(503, { error: 'The event finder is busy right now. Try again in a minute' })
-      if (query.includes('zzz')) return send(200, { results: [] })
+      if (query.includes('zzz')) return send(200, { results: [], dropIds: [] })
       const at = (hours) => new Date(Date.now() + hours * 3600_000).toISOString()
+      // Of the live drops the app sent, the picnic fits anything food-related.
+      const sent = Array.isArray(json.drops) ? json.drops : []
+      const dropIds = query.includes('food') ? sent.filter((d) => /picnic/i.test(d.title)).map((d) => d.id) : []
       return send(200, {
+        dropIds,
         results: [
           // Pattee, not the HUB: the HUB already glows for the Shake-Off drop, so the test couldn't see the search light it.
           { id: 'e2e-pattee', title: 'Late Night Pancakes', organization: 'Library Programming', theme: 'Social', starts_at: at(1), ends_at: at(3), location: 'Pattee 103',

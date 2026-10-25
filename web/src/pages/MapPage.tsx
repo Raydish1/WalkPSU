@@ -5,7 +5,7 @@ import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
 import EventSheet from '../components/EventSheet'
-import { PlusIcon, SearchIcon } from '../components/icons'
+import { CrossIcon, PlusIcon, SearchIcon } from '../components/icons'
 import MeetupSheet from '../components/MeetupSheet'
 import FoundOverlay, { type Found } from '../components/FoundOverlay'
 import PlayerSprite from '../components/PlayerSprite'
@@ -70,14 +70,23 @@ function MapPage() {
   // A searched event's card; like `sheet`, it keeps its event while sliding away.
   const [event, setEvent] = useState<{ event: EventResult; open: boolean } | null>(null)
   const [flyTarget, setFlyTarget] = useState<{ lng: number; lat: number } | null>(null)
+  // Set while a search narrows the map to the drops Gemini picked.
+  const [filter, setFilter] = useState<{ query: string; ids: ReadonlySet<string> } | null>(null)
 
   const here = position?.coords
   const distanceTo = (d: DropRow) => (here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null)
-  // Buildings with a live drop glow; so does the building of the searched event on screen.
+  const shown = useMemo(() => (filter ? drops.filter((d) => filter.ids.has(d.id)) : drops), [drops, filter])
+  // Buildings with a shown drop glow; so does the building of the searched event on screen.
   const eventBuilding = event?.open ? event.event.building?.num : undefined
   const highlighted = useMemo(
-    () => new Set([...drops.flatMap((d) => (d.building_num ? [d.building_num] : [])), ...(eventBuilding ? [eventBuilding] : [])]),
-    [drops, eventBuilding],
+    () => new Set([...shown.flatMap((d) => (d.building_num ? [d.building_num] : [])), ...(eventBuilding ? [eventBuilding] : [])]),
+    [shown, eventBuilding],
+  )
+  const buildingNames = useMemo(() => new Map(buildings.map((b) => [b.properties.num, b.properties.name])), [buildings])
+  // All search sends about a drop: its title and building, never its location.
+  const searchable = useMemo(
+    () => drops.map((d) => ({ id: d.id, title: d.title, ...(d.building_num && buildingNames.has(d.building_num) && { at: buildingNames.get(d.building_num) }) })),
+    [drops, buildingNames],
   )
 
   const circles = useMemo<FeatureCollection<Polygon>>(
@@ -87,7 +96,7 @@ function MapPage() {
         radius === null
           ? []
           : // Meetups aren't claimable, so they get a pin but no claim circle.
-            drops.filter((d) => !isHiddenHunt(d) && d.type !== 'meetup').map((d) => {
+            shown.filter((d) => !isHiddenHunt(d) && d.type !== 'meetup').map((d) => {
               const distance = here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null
               return {
                 type: 'Feature',
@@ -96,33 +105,33 @@ function MapPage() {
               }
             }),
     }),
-    [drops, radius, here],
+    [shown, radius, here],
   )
   const huntAreas = useMemo<FeatureCollection<Polygon>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops
+      features: shown
         .filter(isHiddenHunt)
         .map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: circlePolygon(d.lat, d.lng, d.search_radius_m ?? 125) })),
     }),
-    [drops],
+    [shown],
   )
   // A "?" pin at each search circle's center. That point is already the public decoy center, never the real spot.
   const huntCenters = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops.filter(isHiddenHunt).map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
+      features: shown.filter(isHiddenHunt).map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
     }),
-    [drops],
+    [shown],
   )
   const dropPoints = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops
+      features: shown
         .filter((d) => !isHiddenHunt(d))
         .map((d) => ({ type: 'Feature', properties: { id: d.id, color: pinColor(d) }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
     }),
-    [drops],
+    [shown],
   )
   // Everyone on the map as sprites; me last so my sprite draws on top.
   const sprites = useMemo<LivePlayer[]>(
@@ -138,6 +147,15 @@ function MapPage() {
 
   /** Seeded drops carry their Discover event id, so a search result can open the drop players can claim. */
   const dropForEvent = (eventId: string) => drops.find((d) => d.source_id === `discover:${eventId}`)
+
+  const pickDrop = (drop: DropRow) => {
+    setSearching(false)
+    setTimeout(() => {
+      closeEvent()
+      setSheet({ drop, open: true })
+      setFlyTarget({ lng: drop.lng, lat: drop.lat })
+    }, SHEET_CLOSE_MS)
+  }
 
   const pickEvent = (result: EventResult, drop: DropRow | undefined) => {
     setSearching(false)
@@ -246,8 +264,19 @@ function MapPage() {
           Find events you’d like…
         </button>
         <span className="map-pill glass" role="status">
-          <span className="live-dot" data-off={drops.length === 0 || undefined} aria-hidden />
-          {drops.length === 0 ? 'No live drops' : `${drops.length} live ${drops.length === 1 ? 'drop' : 'drops'}`}
+          <span className="live-dot" data-off={shown.length === 0 || undefined} aria-hidden />
+          {filter
+            ? shown.length === 0
+              ? `No drops match “${filter.query}”`
+              : `Showing ${shown.length} of ${drops.length} · “${filter.query}”`
+            : drops.length === 0
+              ? 'No live drops'
+              : `${drops.length} live ${drops.length === 1 ? 'drop' : 'drops'}`}
+          {filter && (
+            <button type="button" className="pill-clear" aria-label="Show all drops" onClick={() => setFilter(null)}>
+              <CrossIcon size={14} />
+            </button>
+          )}
         </span>
         {error && <div className="map-banner glass error">{error}</div>}
       </div>
@@ -255,7 +284,20 @@ function MapPage() {
         <PlusIcon size={18} />
         Meetup
       </button>
-      <SearchSheet open={searching} onOpenChange={setSearching} dropFor={dropForEvent} onPick={pickEvent} />
+      <SearchSheet
+        open={searching}
+        onOpenChange={setSearching}
+        drops={searchable}
+        dropById={(id) => drops.find((d) => d.id === id)}
+        dropFor={dropForEvent}
+        onMatched={(query, ids) => {
+          closeSheet()
+          // Narrow the map only when there are drops to narrow; a search with no live drops shows events alone.
+          setFilter(drops.length > 0 ? { query, ids: new Set(ids) } : null)
+        }}
+        onPick={pickEvent}
+        onPickDrop={pickDrop}
+      />
       <EventSheet event={event?.event ?? null} open={!!event?.open} onClose={closeEvent} />
       <MeetupSheet
         open={composing}

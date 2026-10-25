@@ -48,9 +48,9 @@ async function joinAs(sub, name) {
 
 const mock = await startMockSupabase()
 const { POST } = await import('../../api/search-events.ts')
-async function search(query, sub = 'ana') {
+async function search(query, sub = 'ana', drops) {
   const headers = { 'Content-Type': 'application/json', ...(sub && { Authorization: `Bearer ${tokenFor(sub)}` }) }
-  const res = await POST(new Request('http://localhost/api/search-events', { method: 'POST', headers, body: JSON.stringify({ query }) }))
+  const res = await POST(new Request('http://localhost/api/search-events', { method: 'POST', headers, body: JSON.stringify({ query, drops }) }))
   return { status: res.status, body: await res.json() }
 }
 
@@ -110,6 +110,18 @@ try {
   r = await search('anything fun')
   check('at most 6 results', r.body.results?.length === 6, r.body.results?.length)
 
+  // Live drops ride along in the same call: the client sends titles and building names only.
+  const drops = [
+    { id: 'd-hoops', title: '🏀 Pickup hoops', at: 'Rec Hall' },
+    { id: 'd-chess', title: 'Chess club', lat: 40.8, lng: -77.86 },
+  ]
+  gemini.queue.push({ matches: [], drop_ids: ['d-hoops', 'not-sent', 'd-hoops', 42] })
+  r = await search('basketball', 'ana', drops)
+  check('matching drops come back by id, only ones the client sent, each once', JSON.stringify(r.body.dropIds) === '["d-hoops"]', r.body)
+  const dropPrompt = gemini.calls.at(-1).prompt
+  check('the prompt lists the drops by title and building', dropPrompt.includes('d-hoops | 🏀 Pickup hoops | Rec Hall') && dropPrompt.includes('d-chess | Chess club'), dropPrompt.slice(-300))
+  check('a coordinate the client sent never reaches Gemini', !dropPrompt.includes('40.8') && !dropPrompt.includes('-77.86'))
+
   gemini.queue.push({ matches: [] })
   r = await search('underwater basket weaving for cats')
   check('nothing matched: an empty list, not an error', r.status === 200 && r.body.results.length === 0, r)
@@ -123,14 +135,14 @@ try {
   check('Gemini busy on every model: 503 "busy"', r.status === 503 && /busy/.test(r.body.error), r)
   check('nothing logged contains a query', !logged.some((line) => /secret hobby|free food|music tonight|basket weaving/.test(line)), logged)
 
-  // 5 searches so far reached the quota (the blank and too-long ones were refused before it). 10 per window.
+  // 6 searches so far reached the quota (the blank and too-long ones were refused before it). 10 per window.
   gemini.calls.length = 0
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     gemini.queue.push({ matches: [] })
     await search('more searches')
   }
   r = await search('one too many')
-  check('the 11th search in 10 minutes is refused (429), before any Gemini call', r.status === 429 && gemini.calls.length === 5, { r, calls: gemini.calls.length })
+  check('the 11th search in 10 minutes is refused (429), before any Gemini call', r.status === 429 && gemini.calls.length === 4, { r, calls: gemini.calls.length })
 } catch (e) {
   failures++
   console.log(`FAIL crashed :: ${e.stack}`)

@@ -744,11 +744,51 @@
 }
 
 .search-results {
+  display: flex;
   flex-shrink: 1;
+  flex-direction: column;
+  gap: 16px;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.search-results .list {
   box-shadow: none;
+}
+
+/* "Live on the map" / "Campus events" */
+.search-section {
+  margin: 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.search-drop-chip {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* The ✕ in the status pill while a search narrows the map. */
+.pill-clear {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: -8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pill-clear:active {
+  transform: scale(0.92);
 }
 
 .search-result {
