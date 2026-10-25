@@ -9,10 +9,14 @@ function TugBar({ players, live, meId, big = false }: Props) {
   const totals = sideTotals(players, live)
   const share = blueShare(totals)
   return (
-    <div className={`tug ${big ? 'tug-big' : ''}`} style={{ '--blue-share': `${share * 100}%` } as CSSProperties}>
+    <div className={`tug ${big ? 'tug-big' : ''}`} style={{ '--blue-share': `${share * 100}%`, '--blue-ratio': share } as CSSProperties}>
       <div className="tug-track" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(share * 100)} aria-label="Blue's share">
-        <div className="tug-blue" style={{ background: SIDES.blue.color }} />
-        <div className="tug-knot" />
+        <div className="tug-fill">
+          <div className="tug-blue" style={{ background: SIDES.blue.color }} />
+        </div>
+        <div className="tug-rail">
+          <div className="tug-knot" />
+        </div>
       </div>
       <div className="tug-labels">
         {(['blue', 'white'] as const).map((side) => (

@@ -1,66 +1,63 @@
-/* Shake-Off */
+/* Shake-Off: lobby, the phone game screen, results, and the /battle projector view. */
+
+/* Game screens get shaken: no selection, callouts, or scroll bounce. */
+.game-screen,
+.game-lobby,
+.battle {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+
+.app[data-chrome='none'] .app-main {
+  overscroll-behavior: none;
+}
 
 .game-eyebrow,
 .battle-eyebrow {
   margin: 0;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.8;
+  opacity: 0.72;
 }
 
-.game-screen {
+/* Lobby */
+
+.game-lobby h1 {
+  overflow-wrap: anywhere;
+}
+
+.game-lobby .button {
+  width: 100%;
+}
+
+.game-countdown {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  min-height: 100dvh;
-  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
-  background: var(--side);
-  color: var(--side-ink);
-  text-align: center;
-  user-select: none;
-  touch-action: manipulation;
+  gap: 2px;
+  padding: 20px 16px;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
-.game-huge {
-  margin: 0;
-  font-size: clamp(56px, 18vw, 120px);
-  font-weight: 900;
-  line-height: 1;
+.game-countdown span {
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
-.game-big {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.game-timer,
-.game-countdown {
-  margin: 0;
-  font-size: 32px;
+.game-countdown strong {
+  font-size: 88px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-}
-
-.game-count {
-  margin: 0;
-  font-size: 72px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.game-tap {
-  width: 100%;
-  min-height: 120px;
-  font-size: 22px;
-}
-
-.game-lobby .game-countdown {
-  color: var(--psu-navy);
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .roster,
@@ -75,16 +72,244 @@
 
 .roster li,
 .battle-roster li {
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 5px 14px 5px 5px;
   border-radius: 999px;
   background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: 15px;
   font-weight: 600;
 }
 
-.roster .color-dot,
-.battle-roster .color-dot {
-  background: var(--player);
+.roster .avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
 }
+
+.roster li > span:not(.avatar) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .roster li,
+  .battle-roster li {
+    animation: chip-in 320ms var(--ease-out) both;
+  }
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.lobby-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lobby-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: var(--radius-card);
+  background: var(--side);
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.1),
+    var(--shadow-card);
+  color: var(--side-ink);
+}
+
+.lobby-side strong {
+  font-size: 17px;
+}
+
+/* Phone game screen: the whole screen is your side's color. */
+
+.game-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-height: 100%;
+  padding: calc(var(--safe-top) + 16px) var(--gutter-r) max(24px, var(--safe-bottom)) var(--gutter-l);
+  background: var(--side);
+  color: var(--side-ink);
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.game-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.side-chip,
+.game-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--side-ink) 12%, transparent);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-hero {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.game-huge {
+  margin: 0;
+  font-size: clamp(64px, 22vw, 128px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+/* A wobble that says "shake" without words; off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .game-huge.is-shaking {
+    animation: wobble 600ms ease-in-out infinite;
+  }
+}
+
+@keyframes wobble {
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.game-count {
+  margin: 12px 0 0;
+  font-size: 96px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.game-count-label {
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.game-big {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.016em;
+}
+
+.game-tap {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 24px;
+  font-size: 22px;
+}
+
+.game-tap:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.game-screen > .button:not(.game-tap) {
+  width: min(100%, 320px);
+  background: color-mix(in srgb, var(--side-ink) 14%, transparent);
+  color: var(--side-ink);
+}
+
+/* Results */
+
+.game-result {
+  justify-content: center;
+}
+
+.game-winners,
+.battle-winners {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-winners h1,
+.battle-winners h1 {
+  margin: 0;
+  font-size: clamp(34px, 10vw, 56px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.game-winners p,
+.battle-winners p {
+  margin: 0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--side-ink) 14%, transparent);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .game-result > *,
+  .battle-result > * {
+    animation: rise-in 520ms var(--ease-out) both;
+  }
+  .game-result > :nth-child(2),
+  .battle-result > :nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .game-result > :nth-child(3),
+  .battle-result > :nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .game-result > :nth-child(n + 4),
+  .battle-result > :nth-child(n + 4) {
+    animation-delay: 180ms;
+  }
+}
+
+.mvp {
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #facc15;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.4);
+  color: #0f172a;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+/* Tug-of-war: Blue fills from the left; the knot rides at Blue's share. Transform-only, so it stays smooth. */
 
 .tug {
   width: 100%;
@@ -93,37 +318,55 @@
 
 .tug-track {
   position: relative;
-  height: 28px;
-  overflow: hidden;
-  border: 3px solid #0f172a;
+  height: 36px;
   border-radius: 999px;
   background: #f8fafc;
+  box-shadow:
+    inset 0 0 0 2px rgba(15, 23, 42, 0.18),
+    inset 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.tug-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
 }
 
 .tug-blue {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--blue-share);
-  transition: width 400ms ease-out;
+  inset: 0;
+  transform: scaleX(var(--blue-ratio));
+  transform-origin: left;
+  transition: transform 500ms var(--ease-out);
+}
+
+.tug-rail {
+  position: absolute;
+  inset: 0;
+  transform: translateX(var(--blue-share));
+  transition: transform 500ms var(--ease-out);
 }
 
 .tug-knot {
   position: absolute;
-  top: -3px;
-  bottom: -3px;
-  left: var(--blue-share);
-  width: 6px;
-  margin-left: -3px;
+  top: 50%;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
   background: #facc15;
-  transition: left 400ms ease-out;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
 }
 
 .tug-labels {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 6px;
-  font-size: 14px;
+  margin-top: 8px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -132,6 +375,7 @@
   flex-direction: column;
   gap: 2px;
   max-width: 50%;
+  text-align: left;
 }
 
 .tug-side-white {
@@ -146,61 +390,13 @@
 }
 
 mark.me {
-  padding: 0 4px;
-  border-radius: 4px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 5px;
+  border-radius: 6px;
   background: #facc15;
   color: #0f172a;
   font-weight: 700;
-}
-
-.game-winners h1,
-.battle-winners h1 {
-  margin: 0;
-  font-size: clamp(32px, 10vw, 56px);
-  font-weight: 900;
-  line-height: 1.1;
-  overflow-wrap: anywhere;
-}
-
-.game-winners p,
-.battle-winners p {
-  margin: 8px 0 0;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.battle-winners h1 {
-  font-size: clamp(48px, 8vw, 120px);
-}
-
-.battle-winners p {
-  font-size: clamp(24px, 3vw, 40px);
-}
-
-.mvp {
-  margin: 0;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(250, 204, 21, 0.9);
-  color: #0f172a;
-  font-size: 18px;
-}
-
-.lobby-sides {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.lobby-side {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 2px solid #1e40af;
-  border-radius: 12px;
-  background: var(--side);
-  color: var(--side-ink);
 }
 
 .tug-big {
@@ -208,66 +404,110 @@ mark.me {
 }
 
 .tug-big .tug-track {
-  height: 72px;
-  border-width: 5px;
+  height: 80px;
+}
+
+.tug-big .tug-knot {
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-width: 6px;
 }
 
 .tug-big .tug-labels {
-  font-size: 28px;
+  margin-top: 14px;
+  font-size: clamp(18px, min(2.4vw, 3.6vh), 34px);
 }
+
+/* /battle: a projector across the room. Big, bold, high contrast. */
 
 .battle {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  min-height: 100dvh;
-  padding: 40px clamp(16px, 5vw, 80px);
-  background: #0f172a;
-  color: #f8fafc;
+  justify-content: center;
+  gap: clamp(12px, 2.5vh, 40px);
+  min-height: 100%;
+  padding: clamp(20px, 4vh, 72px) clamp(24px, 4vw, 72px);
+  background: radial-gradient(120% 80% at 50% 0%, #1c2742 0%, #0b0d14 62%);
+  color: #f5f5f7;
   text-align: center;
+}
+
+.battle-eyebrow {
+  font-size: clamp(15px, 1.6vw, 26px);
 }
 
 .battle-title {
   margin: 0;
-  font-size: clamp(32px, 5vw, 64px);
+  font-size: clamp(32px, min(6.4vw, 9vh), 104px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .battle-huge {
   margin: 0;
-  font-size: clamp(64px, 12vw, 180px);
+  font-size: clamp(64px, min(16vw, 20vh), 260px);
   font-weight: 900;
-  line-height: 1;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
 }
 
 .battle-sub {
+  max-width: 40ch;
   margin: 0;
-  font-size: clamp(18px, 2vw, 28px);
-  opacity: 0.8;
+  font-size: clamp(16px, min(2vw, 3.2vh), 30px);
+  opacity: 0.7;
 }
 
 .battle-lobby {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  gap: 32px;
+  gap: clamp(24px, 4vw, 64px);
+}
+
+.battle .qr-code {
+  border-radius: 32px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 700;
+}
+
+.battle .qr-code svg {
+  width: clamp(150px, 26vh, 260px);
+  height: auto;
 }
 
 .battle-roster {
-  max-width: 720px;
+  max-width: 820px;
   justify-content: center;
-  font-size: clamp(18px, 2vw, 28px);
+  gap: 12px;
 }
 
 .battle-roster li {
-  background: #1e293b;
+  padding: 8px 22px 8px 8px;
+  border: 0.5px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  font-size: clamp(18px, min(2.2vw, 3.6vh), 34px);
+}
+
+.battle-roster .avatar {
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 0.75em;
 }
 
 .battle-start {
-  min-height: 64px;
-  font-size: 24px;
+  min-height: 76px;
+  padding: 0 56px;
+  border-radius: 999px;
+  font-size: clamp(22px, 2.2vw, 30px);
 }
 
 .battle-result {
@@ -275,32 +515,79 @@ mark.me {
   color: var(--side-ink);
 }
 
+.battle-winners h1 {
+  font-size: clamp(40px, min(8.5vw, 10vh), 140px);
+}
+
+.battle-winners p {
+  font-size: clamp(22px, min(3vw, 4.5vh), 44px);
+}
+
+.battle .mvp {
+  font-size: clamp(18px, min(2.2vw, 3.4vh), 34px);
+}
+
+.battle .tug-big .tug-track {
+  height: clamp(48px, 9vh, 80px);
+}
+
+.battle .tug-big .tug-knot {
+  width: clamp(40px, 8vh, 64px);
+  height: clamp(40px, 8vh, 64px);
+  margin: calc(clamp(40px, 8vh, 64px) / -2) 0 0 calc(clamp(40px, 8vh, 64px) / -2);
+}
+
 .battle-sides {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: clamp(12px, 2vw, 28px);
   width: 100%;
 }
 
 .battle-side {
-  padding: 20px;
-  border-radius: 20px;
+  min-width: 0;
+  padding: clamp(16px, 2vw, 28px);
+  border-radius: 28px;
   background: var(--side);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--side-ink) 16%, transparent);
   color: var(--side-ink);
-  font-size: clamp(18px, 2vw, 28px);
+  font-size: clamp(16px, min(2vw, 3.4vh), 30px);
+  text-align: left;
 }
 
 .battle-side h2 {
   margin: 0 0 12px;
   font-size: 1.4em;
+  letter-spacing: -0.02em;
 }
 
 .battle-side ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.battle-side li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.battle-side li span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-side li strong {
+  font-variant-numeric: tabular-nums;
+}
+
 .battle-side-won {
   outline: 6px solid #facc15;
+  outline-offset: 4px;
 }

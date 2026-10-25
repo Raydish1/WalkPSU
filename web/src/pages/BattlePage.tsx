@@ -1,6 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState, type CSSProperties } from 'react'
 import { useParams } from 'react-router'
+import Avatar from '../components/Avatar'
 import TugBar from '../game/TugBar'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import { SIDES, shakesOf, sidePlayers } from '../game/shakeoff'
@@ -26,7 +27,14 @@ function BattlePage() {
     getDrop(dropId).then(setDrop, console.error)
   }, [dropId])
 
-  if (!state) return <section className="battle center-screen">Loading…</section>
+  if (!state) {
+    return (
+      <section className="battle">
+        <span className="spinner" aria-hidden />
+        <p className="battle-sub">Loading…</p>
+      </section>
+    )
+  }
   const shown = phase.kind === 'finished' ? NO_LIVE : live
   const title = drop?.title ?? 'Shake-Off'
 
@@ -69,8 +77,8 @@ function BattlePage() {
         {isAdmin && <JoinQr dropId={dropId} />}
         <ul className="battle-roster">
           {state.players.map((p) => (
-            <li key={p.player_id} style={{ '--player': p.color } as CSSProperties}>
-              <span className="color-dot" aria-hidden />
+            <li key={p.player_id}>
+              <Avatar name={p.display_name} color={p.color} />
               {p.display_name}
             </li>
           ))}
@@ -110,7 +118,7 @@ function SideRosters({ players, live, highlight }: { players: GamePlayer[]; live
           <ul>
             {sidePlayers(players, side, live).map((p) => (
               <li key={p.player_id}>
-                {p.display_name} <strong>{shakesOf(p, live)}</strong>
+                <span>{p.display_name}</span> <strong>{shakesOf(p, live)}</strong>
               </li>
             ))}
           </ul>

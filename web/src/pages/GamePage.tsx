@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
+import { toast } from 'sonner'
+import Avatar from '../components/Avatar'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import TugBar, { SideNames } from '../game/TugBar'
 import { SIDES, type Phase } from '../game/shakeoff'
@@ -36,18 +38,26 @@ function GamePage() {
   const shakes = useShakes(playing)
   const live = useShakeBroadcast(dropId, me ? { playerId: player.id, count: shakes.count, active: playing } : null)
 
-  // Buzz once as the game starts and once at the result.
+  // Buzz and toast once as the game starts and once at the result.
   const buzzed = useRef<string | null>(null)
+  const points = drop?.points
   useEffect(() => {
     if (!me) return
     if (phase.kind === 'playing' && buzzed.current !== 'start') {
       buzzed.current = 'start'
       vibrate(400)
+      toast('Shake-Off started', { id: `start-${dropId}`, description: 'Shake as fast as you can!', duration: 2500 })
     } else if (phase.kind === 'finished' && buzzed.current !== 'end') {
       buzzed.current = 'end'
       vibrate([150, 80, 150, 80, 300])
+      const won = me.side === phase.winner
+      const result = won ? toast.success : toast
+      result(won ? 'You won the Shake-Off!' : `${SIDES[phase.winner].label} won the Shake-Off`, {
+        id: `result-${dropId}`,
+        description: won && points !== undefined ? `+${points} points` : 'Get them next time.',
+      })
     }
-  }, [phase.kind, me])
+  }, [phase, me, dropId, points])
 
   if (!state) return <section className="center-screen">{error ?? 'Loading Shake-Off…'}</section>
 
@@ -76,16 +86,15 @@ function GamePage() {
     if (!me?.side) return <Spectating title={title} phase={phase} players={state.players} live={live} />
     return (
       <section className="game-screen" style={{ '--side': side!.color, '--side-ink': side!.ink } as CSSProperties}>
-        <p className="game-eyebrow">You're {side!.label}</p>
-        {phase.kind === 'playing' ? (
-          <>
-            <h1 className="game-huge">SHAKE!</h1>
-            <p className="game-timer">{seconds(phase.remainingMs)}s</p>
-          </>
-        ) : (
-          <h1 className="game-huge">Counting…</h1>
-        )}
-        <p className="game-count">{shakes.count}</p>
+        <div className="game-top">
+          <span className="side-chip">You’re {side!.label}</span>
+          {phase.kind === 'playing' && <p className="game-timer">{seconds(phase.remainingMs)}s</p>}
+        </div>
+        <div className="game-hero">
+          {phase.kind === 'playing' ? <h1 className="game-huge is-shaking">SHAKE!</h1> : <h1 className="game-huge">Counting…</h1>}
+          <p className="game-count">{shakes.count}</p>
+          <span className="game-count-label">{shakes.count === 1 ? 'shake' : 'shakes'}</span>
+        </div>
         <TugBar players={state.players} live={live} meId={player.id} />
         {!shakes.motionReady && phase.kind === 'playing' && (
           <button className="button primary game-tap" onClick={shakes.tap}>
@@ -103,7 +112,10 @@ function GamePage() {
       <p className="game-eyebrow">Shake-Off · {drop?.points ?? '…'} pts to every winner</p>
       <h1>{title}</h1>
       {startsIn !== null ? (
-        <p className="game-countdown">Starting in {seconds(startsIn)}</p>
+        <p className="game-countdown" role="timer">
+          <span>Starting in</span>
+          <strong>{seconds(startsIn)}</strong>
+        </p>
       ) : (
         <p className="muted">
           Starts automatically at {state.settings.auto_start_players} players, or when an admin taps Start. Teams are picked at
@@ -129,7 +141,7 @@ function GamePage() {
       )}
       {isAdmin && <AdminStart dropId={dropId} state={state} startsIn={startsIn} onStarted={refresh} />}
       {error && <p className="error">{error}</p>}
-      <Link className="muted" to={`/battle/${dropId}`}>
+      <Link className="button plain" to={`/battle/${dropId}`}>
         Open the big-screen view
       </Link>
     </section>
@@ -181,22 +193,24 @@ function MotionGate({ shakes }: { shakes: ReturnType<typeof useShakes> }) {
     )
   }
   if (shakes.permission === 'denied') {
-    return <p className="muted">Motion access was denied, so you'll tap instead. To shake, allow motion in Settings › Safari and reload.</p>
+    return <p className="card muted">Motion access was denied, so you’ll tap instead. To shake, allow motion in Settings › Safari and reload.</p>
   }
-  if (shakes.permission === 'unsupported') return <p className="muted">You're in! No motion sensor found, so you'll tap instead.</p>
-  return <p className="muted">You're in! Hold your phone tight. When it starts, shake it as fast as you can.</p>
+  if (shakes.permission === 'unsupported') return <p className="card"><strong>You’re in!</strong> <span className="muted">No motion sensor found, so you’ll tap instead.</span></p>
+  return <p className="card"><strong>You’re in!</strong> <span className="muted">Hold your phone tight. When it starts, shake it as fast as you can.</span></p>
 }
 
 function Roster({ players, meId }: { players: GamePlayer[]; meId: string }) {
   return (
     <div className="stack-sm">
-      <strong>{players.length} joined</strong>
+      <strong>{players.length === 0 ? 'Nobody’s here yet. Be the first!' : `${players.length} joined`}</strong>
       <ul className="roster">
         {players.map((p) => (
-          <li key={p.player_id} style={{ '--player': p.color } as CSSProperties}>
-            <span className="color-dot" aria-hidden />
-            {p.display_name}
-            {p.player_id === meId && <span className="muted"> (you)</span>}
+          <li key={p.player_id}>
+            <Avatar name={p.display_name} color={p.color} />
+            <span>
+              {p.display_name}
+              {p.player_id === meId && <span className="muted"> (you)</span>}
+            </span>
           </li>
         ))}
       </ul>
@@ -225,10 +239,15 @@ function AdminStart({ dropId, state, startsIn, onStarted }: { dropId: string; st
 
 function Spectating({ title, phase, players, live }: { title: string; phase: Phase; players: GamePlayer[]; live: ReadonlyMap<string, number> }) {
   return (
-    <section className="page stack">
+    <section className="page stack game-lobby">
       <p className="game-eyebrow">{title}</p>
       <h1>This Shake-Off already started</h1>
-      {phase.kind === 'playing' && <p className="game-timer">{seconds(phase.remainingMs)}s left</p>}
+      {phase.kind === 'playing' && (
+        <p className="game-countdown" role="timer">
+          <span>Time left</span>
+          <strong>{seconds(phase.remainingMs)}</strong>
+        </p>
+      )}
       <TugBar players={players} live={live} />
       <Link className="button" to="/">
         Back to map
