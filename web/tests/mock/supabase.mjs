@@ -1,6 +1,6 @@
 // In-memory stand-in for the Supabase REST/auth/RPC endpoints the app uses, for UI tests without a real project.
 // It mirrors the SQL rules closely enough to drive the screens (60 m claim radius, QR codes, Shake-Off timing and
-// caps, photo hunts) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
+// caps, Quick Draw rounds, photo hunts) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
 // polling fallbacks keep screens current, exactly as on flaky venue Wi-Fi.
 //
 //   node tests/mock/supabase.mjs            # serves on :54321
@@ -21,6 +21,14 @@ export const SERVICE_ROLE_KEY = 'mock-service-role'
 const HINT_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
 // A shorter countdown than production so tests run fast; the client must take timing from here, not hard-code it.
 const SETTINGS = { game_seconds: 15, auto_start_players: 4, auto_start_delay_seconds: 4, admin_start_delay_seconds: 3, max_shakes_per_second: 8, submit_grace_seconds: 3 }
+// Quick Draw, also shortened: 3 rounds of 5 s, each signal 1.5-2.5 s in. Real values come from minigame_settings().
+const QUICK_DRAW = {
+  ...SETTINGS, game_seconds: 15, rounds: 3, round_seconds: 5, min_signal_delay_ms: 1500, max_signal_delay_ms: 2500,
+  min_reaction_ms: 100, max_reaction_ms: 1500, clock_tolerance_ms: 1000,
+}
+const settingsOf = (kind) => (kind === 'quick_draw' ? QUICK_DRAW : SETTINGS)
+/** Bots' Quick Draw times per round: valid but slow, so the e2e player wins however fast the test machine is. */
+const BOT_TIMES = { bot0: [1300, 1350, 1320], bot1: [1200, 1250, 1180], bot2: [1400, 1380, 1420] }
 const PALETTE = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4']
 const BOT_SHAKES = 20
 
@@ -36,7 +44,8 @@ function seed() {
   }
   const drop = (id, title, type, lat, lng, points, building_num, extra = {}) => ({
     id, title, type, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null,
-    subtitle: null, starts_at: null, source_id: null, twist: null, search_radius_m: null, first_found_at: null, ...extra,
+    subtitle: null, starts_at: null, source_id: null, twist: null, search_radius_m: null, first_found_at: null,
+    game: type === 'minigame' ? 'shake_off' : null, ...extra,
   })
   const drops = [
     // Shaped like a drop seeded from a Penn State Discover event, so the card shows its organization and time.
@@ -48,6 +57,8 @@ function seed() {
     }),
     // ~30 m east of the lawn drop, at the HUB (so the map highlights building 0005000).
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
+    // ~30 m south of the lawn drop, in the open.
+    drop('draw-drop', 'Lawn Quick Draw', 'minigame', OLD_MAIN_LAWN.lat - 30 / 111_195, OLD_MAIN_LAWN.lng, 25, null, { game: 'quick_draw' }),
     // Hidden photo hunt: the public row has only the search circle's center and no building.
     drop('hunt-drop', 'Mystery spot', 'photo_hunt', HUNT_SPOT.lat, HUNT_SPOT.lng + 60 / (111_195 * Math.cos(rad(HUNT_SPOT.lat))), 20, null, {
       twist: 'with a thumbs up',
@@ -62,10 +73,20 @@ function seed() {
     claims: [],
     discovered: [],
     secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
-    games: new Map([['game-drop', { drop_id: 'game-drop', created_at: now(), started_at: null, finished_at: null, winner_side: null }]]),
-    gamePlayers: ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: 'game-drop', player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
+    games: new Map(['game-drop', 'draw-drop'].map((id) => [id, newGame(id)])),
+    // Three bots wait in each lobby, so joining makes 4 and starts the countdown.
+    gamePlayers: ['game-drop', 'draw-drop'].flatMap((dropId) =>
+      ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: dropId, player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
+    ),
+    results: [],
     log: [],
   }
+}
+
+/** A games row. `delays` stands in for the SQL seed: each Quick Draw round's hidden signal delay. */
+function newGame(dropId) {
+  const delays = [0, 1, 2].map(() => QUICK_DRAW.min_signal_delay_ms + Math.floor(Math.random() * (QUICK_DRAW.max_signal_delay_ms - QUICK_DRAW.min_signal_delay_ms + 1)))
+  return { drop_id: dropId, created_at: now(), started_at: null, finished_at: null, winner_side: null, delays }
 }
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
@@ -84,7 +105,18 @@ const filterRows = (rows, params) =>
 
 export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const db = seed()
-  const { players, drops, claims, discovered, secrets, games, gamePlayers, log } = db
+  const { players, drops, claims, discovered, secrets, games, gamePlayers, results, log } = db
+  const kindOf = (dropId) => drops.find((d) => d.id === dropId)?.game ?? 'shake_off'
+  const roundsOf = (dropId) => {
+    const g = games.get(dropId)
+    if (kindOf(dropId) !== 'quick_draw' || !g?.started_at) return []
+    const start = Date.parse(g.started_at)
+    return g.delays.map((delay, i) => ({
+      round: i + 1,
+      starts_at: new Date(start + i * QUICK_DRAW.round_seconds * 1000).toISOString(),
+      signal_at: new Date(start + i * QUICK_DRAW.round_seconds * 1000 + delay).toISOString(),
+    }))
+  }
 
   const sidesOf = (dropId) => {
     if (!games.get(dropId)?.started_at) return new Map()
@@ -93,10 +125,15 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   }
   const gameState = (dropId) => {
     const sides = sidesOf(dropId)
+    // The delays stand in for the SQL seed, which get_game_state() never returns.
+    const { delays: _seed, ...game } = games.get(dropId) ?? {}
     return {
       server_now: now(),
-      settings: SETTINGS,
-      game: games.get(dropId) ?? null,
+      kind: kindOf(dropId),
+      settings: settingsOf(kindOf(dropId)),
+      game: game.drop_id ? game : null,
+      rounds: roundsOf(dropId),
+      results: results.filter((r) => r.drop_id === dropId).map(({ player_id, round, value, false_start }) => ({ player_id, round, value, false_start })),
       players: gamePlayers
         .filter((gp) => gp.drop_id === dropId)
         .map((gp) => {
@@ -210,6 +247,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     },
     get_game_state: (json) => [200, gameState(json.p_drop_id)],
     join_game: (json, me) => {
+      if (!games.has(json.p_drop_id)) games.set(json.p_drop_id, newGame(json.p_drop_id))
       const g = games.get(json.p_drop_id)
       if (gamePlayers.some((gp) => gp.drop_id === json.p_drop_id && gp.player_id === me.id)) return [200, null]
       if (g.started_at && Date.parse(g.started_at) <= Date.now()) return [400, { message: 'This Shake-Off already started' }]
@@ -227,6 +265,28 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       if (!g.started_at || Date.parse(g.started_at) > start) g.started_at = new Date(start).toISOString()
       return [200, null]
     },
+    submit_reaction: (json, me) => {
+      const g = games.get(json.p_drop_id)
+      if (kindOf(json.p_drop_id) !== 'quick_draw' || !g?.started_at || Date.now() < Date.parse(g.started_at)) return [400, { message: "This Quick Draw hasn't started" }]
+      if (g.finished_at) return [400, { message: 'This Quick Draw is over' }]
+      if (!gamePlayers.some((gp) => gp.drop_id === json.p_drop_id && gp.player_id === me?.id)) return [400, { message: "You're not in this Quick Draw" }]
+      const round = roundsOf(json.p_drop_id).find((r) => r.round === json.p_round)
+      if (!round) return [400, { message: `There's no round ${json.p_round}` }]
+      const signal = Date.parse(round.signal_at)
+      if (Date.now() < Date.parse(round.starts_at)) return [400, { message: `Round ${json.p_round} hasn't started` }]
+      if (Date.now() > signal + QUICK_DRAW.max_reaction_ms + QUICK_DRAW.submit_grace_seconds * 1000) return [400, { message: `Round ${json.p_round} is over` }]
+      const ms = json.p_reaction_ms ?? null
+      if (ms !== null && (ms < 0 || ms > QUICK_DRAW.max_reaction_ms)) return [400, { message: `A reaction time of ${ms} ms isn't possible` }]
+      if (ms !== null && Date.now() < signal + ms - QUICK_DRAW.clock_tolerance_ms) return [400, { message: `No signal was shown yet in round ${json.p_round}` }]
+      const falseStart = ms === null || ms < QUICK_DRAW.min_reaction_ms
+      let row = results.find((r) => r.drop_id === json.p_drop_id && r.player_id === me.id && r.round === json.p_round)
+      if (!row) {
+        row = { drop_id: json.p_drop_id, player_id: me.id, round: json.p_round, value: falseStart ? null : ms, false_start: falseStart, created_at: now() }
+        results.push(row)
+        log.push(`reaction round ${row.round}: ${row.false_start ? 'false start' : `${row.value} ms`}`)
+      }
+      return [200, row]
+    },
     submit_shakes: (json, me) => {
       const started = Date.parse(games.get(json.p_drop_id)?.started_at ?? '')
       if (!started || Date.now() < started) return [400, { message: "This Shake-Off hasn't started" }]
@@ -239,19 +299,34 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     },
     finish_game: (json) => {
       const g = games.get(json.p_drop_id)
+      const kind = kindOf(json.p_drop_id)
+      const settings = settingsOf(kind)
       if (!g.finished_at) {
-        if (Date.now() < Date.parse(g.started_at) + (SETTINGS.game_seconds + SETTINGS.submit_grace_seconds) * 1000) return [400, { message: "This Shake-Off isn't over yet" }]
-        for (const gp of gamePlayers) if (gp.player_id.startsWith('bot')) gp.shakes = BOT_SHAKES
+        if (Date.now() < Date.parse(g.started_at) + (settings.game_seconds + settings.submit_grace_seconds) * 1000) return [400, { message: "This Shake-Off isn't over yet" }]
+        const roster = gamePlayers.filter((gp) => gp.drop_id === json.p_drop_id)
+        for (const gp of roster) if (gp.player_id.startsWith('bot')) gp.shakes = BOT_SHAKES
+        if (kind === 'quick_draw') {
+          for (const gp of roster.filter((x) => x.player_id.startsWith('bot'))) {
+            BOT_TIMES[gp.player_id].forEach((value, i) => results.push({ drop_id: json.p_drop_id, player_id: gp.player_id, round: i + 1, value, false_start: false, created_at: now() }))
+          }
+        }
+        // As SQL side_scores(): shakes per player, or each player's best valid time (max_reaction_ms if none).
+        const score = (gp) => {
+          if (kind === 'shake_off') return gp.shakes
+          const times = results.filter((r) => r.drop_id === json.p_drop_id && r.player_id === gp.player_id && r.value !== null).map((r) => r.value)
+          return times.length ? Math.min(...times) : QUICK_DRAW.max_reaction_ms
+        }
         const sides = sidesOf(json.p_drop_id)
         const avg = (side) => {
-          const xs = gamePlayers.filter((gp) => sides.get(gp.player_id) === side).map((gp) => gp.shakes)
+          const xs = roster.filter((gp) => sides.get(gp.player_id) === side).map(score)
           return xs.reduce((a, b) => a + b, 0) / (xs.length || 1)
         }
-        g.winner_side = avg('blue') >= avg('white') ? 'blue' : 'white'
+        const blueWins = kind === 'shake_off' ? avg('blue') >= avg('white') : avg('blue') <= avg('white')
+        g.winner_side = blueWins ? 'blue' : 'white'
         g.finished_at = now()
         drops.find((d) => d.id === json.p_drop_id).status = 'claimed'
         const points = drops.find((d) => d.id === json.p_drop_id).points
-        for (const gp of gamePlayers) if (sides.get(gp.player_id) === g.winner_side) claims.push({ id: randomUUID(), drop_id: json.p_drop_id, player_id: gp.player_id, points, created_at: g.finished_at })
+        for (const gp of roster) if (sides.get(gp.player_id) === g.winner_side) claims.push({ id: randomUUID(), drop_id: json.p_drop_id, player_id: gp.player_id, points, created_at: g.finished_at })
         log.push(`finish: blue ${avg('blue')} white ${avg('white')} -> ${g.winner_side}`)
       }
       return [200, gameState(json.p_drop_id)]
@@ -276,7 +351,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     const reply = (rows) => (single ? (rows.length === 1 ? send(200, rows[0]) : send(406, { message: 'expected one row' })) : send(200, rows))
 
     // Test-only introspection, e.g. to read claims or a drop's QR code.
-    if (url.pathname === '/__state') return send(200, { log, players, drops, claims, discovered, secrets, gamePlayers, games: [...games.values()] })
+    if (url.pathname === '/__state') return send(200, { log, players, drops, claims, discovered, secrets, gamePlayers, results, games: [...games.values()] })
     if (url.pathname === '/auth/v1/signup') {
       const id = randomUUID()
       const user = { id, aud: 'authenticated', role: 'authenticated', is_anonymous: true, app_metadata: {}, user_metadata: {}, created_at: now() }
@@ -317,7 +392,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       return reply([p])
     }
     if (req.method === 'POST' && path === 'drops') {
-      const d = { id: randomUUID(), status: 'active', points: 10, hint_photo_url: null, building_num: null, expires_at: null, subtitle: null, starts_at: null, source_id: null, created_at: now(), twist: null, search_radius_m: null, first_found_at: null, ...json }
+      const d = { id: randomUUID(), status: 'active', points: 10, game: json.type === 'minigame' ? 'shake_off' : null, hint_photo_url: null, building_num: null, expires_at: null, subtitle: null, starts_at: null, source_id: null, created_at: now(), twist: null, search_radius_m: null, first_found_at: null, ...json }
       drops.push(d)
       secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', '') })
       return reply([d])

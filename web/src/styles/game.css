@@ -648,3 +648,200 @@ mark.me {
 .battle-exit:active {
   transform: scale(0.96);
 }
+
+/* Mini-game kinds: icon + name on the drop card, lobby, projector, and the admin picker. */
+
+.game-kind {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.game-icon {
+  flex-shrink: 0;
+  color: var(--drop);
+}
+
+.game-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.game-line p {
+  margin: 0;
+}
+
+.game-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.game-picker legend {
+  margin-bottom: 6px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.game-option {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: start;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-ctl);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.game-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.game-option input {
+  margin: 3px 0 0;
+}
+
+.game-option > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+}
+
+/* Quick Draw. Holding still is calm navy; the signal is an instant full-screen flash (no transition, so the
+   flash itself is the starting gun); afterwards the screen returns to the player's side color. */
+
+.draw-screen[data-stage='hold'],
+.draw-screen[data-stage='waiting'] {
+  background: var(--psu-navy);
+  color: #ffffff;
+}
+
+.draw-screen[data-stage='draw'] {
+  background: var(--drop);
+  color: #ffffff;
+}
+
+.draw-round {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.draw-signal {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(96px, 34vw, 200px);
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+.draw-hold {
+  font-size: clamp(48px, 16vw, 88px);
+}
+
+.draw-screen .game-hero .muted {
+  max-width: 28ch;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.draw-best {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 560px);
+}
+
+.round-board-head {
+  margin: 0;
+  font-size: 17px;
+}
+
+.round-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: rank;
+}
+
+.round-ranking li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-ctl);
+  background: var(--fill);
+  text-align: left;
+}
+
+.round-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+  background: var(--side);
+  color: var(--side-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.round-time {
+  min-width: 7ch;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.round-board-big {
+  width: min(100%, 900px);
+}
+
+.round-board-big .round-board-head {
+  font-size: clamp(20px, 2.6vw, 30px);
+}
+
+.round-board-big .round-ranking li {
+  min-height: clamp(48px, 7vh, 72px);
+  font-size: clamp(18px, 2.6vw, 30px);
+}
+
+.round-board-big .round-time {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3.6vw, 44px);
+}
+
+.draw-avg {
+  font-size: 0.7em;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0.75;
+}

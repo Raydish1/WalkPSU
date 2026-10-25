@@ -114,6 +114,11 @@ export async function submitShakes(dropId: string, count: number) {
   return unwrap(await supabase.rpc('submit_shakes', { p_drop_id: dropId, p_count: count }))
 }
 
+/** Quick Draw: a round's reaction time measured on this phone, or null for a flick before the signal. */
+export async function submitReaction(dropId: string, round: number, reactionMs: number | null) {
+  return unwrap(await supabase.rpc('submit_reaction', { p_drop_id: dropId, p_round: round, ...(reactionMs !== null && { p_reaction_ms: reactionMs }) }))
+}
+
 /** Idempotent; any participant may call it once the submit grace period has passed. */
 export async function finishGame(dropId: string) {
   return unwrap(await supabase.rpc('finish_game', { p_drop_id: dropId }))
@@ -166,7 +171,7 @@ export async function getClaimRadius() {
   return unwrap(await supabase.rpc('claim_radius_m'))
 }
 
-type RealtimeTable = 'drops' | 'claims' | 'games' | 'game_players'
+type RealtimeTable = 'drops' | 'claims' | 'games' | 'game_players' | 'game_results'
 type RowOf<T extends RealtimeTable> = Database['public']['Tables'][T]['Row']
 
 /** Calls onChange for every insert/update/delete on a Realtime-enabled table. Returns an unsubscribe fn. */

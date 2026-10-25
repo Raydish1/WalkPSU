@@ -49,6 +49,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | `subtitle` | text | optional line under the title; the hosting organization for imported campus events |
 | `starts_at` | timestamptz | optional; when the event behind the drop begins. The drop card shows it with `expires_at` |
 | `source_id` | text | unique. Set only on drops seeded from campus events (`discover:<event id>`, by `web/scripts/seed-event-drops.mjs`); null for drops made in `/admin` |
+| `game` | `shake_off` \| `quick_draw` | `minigame` drops only: which game the lobby plays. A trigger sets `shake_off` when a minigame insert leaves it out and clears it on other types |
 
 Only admins can insert, update, or delete. Everyone signed in can read. Create photo hunts with `create_photo_hunt`, not a plain insert, so the spot stays hidden.
 
@@ -75,14 +76,14 @@ Read-only for clients. Rows come only from `claim_drop` (one claim per ordinary 
 
 Created automatically by a trigger when a drop is inserted. **Only admins can read it**; players never see codes except by scanning. The QR encodes `https://<app>/claim/<drop_id>?key=<claim_code>`.
 
-### `games` (Shake-Off)
+### `games` (mini-games)
 
-One per `minigame` drop, created by the first `join_game`.
+One per `minigame` drop, created by the first `join_game`. Every kind (`drops.game`) shares this lobby, the join rules, and the side split.
 
 | column | type | notes |
 | --- | --- | --- |
 | `drop_id` | uuid → `drops` | primary key |
-| `seed` | text | random; decides sides and tie-breaks. Hidden from `get_game_state` |
+| `seed` | text | random; decides sides, tie-breaks, and Quick Draw's signal moments. Hidden from `get_game_state` |
 | `created_at` | timestamptz | |
 | `started_at` | timestamptz | null until scheduled. The future time the game begins; the lobby closes then |
 | `finished_at` | timestamptz | set by `finish_game` |
@@ -96,7 +97,16 @@ One per `minigame` drop, created by the first `join_game`.
 | `joined_at` | timestamptz | |
 | `shakes` | integer | the server-capped count from `submit_shakes` |
 
-Both are read-only for clients and in the Realtime publication. Sides aren't stored: `game_sides(drop_id)` deals them from the seed once `started_at` is set, so every caller sees the same balanced split. Teams exist only inside one game.
+### `game_results` (timed games)
+
+| column | type | notes |
+| --- | --- | --- |
+| `drop_id`, `player_id`, `round` | uuid, uuid, smallint | primary key. The first submission for a round is final |
+| `value` | double precision | the round's score, lower is better. Quick Draw: reaction time in ms. Null exactly when `false_start` |
+| `false_start` | boolean | flicked before the signal, or under `min_reaction_ms` |
+| `created_at` | timestamptz | |
+
+All three are read-only for clients and in the Realtime publication. Sides aren't stored: `game_sides(drop_id)` deals them from the seed once `started_at` is set, so every caller sees the same balanced split. Teams exist only inside one game.
 
 ### `player_scores` (view)
 
@@ -121,13 +131,14 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
   - there's no code and the caller is too far away.
 
   Client: `claimDrop(dropId, { lat, lng })` or `claimDrop(dropId, { code })`.
-- **Shake-Off functions** (all keyed by the drop id; phases come from timestamps, so there's no server timer):
-  - `get_game_state(drop) → { server_now, settings, game, players[] }`. One call per screen. `server_now` lets phones correct skewed clocks.
+- **Mini-game functions** (all keyed by the drop id; phases come from timestamps, so there's no server timer):
+  - `get_game_state(drop) → { server_now, kind, settings, game, players[], rounds[], results[] }`. One call per screen. `server_now` lets phones correct skewed clocks. `settings` is `minigame_settings(kind)`. `rounds` (Quick Draw, once a start is set) holds each round's `starts_at` and `signal_at`; `results` holds every `game_results` row.
   - `join_game(drop, lat?, lng?, code?)`. Same proof as claiming. Rejoining is a no-op. Joining closes at `started_at`. The 4th player schedules the start `auto_start_delay_seconds` out.
   - `start_game(drop)`. Admin only, needs 2+ players. Pulls the start in to `admin_start_delay_seconds` from now.
-  - `submit_shakes(drop, count)`. Running total during and just after the game. Stored as `greatest(previous, min(count, floor(elapsed_seconds × max_shakes_per_second)))`, so a client can't report more than a human could shake.
-  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds`. The higher **average shakes per player** wins (fair for uneven sides). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
-  - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. The client reads them from `get_game_state`; don't copy them into client code.
+  - `submit_shakes(drop, count)`. Shake-Off only. Running total during and just after the game. Stored as `greatest(previous, min(count, floor(elapsed_seconds × max_shakes_per_second)))`, so a client can't report more than a human could shake.
+  - `submit_reaction(drop, round, reaction_ms?)`. Quick Draw only. The phone times the reaction itself (`performance.now()` from the frame that shows "DRAW!" to the flick), so network lag never counts; no `reaction_ms` = flicked before the signal. Under `min_reaction_ms` is stored as a false start. Refused: a round that doesn't exist or hasn't begun, a time outside 0..`max_reaction_ms`, a time the server's clock says couldn't have happened yet (`now < signal_at + reaction_ms − clock_tolerance_ms`), and anything after `signal_at + max_reaction_ms + submit_grace_seconds`.
+  - `finish_game(drop)`. Idempotent; any client calls it after `game_seconds + submit_grace_seconds` (per kind). `side_scores(drop, kind)` scores each side: Shake-Off, average shakes per player (higher wins, fair for uneven sides); Quick Draw, the average of each player's best valid time, with `max_reaction_ms` for a player who has none (lower wins). An exact tie goes to a seeded coin flip. Every winner gets a claim worth the drop's points, and the drop is marked claimed.
+  - `shake_off_settings()`: `game_seconds` 15, `auto_start_players` 4, `auto_start_delay_seconds` 15, `admin_start_delay_seconds` 5, `max_shakes_per_second` 8, `submit_grace_seconds` 3. `minigame_settings(kind)` adds each kind's own: Quick Draw `game_seconds` 30, `rounds` 3, `round_seconds` 10, signal 2000–6000 ms into each round (`quick_draw_signal_at(game, round)`, seeded), `min_reaction_ms` 100, `max_reaction_ms` 1500, `clock_tolerance_ms` 1000. The client reads them from `get_game_state`; don't copy them into client code.
   - `claim_drop` refuses `minigame` drops, so the game can't be skipped.
 - **Photo hunt functions:**
   - `create_photo_hunt(p_title, p_lat, p_lng, p_hint_photo_url, p_twist, p_points?, p_building_num?, p_expires_at?) → drops`. Admin only. Saves the exact spot and building in `drop_secrets` and publishes the drop at a random point up to 3/4 of `search_radius_m` (125 m) away, so neither the row nor its Realtime insert reveals the spot. Client: `createPhotoHunt(...)`.
@@ -145,7 +156,7 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
 
 ## Realtime
 
-`drops`, `claims`, `games`, and `game_players` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete, which is enough to refresh the map. A photo hunt's later finders add claims without touching the drop, so the leaderboard listens to `claims`.
+`drops`, `claims`, `games`, `game_players`, and `game_results` are in the `supabase_realtime` publication. `subscribeToDrops(cb)` fires on every drop insert, update, or delete, which is enough to refresh the map. A photo hunt's later finders add claims without touching the drop, so the leaderboard listens to `claims`.
 
 ## Photo hunts and `/api/verify-photo`
 

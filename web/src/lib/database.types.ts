@@ -3,6 +3,8 @@
 
 export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'meetup'
 export type DropStatus = 'active' | 'claimed' | 'expired'
+/** Which mini-game a 'minigame' drop runs. */
+export type MinigameKind = 'shake_off' | 'quick_draw'
 
 type Player = {
   id: string
@@ -39,6 +41,8 @@ type Drop = {
   starts_at: string | null
   /** Set only on drops seeded from campus events (e.g. 'discover:12893409'), so they can be cleared. */
   source_id: string | null
+  /** 'minigame' drops only (null otherwise): which game its lobby plays. */
+  game: MinigameKind | null
 }
 
 type Claim = { id: string; drop_id: string; player_id: string; points: number; created_at: string }
@@ -67,10 +71,41 @@ export type ShakeOffSettings = {
   submit_grace_seconds: number
 }
 
+/** Timed games' extra settings (Quick Draw). Lower round values win. */
+export type TimedSettings = {
+  rounds: number
+  round_seconds: number
+  min_signal_delay_ms: number
+  max_signal_delay_ms: number
+  min_reaction_ms: number
+  max_reaction_ms: number
+  clock_tolerance_ms: number
+}
+
+/** Mirrors SQL minigame_settings(kind): the shared lobby settings plus the kind's own (game_seconds per kind). */
+export type MinigameSettings = ShakeOffSettings & Partial<TimedSettings>
+
+/** One round of a timed game. Quick Draw: `signal_at` is when every phone shows "DRAW!". */
+export type GameRound = { round: number; starts_at: string; signal_at: string }
+
+/** A player's result for one round. Quick Draw: `value` is the reaction in ms; null with false_start = too early. */
+export type RoundResult = { player_id: string; round: number; value: number | null; false_start: boolean }
+
+type GameResultRow = RoundResult & { drop_id: string; created_at: string }
+
 export type GamePlayer = { player_id: string; display_name: string; color: string; side: Side | null; shakes: number; joined_at: string }
 
 /** Returned by get_game_state() and finish_game(). `game` is null until someone joins. */
-export type GameState = { server_now: string; settings: ShakeOffSettings; game: Game | null; players: GamePlayer[] }
+export type GameState = {
+  server_now: string
+  kind: MinigameKind
+  settings: MinigameSettings
+  game: Game | null
+  players: GamePlayer[]
+  /** Timed games, once a start is set. Empty for a Shake-Off. */
+  rounds: GameRound[]
+  results: RoundResult[]
+}
 
 type PlayerScore = { player_id: string; display_name: string; color: string; points: number; claims: number }
 
@@ -87,7 +122,7 @@ export type Database = {
         Row: Drop
         Insert: Pick<Drop, 'title' | 'type' | 'lat' | 'lng'> &
           Partial<
-            Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at' | 'subtitle' | 'starts_at' | 'source_id'>
+            Pick<Drop, 'points' | 'status' | 'hint_photo_url' | 'building_num' | 'created_by' | 'expires_at' | 'subtitle' | 'starts_at' | 'source_id' | 'game'>
           >
         Update: Partial<Omit<Drop, 'id' | 'created_at'>>
         Relationships: []
@@ -96,6 +131,7 @@ export type Database = {
       drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
       games: { Row: Game & { seed: string }; Insert: never; Update: never; Relationships: [] }
       game_players: { Row: GamePlayerRow; Insert: never; Update: never; Relationships: [] }
+      game_results: { Row: GameResultRow; Insert: never; Update: never; Relationships: [] }
       /** Fog-of-war: hexes (web/src/map/hexgrid.ts ids, "q:r") a player has walked into. Own rows only. */
       discovered_areas: { Row: { player_id: string; hex_id: string }; Insert: { player_id: string; hex_id: string }; Update: never; Relationships: [] }
     }
@@ -133,6 +169,8 @@ export type Database = {
       join_game: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: undefined }
       start_game: { Args: { p_drop_id: string }; Returns: undefined }
       submit_shakes: { Args: { p_drop_id: string; p_count: number }; Returns: number }
+      /** Quick Draw. p_reaction_ms omitted = flicked before the signal. */
+      submit_reaction: { Args: { p_drop_id: string; p_round: number; p_reaction_ms?: number }; Returns: GameResultRow }
       finish_game: { Args: { p_drop_id: string }; Returns: GameState }
       is_admin: { Args: Record<string, never>; Returns: boolean }
     }

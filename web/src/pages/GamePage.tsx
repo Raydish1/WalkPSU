@@ -3,6 +3,9 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import Avatar from '../components/Avatar'
 import { ChevronIcon } from '../components/icons'
+import GameIcon from '../game/GameIcon'
+import { MINIGAMES } from '../game/kinds'
+import { DrawSides, QuickDrawPlay, RoundBoard } from '../game/QuickDrawScreens'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import TugBar, { SideNames } from '../game/TugBar'
 import { SIDES, type Phase } from '../game/shakeoff'
@@ -10,7 +13,7 @@ import { useGame } from '../game/useGame'
 import { useShakeBroadcast } from '../game/useShakeBroadcast'
 import { useShakes } from '../game/useShakes'
 import { getDrop, joinGame, startGame } from '../lib/api'
-import type { DropRow, GamePlayer, GameState, Side } from '../lib/database.types'
+import type { DropRow, GamePlayer, GameState, MinigameKind, Side } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useClaimRadius } from '../lib/hooks'
 import { usePresence } from '../session/presence'
@@ -21,13 +24,13 @@ const NO_LIVE: ReadonlyMap<string, number> = new Map()
 const sideStyle = (side: Side) => ({ '--side': SIDES[side].color, '--side-ink': SIDES[side].ink }) as CSSProperties
 const vibrate = (pattern: number | number[]) => navigator.vibrate?.(pattern)
 
-/** A player's Shake-Off: join → lobby → countdown → shake → winner. /game/:dropId (?key= when arriving by QR). */
+/** A player's mini-game: join → lobby → countdown → play → winner. /game/:dropId (?key= when arriving by QR). */
 function GamePage() {
   const { dropId = '' } = useParams()
   const [params] = useSearchParams()
   const key = params.get('key')
   const { player, isAdmin } = useReadySession()
-  const { state, phase, error, refresh } = useGame(dropId)
+  const { state, phase, error, refresh, offset, serverNow } = useGame(dropId)
   const [drop, setDrop] = useState<DropRow | null>(null)
 
   useEffect(() => {
@@ -35,9 +38,11 @@ function GamePage() {
   }, [dropId])
 
   const me = state?.players.find((p) => p.player_id === player.id) ?? null
-  const playing = phase.kind === 'playing' && !!me?.side
-  const shakes = useShakes(playing)
-  const live = useShakeBroadcast(dropId, me ? { playerId: player.id, count: shakes.count, active: playing } : null)
+  const kind = state?.kind ?? drop?.game ?? 'shake_off'
+  const game = MINIGAMES[kind]
+  const shaking = kind === 'shake_off' && phase.kind === 'playing' && !!me?.side
+  const shakes = useShakes(shaking)
+  const live = useShakeBroadcast(dropId, me && kind === 'shake_off' ? { playerId: player.id, count: shakes.count, active: shaking } : null)
 
   // Buzz and toast once as the game starts and once at the result.
   const buzzed = useRef<string | null>(null)
@@ -47,29 +52,33 @@ function GamePage() {
     if (phase.kind === 'playing' && buzzed.current !== 'start') {
       buzzed.current = 'start'
       vibrate(400)
-      toast('Shake-Off started', { id: `start-${dropId}`, description: 'Shake as fast as you can!', duration: 2500 })
+      toast(`${game.name} started`, {
+        id: `start-${dropId}`,
+        description: kind === 'quick_draw' ? 'Hold still and wait for the flash.' : 'Shake as fast as you can!',
+        duration: 2500,
+      })
     } else if (phase.kind === 'finished' && buzzed.current !== 'end') {
       buzzed.current = 'end'
       vibrate([150, 80, 150, 80, 300])
       const won = me.side === phase.winner
       const result = won ? toast.success : toast
-      result(won ? 'You won the Shake-Off!' : `${SIDES[phase.winner].label} won the Shake-Off`, {
+      result(won ? `You won the ${game.name}!` : `${SIDES[phase.winner].label} won the ${game.name}`, {
         id: `result-${dropId}`,
         description: won && points !== undefined ? `+${points} points` : 'Get them next time.',
       })
     }
-  }, [phase, me, dropId, points])
+  }, [phase, me, dropId, points, game.name, kind])
 
   if (!state) {
     return (
       <section className="page stack game-lobby">
         <BackToMap />
-        <p className="muted">{error ?? 'Loading Shake-Off…'}</p>
+        <p className="muted">{error ?? 'Loading the game…'}</p>
       </section>
     )
   }
 
-  const title = drop?.title ?? 'Shake-Off'
+  const title = drop?.title ?? game.name
   const side = me?.side ? SIDES[me.side] : null
 
   if (phase.kind === 'finished') {
@@ -79,10 +88,14 @@ function GamePage() {
         <p className="game-eyebrow">
           {title} · {SIDES[phase.winner].label} wins
         </p>
-        <WinnerHeadline players={state.players} winner={phase.winner} points={drop?.points} className="game-winners" />
+        <WinnerHeadline state={state} winner={phase.winner} points={drop?.points} className="game-winners" />
         {me && <p className="game-big">{won ? 'You won! 🎉' : 'So close. Get them next time.'}</p>}
-        <MvpLine players={state.players} meId={player.id} />
-        <TugBar players={state.players} live={NO_LIVE} meId={player.id} />
+        <MvpLine state={state} meId={player.id} />
+        {kind === 'quick_draw' ? (
+          <DrawSides state={state} highlight={phase.winner} meId={player.id} />
+        ) : (
+          <TugBar players={state.players} live={NO_LIVE} meId={player.id} />
+        )}
         <Link className="button" to="/">
           Back to map
         </Link>
@@ -91,7 +104,8 @@ function GamePage() {
   }
 
   if (phase.kind === 'playing' || phase.kind === 'tallying') {
-    if (!me?.side) return <Spectating title={title} phase={phase} players={state.players} live={live} />
+    if (!me?.side) return <Spectating title={title} name={game.name} phase={phase} state={state} live={live} serverNow={serverNow} />
+    if (kind === 'quick_draw') return <QuickDrawPlay dropId={dropId} state={state} me={{ ...me, side: me.side }} offset={offset} serverNow={serverNow} />
     return (
       <section className="game-screen" style={{ '--side': side!.color, '--side-ink': side!.ink } as CSSProperties}>
         <div className="game-top">
@@ -118,8 +132,12 @@ function GamePage() {
   return (
     <section className="page stack game-lobby">
       <BackToMap />
-      <p className="game-eyebrow">Shake-Off · {drop?.points ?? '…'} pts to every winner</p>
+      <p className="game-eyebrow game-kind">
+        <GameIcon kind={kind} />
+        {game.name} · {drop?.points ?? '…'} pts to every winner
+      </p>
       <h1>{title}</h1>
+      <p className="muted">{game.blurb}</p>
       {startsIn !== null ? (
         <p className="game-countdown" role="timer">
           <span>Starting in</span>
@@ -132,9 +150,9 @@ function GamePage() {
         </p>
       )}
       {me ? (
-        <MotionGate shakes={shakes} />
+        <MotionGate motion={shakes} kind={kind} />
       ) : (
-        <JoinButton dropId={dropId} drop={drop} code={key} onJoined={refresh} />
+        <JoinButton dropId={dropId} drop={drop} code={key} label={`Join the ${game.name}`} onJoined={refresh} />
       )}
       {state.players.some((p) => p.side) ? (
         <div className="lobby-sides">
@@ -169,7 +187,7 @@ function BackToMap() {
   )
 }
 
-function JoinButton({ dropId, drop, code, onJoined }: { dropId: string; drop: DropRow | null; code: string | null; onJoined: () => void }) {
+function JoinButton({ dropId, drop, code, label, onJoined }: { dropId: string; drop: DropRow | null; code: string | null; label: string; onJoined: () => void }) {
   const { position } = usePresence()
   const radius = useClaimRadius()
   const [busy, setBusy] = useState(false)
@@ -193,7 +211,7 @@ function JoinButton({ dropId, drop, code, onJoined }: { dropId: string; drop: Dr
   return (
     <div className="stack-sm">
       <button className="button primary" onClick={join} disabled={busy || !inRange}>
-        {busy ? 'Joining…' : 'Join the Shake-Off'}
+        {busy ? 'Joining…' : label}
       </button>
       {!inRange && (
         <span className="muted">
@@ -205,19 +223,25 @@ function JoinButton({ dropId, drop, code, onJoined }: { dropId: string; drop: Dr
   )
 }
 
-function MotionGate({ shakes }: { shakes: ReturnType<typeof useShakes> }) {
-  if (shakes.permission === 'needs-tap') {
+const READY: Record<MinigameKind, string> = {
+  shake_off: 'Hold your phone tight. When it starts, shake it as fast as you can.',
+  quick_draw: 'When it starts, hold your phone still. Flick it the instant it flashes DRAW!',
+}
+
+/** The Shake-Off and Quick Draw both read motion; the permission state comes from game/motion.ts. */
+function MotionGate({ motion, kind }: { motion: Pick<ReturnType<typeof useShakes>, 'permission' | 'requestPermission'>; kind: MinigameKind }) {
+  if (motion.permission === 'needs-tap') {
     return (
-      <button className="button primary" onClick={shakes.requestPermission}>
+      <button className="button primary" onClick={motion.requestPermission}>
         Tap to enable motion
       </button>
     )
   }
-  if (shakes.permission === 'denied') {
+  if (motion.permission === 'denied') {
     return <p className="card muted">Motion access was denied, so you’ll tap instead. To shake, allow motion in Settings › Safari and reload.</p>
   }
-  if (shakes.permission === 'unsupported') return <p className="card"><strong>You’re in!</strong> <span className="muted">No motion sensor found, so you’ll tap instead.</span></p>
-  return <p className="card"><strong>You’re in!</strong> <span className="muted">Hold your phone tight. When it starts, shake it as fast as you can.</span></p>
+  if (motion.permission === 'unsupported') return <p className="card"><strong>You’re in!</strong> <span className="muted">No motion sensor found, so you’ll tap instead.</span></p>
+  return <p className="card"><strong>You’re in!</strong> <span className="muted">{READY[kind]}</span></p>
 }
 
 function Roster({ players, meId }: { players: GamePlayer[]; meId: string }) {
@@ -258,19 +282,21 @@ function AdminStart({ dropId, state, startsIn, onStarted }: { dropId: string; st
   )
 }
 
-function Spectating({ title, phase, players, live }: { title: string; phase: Phase; players: GamePlayer[]; live: ReadonlyMap<string, number> }) {
+type SpectatingProps = { title: string; name: string; phase: Phase; state: GameState; live: ReadonlyMap<string, number>; serverNow: number }
+
+function Spectating({ title, name, phase, state, live, serverNow }: SpectatingProps) {
   return (
     <section className="page stack game-lobby">
       <BackToMap />
       <p className="game-eyebrow">{title}</p>
-      <h1>This Shake-Off already started</h1>
+      <h1>This {name} already started</h1>
       {phase.kind === 'playing' && (
         <p className="game-countdown" role="timer">
           <span>Time left</span>
           <strong>{seconds(phase.remainingMs)}</strong>
         </p>
       )}
-      <TugBar players={players} live={live} />
+      {state.kind === 'quick_draw' ? <RoundBoard state={state} serverNow={serverNow} /> : <TugBar players={state.players} live={live} />}
       <Link className="button" to="/">
         Back to map
       </Link>

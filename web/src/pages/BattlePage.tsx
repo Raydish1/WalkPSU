@@ -3,6 +3,9 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router'
 import Avatar from '../components/Avatar'
 import { ChevronIcon } from '../components/icons'
+import GameIcon from '../game/GameIcon'
+import { MINIGAMES } from '../game/kinds'
+import { DrawSides, RoundBoard } from '../game/QuickDrawScreens'
 import TugBar from '../game/TugBar'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import { SIDES, shakesOf, sidePlayers } from '../game/shakeoff'
@@ -16,7 +19,7 @@ import { useReadySession } from '../session/session'
 const seconds = (ms: number) => Math.ceil(ms / 1000)
 const NO_LIVE: ReadonlyMap<string, number> = new Map()
 
-/** Projector view of one Shake-Off: /battle/:dropId. Listens only; it never joins or shakes. */
+/** Projector view of one mini-game: /battle/:dropId. Listens only; it never joins or plays. */
 function BattlePage() {
   const { dropId = '' } = useParams()
   return (
@@ -33,7 +36,7 @@ function BattlePage() {
 
 function BattleScreen({ dropId }: { dropId: string }) {
   const { isAdmin } = useReadySession()
-  const { state, phase, refresh } = useGame(dropId)
+  const { state, phase, refresh, serverNow } = useGame(dropId)
   const live = useShakeBroadcast(dropId, null)
   const [drop, setDrop] = useState<DropRow | null>(null)
 
@@ -50,7 +53,9 @@ function BattleScreen({ dropId }: { dropId: string }) {
     )
   }
   const shown = phase.kind === 'finished' ? NO_LIVE : live
-  const title = drop?.title ?? 'Shake-Off'
+  const kind = state.kind
+  const game = MINIGAMES[kind]
+  const title = drop?.title ?? game.name
 
   if (phase.kind === 'finished') {
     const winner = SIDES[phase.winner]
@@ -59,10 +64,26 @@ function BattleScreen({ dropId }: { dropId: string }) {
         <p className="battle-eyebrow">
           {title} · {winner.label} wins
         </p>
-        <WinnerHeadline players={state.players} winner={phase.winner} points={drop?.points} className="battle-winners" />
-        <MvpLine players={state.players} />
-        <TugBar players={state.players} live={shown} big />
-        <SideRosters players={state.players} live={shown} highlight={phase.winner} />
+        <WinnerHeadline state={state} winner={phase.winner} points={drop?.points} className="battle-winners" />
+        <MvpLine state={state} />
+        {kind === 'quick_draw' ? (
+          <DrawSides state={state} highlight={phase.winner} />
+        ) : (
+          <>
+            <TugBar players={state.players} live={shown} big />
+            <SideRosters players={state.players} live={shown} highlight={phase.winner} />
+          </>
+        )}
+      </section>
+    )
+  }
+
+  if ((phase.kind === 'playing' || phase.kind === 'tallying') && kind === 'quick_draw') {
+    return (
+      <section className="battle">
+        <p className="battle-eyebrow">{title}</p>
+        <RoundBoard state={state} serverNow={serverNow} big />
+        <DrawSides state={state} />
       </section>
     )
   }
@@ -81,7 +102,10 @@ function BattleScreen({ dropId }: { dropId: string }) {
   const startsIn = phase.kind === 'lobby' ? phase.startsInMs : null
   return (
     <section className="battle">
-      <p className="battle-eyebrow">Shake-Off · {drop?.points ?? '…'} pts to every winner</p>
+      <p className="battle-eyebrow game-kind">
+        <GameIcon kind={kind} size={28} />
+        {game.name} · {drop?.points ?? '…'} pts to every winner
+      </p>
       <h1 className="battle-title">{title}</h1>
       <p className="battle-huge">{startsIn !== null ? `Starting in ${seconds(startsIn)}` : `${state.players.length} joined`}</p>
       {startsIn === null && (

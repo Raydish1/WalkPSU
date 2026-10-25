@@ -8,8 +8,10 @@ import { PinIcon } from '../components/icons'
 import DropQrList from '../components/DropQrList'
 import { createDrop, createPhotoHunt, uploadHintPhoto } from '../lib/api'
 import { findBuildingAt, type Building } from '../lib/buildings'
+import GameIcon from '../game/GameIcon'
+import { MINIGAMES } from '../game/kinds'
 import { DROP_TYPES } from '../lib/campus'
-import type { DropType } from '../lib/database.types'
+import type { DropType, MinigameKind } from '../lib/database.types'
 import { useBuildings, useDrops } from '../lib/hooks'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
@@ -36,6 +38,7 @@ function AdminPage() {
   const [target, setTarget] = useState<Target | null>(null)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<DropType>('minigame')
+  const [game, setGame] = useState<MinigameKind>('shake_off')
   const [points, setPoints] = useState(10)
   const [minutes, setMinutes] = useState(30)
   const [photo, setPhoto] = useState<File | null>(null)
@@ -103,7 +106,7 @@ function AdminPage() {
         if (!photo) throw new Error('Add a reference photo of the spot')
         await createPhotoHunt({ ...fields, hint_photo_url: await uploadHintPhoto(photo), twist: twist.trim() })
       } else {
-        await createDrop({ ...fields, type, hint_photo_url: photo ? await uploadHintPhoto(photo) : null, created_by: player.id })
+        await createDrop({ ...fields, type, game: type === 'minigame' ? game : null, hint_photo_url: photo ? await uploadHintPhoto(photo) : null, created_by: player.id })
       }
     }, title.trim())
     if (ok) {
@@ -196,6 +199,21 @@ function AdminPage() {
             ))}
           </select>
         </label>
+        {type === 'minigame' && (
+          <fieldset className="game-picker">
+            <legend>Game</legend>
+            {Object.entries(MINIGAMES).map(([value, { name, blurb }]) => (
+              <label key={value} className="game-option">
+                <input type="radio" name="game" value={value} checked={game === value} onChange={() => setGame(value as MinigameKind)} />
+                <GameIcon kind={value as MinigameKind} size={22} />
+                <span>
+                  <strong>{name}</strong>
+                  <span className="muted">{blurb}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        )}
         <div className="row">
           <label className="field">
             Points

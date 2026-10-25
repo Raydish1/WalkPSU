@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { Drawer } from 'vaul'
+import GameIcon from '../game/GameIcon'
+import { minigameOf } from '../game/kinds'
 import { useGame } from '../game/useGame'
 import { claimDrop, closeDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
@@ -113,7 +115,7 @@ function DropCard({ drop, distance, radius, position, onClaimed }: CardProps) {
         </span>
       )}
       {drop.hint_photo_url && <img className="hint-photo" src={drop.hint_photo_url} alt="Hint" />}
-      {drop.type === 'minigame' && <p className="muted">Two random teams race to shake the hardest. Every winner gets the points.</p>}
+      {drop.type === 'minigame' && <GameLine drop={drop} />}
       <span className="range" data-in={inRange || undefined}>
         <PinIcon size={16} />
         {range}
@@ -191,7 +193,21 @@ function ClearDrop({ drop, onCleared }: { drop: DropRow; onCleared: () => void }
   )
 }
 
-/** Who's waiting in a Shake-Off, so players can decide whether it's worth the walk. */
+/** Which mini-game this lobby plays, so players know what they're walking into. */
+function GameLine({ drop }: { drop: DropRow }) {
+  const game = minigameOf(drop.game)
+  return (
+    <div className="game-line">
+      <p className="game-kind">
+        <GameIcon kind={drop.game ?? 'shake_off'} />
+        <strong>{game.name}</strong>
+      </p>
+      <p className="muted">{game.blurb} Every winner gets the points.</p>
+    </div>
+  )
+}
+
+/** Who's waiting in a mini-game lobby, so players can decide whether it's worth the walk. */
 function LobbyStatus({ dropId }: { dropId: string }) {
   const { state, phase } = useGame(dropId)
   if (!state) return null

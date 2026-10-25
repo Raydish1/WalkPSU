@@ -131,6 +131,7 @@ async function mapScenario(browser) {
   await tapFeature(page, 'drop-points', 'game-drop')
   await page.waitForSelector('.map-card')
   check('Shake-Off drop card offers the lobby', /Open the lobby/.test(await page.textContent('.map-card')))
+  check('the card names the game', /Shake-Off/.test(await page.textContent('.map-card .game-kind')))
   await page.touchscreen.tap(40, 300)
   await page.waitForTimeout(300)
 
@@ -197,6 +198,13 @@ async function mapScenario(browser) {
     target: window.__walkpsuMap.queryRenderedFeatures({ layers: ['admin-target'] }).length,
   }))
   check('admin tap-to-place resolves the building', admin.where === 'At Old Main' && admin.title === 'Old Main' && admin.target === 1, admin)
+  const options = (await page.$$eval('.game-option', (els) => els.map((el) => el.textContent))).join(' | ')
+  check('a minigame drop offers a game picker with descriptions', /Shake-Off.*shake.*\|.*Quick Draw.*DRAW!/.test(options), options)
+  await page.check('.game-option input[value="quick_draw"]')
+  await page.click('form button.primary')
+  await page.waitForFunction(() => document.querySelector('form input.input')?.value === '')
+  const created = (await (await fetch(`${MOCK}/__state`)).json()).drops.find((d) => d.title === 'Old Main')
+  check('the drop stores the chosen game', created?.type === 'minigame' && created.game === 'quick_draw', created)
   check('no console errors', page.errors.length === 0, page.errors)
   await page.context().close()
 }
@@ -340,6 +348,75 @@ async function shakeOffScenario(browser) {
   await page.context().close()
 }
 
+async function quickDrawScenario(browser) {
+  console.log('\n# Quick Draw (3 bots in the lobby; joining makes 4; 3 rounds)')
+  const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat - 30 / M_PER_DEG_LAT, lng: OLD_MAIN_LAWN.lng })
+  await page.waitForSelector('.bottom-nav')
+  await page.evaluate(() => Object.defineProperty(DeviceMotionEvent, 'requestPermission', { value: undefined, configurable: true }))
+  await page.evaluate(() => {
+    window.history.pushState({}, '', '/game/draw-drop')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    window.__motion = (x) => window.dispatchEvent(new DeviceMotionEvent('devicemotion', { acceleration: { x, y: 0, z: 0 }, accelerationIncludingGravity: { x, y: 9.81, z: 0 }, interval: 16 }))
+    window.__idle = setInterval(() => window.__motion(0.3), 100)
+  })
+  await page.waitForSelector('.game-kind')
+  check('lobby names the game', /Quick Draw/.test(await page.textContent('.game-kind')))
+  // The big screen loads first: booting a second app (and its software-rendered map) mid-round would slow the phone.
+  const projector = await newPhone(browser, OLD_MAIN_LAWN)
+  await projector.waitForSelector('.bottom-nav')
+  await projector.evaluate(() => {
+    window.history.pushState({}, '', '/battle/draw-drop')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
+  await projector.waitForSelector('.battle-title')
+  await page.click('text=Join the Quick Draw')
+  await page.waitForSelector('.lobby-sides', { timeout: 10_000 })
+
+  const outcomes = []
+  for (const round of [1, 2, 3]) {
+    await page.waitForSelector(`text=Round ${round} of 3`, { timeout: 15_000 })
+    await page.waitForSelector('.draw-screen[data-stage="hold"]', { timeout: 5_000 })
+    if (round === 1) await page.screenshot({ path: SHOTS + 'quick-draw-hold.png' })
+    if (round === 2) {
+      // Jump the gun: a flick while it still says "Hold still…".
+      await page.evaluate(() => window.__motion(25))
+    } else {
+      await page.waitForSelector('.draw-signal', { timeout: 5_000 })
+      if (round === 1) await page.screenshot({ path: SHOTS + 'quick-draw-draw.png' })
+      await page.waitForTimeout(150)
+      await page.evaluate(() => window.__motion(25))
+    }
+    await page.waitForSelector('.draw-screen[data-stage="done"]', { timeout: 5_000 })
+    outcomes.push((await page.textContent('.game-hero')).replace(/\s+/g, ' ').trim())
+    if (round === 1) {
+      await page.screenshot({ path: SHOTS + 'quick-draw-time.png' })
+      await projector.waitForFunction(() => /Rayhan\s*White\s*\d+ ms/.test(document.querySelector('.round-ranking')?.textContent ?? ''), null, { timeout: 5_000 })
+      await projector.screenshot({ path: SHOTS + 'quick-draw-projector.png' })
+      check('projector ranks this round live', true)
+    }
+  }
+  const [first, second, third] = outcomes
+  check(`a flick after DRAW! shows the time (${first}, ${third})`, /^\d+\s*ms$/.test(first) && /^\d+\s*ms$/.test(third), outcomes)
+  check('a flick before DRAW! is a false start', /False start!/.test(second), second)
+  const state = await (await fetch(`${MOCK}/__state`)).json()
+  const mine = state.results.filter((r) => r.drop_id === 'draw-drop' && !r.player_id.startsWith('bot')).sort((a, b) => a.round - b.round)
+  check('server stored 2 times and 1 false start', mine.length === 3 && mine[1].false_start && mine[0].value >= 100 && mine[2].value >= 100, mine)
+  check('the server stores the time the phone measured', `${mine[0].value}ms` === first.replace(/\s/g, '') && `${mine[2].value}ms` === third.replace(/\s/g, ''), { mine, outcomes })
+
+  await page.waitForSelector('.game-winners', { timeout: 20_000 })
+  await page.waitForTimeout(800) // let the result finish fading in
+  await page.screenshot({ path: SHOTS + 'quick-draw-result.png' })
+  const result = (await page.textContent('.game-screen')).replace(/\s+/g, ' ')
+  check('faster side wins: the winners and points are named', /Rayhan & Bot Ben win!\s*\+25 points each/.test(result), result)
+  check('MVP is the fastest draw', /MVP: Rayhan \(you\) · \d+ ms draw/.test(result), result)
+  await projector.waitForSelector('.battle-winners', { timeout: 10_000 })
+  check('projector shows the result', /Rayhan & Bot Ben win!/.test(await projector.textContent('.battle-winners')))
+  check('no console errors', page.errors.length === 0 && projector.errors.length === 0, [...page.errors, ...projector.errors])
+  await page.evaluate(() => clearInterval(window.__idle))
+  await projector.context().close()
+  await page.context().close()
+}
+
 const mock = await startMockSupabase()
 const server = await buildAndServe()
 const browser = await chromium.launch({
@@ -351,6 +428,7 @@ try {
   await mapScenario(browser)
   await photoHuntScenario(browser)
   await shakeOffScenario(browser)
+  await quickDrawScenario(browser)
   await meetupScenario(browser)
 } catch (e) {
   failures++

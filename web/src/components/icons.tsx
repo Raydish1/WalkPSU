@@ -83,3 +83,18 @@ export const PlusIcon = (p: IconProps) => (
     <path d="M12 5v14M5 12h14" />
   </Icon>
 )
+
+/** Shake-Off: a phone with motion lines. */
+export const ShakeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="8" y="3" width="8" height="18" rx="2" />
+    <path d="M4 8v8M20 8v8M11 18h2" />
+  </Icon>
+)
+
+/** Quick Draw: a lightning bolt. */
+export const BoltIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12z" />
+  </Icon>
+)
