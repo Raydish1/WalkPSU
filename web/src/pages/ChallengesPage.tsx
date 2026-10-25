@@ -1,5 +1,5 @@
-import { useMemo, useState, type CSSProperties } from 'react'
-import { Link } from 'react-router'
+import { useMemo, type CSSProperties } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import { StarIcon } from '../components/icons'
 import { DROP_TYPES } from '../lib/campus'
 import {
@@ -16,6 +16,11 @@ import type { DropRow } from '../lib/database.types'
 import { usePresence } from '../session/presence'
 import { CHEM_PRACTICE_ID } from './ChemPage'
 import { MATH_PRACTICE_ID } from './MathPage'
+
+function parseTheme(raw: string | null): EventCategoryId | 'all' {
+  if (raw && raw in EVENT_CATEGORIES) return raw as EventCategoryId
+  return 'all'
+}
 
 type ListedEvent = {
   key: string
@@ -99,8 +104,21 @@ const CURATED_EVENTS: ListedEvent[] = [
 function ChallengesPage() {
   const { data: drops, error } = useDrops()
   const { position } = usePresence()
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<EventCategoryId | 'all'>('all')
+  const [params, setParams] = useSearchParams()
+  const query = params.get('q') ?? ''
+  const category = parseTheme(params.get('theme'))
+
+  function setQuery(next: string) {
+    setParams(
+      (prev) => {
+        const p = new URLSearchParams(prev)
+        if (next.trim()) p.set('q', next)
+        else p.delete('q')
+        return p
+      },
+      { replace: true },
+    )
+  }
 
   const catalog = useMemo(() => {
     const live: ListedEvent[] = drops.map((drop) => ({
@@ -151,26 +169,31 @@ function ChallengesPage() {
       </label>
 
       <div className="filter-chips" role="toolbar" aria-label="Filter by event theme">
-        <button
-          type="button"
+        <Link
           className="filter-chip"
+          to={query ? `/challenges?q=${encodeURIComponent(query)}` : '/challenges'}
           data-on={category === 'all' || undefined}
-          onClick={() => setCategory('all')}
+          aria-pressed={category === 'all'}
         >
           All
-        </button>
-        {(Object.keys(EVENT_CATEGORIES) as EventCategoryId[]).map((id) => (
-          <button
-            key={id}
-            type="button"
-            className="filter-chip"
-            data-on={category === id || undefined}
-            style={{ '--chip': EVENT_CATEGORIES[id].color } as CSSProperties}
-            onClick={() => setCategory(id)}
-          >
-            {EVENT_CATEGORIES[id].label}
-          </button>
-        ))}
+        </Link>
+        {(Object.keys(EVENT_CATEGORIES) as EventCategoryId[]).map((id) => {
+          const next = new URLSearchParams()
+          if (query) next.set('q', query)
+          next.set('theme', id)
+          return (
+            <Link
+              key={id}
+              className="filter-chip"
+              to={`/challenges?${next.toString()}`}
+              data-on={category === id || undefined}
+              aria-pressed={category === id}
+              style={{ '--chip': EVENT_CATEGORIES[id].color } as CSSProperties}
+            >
+              {EVENT_CATEGORIES[id].label}
+            </Link>
+          )
+        })}
       </div>
 
       {error && <p className="error">{error}</p>}
@@ -185,16 +208,9 @@ function ChallengesPage() {
               : 'Try a practice challenge, or wait for an admin drop.'}
           </p>
           {(query || category !== 'all') && (
-            <button
-              type="button"
-              className="button"
-              onClick={() => {
-                setQuery('')
-                setCategory('all')
-              }}
-            >
+            <Link className="button" to="/challenges">
               Clear filters
-            </button>
+            </Link>
           )}
         </div>
       ) : (

@@ -877,7 +877,13 @@ a.list-row:active {
 }
 
 .filter-chip {
+  position: relative;
+  z-index: 1;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
   padding: 8px 14px;
   border: 1px solid var(--material-edge);
   border-radius: 999px;
@@ -886,7 +892,17 @@ a.list-row:active {
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a.filter-chip:hover,
+a.filter-chip:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--chip, var(--accent)) 45%, transparent);
 }
 
 .filter-chip[data-on] {
