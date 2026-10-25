@@ -30,6 +30,8 @@ type Props = {
   buildings: Building[]
   /** Building numbers hosting an active drop: drawn in the accent color with a soft pulse. */
   highlighted: ReadonlySet<string>
+  /** Optional per-building accent (e.g. drop-type / team colors). Falls back to DROP_ACCENT. */
+  highlightColors?: ReadonlyMap<string, string>
   className: string
   interactiveLayerIds?: string[]
   onClick?: (e: MapLayerMouseEvent) => void
@@ -37,10 +39,20 @@ type Props = {
 }
 
 /** Minimal 2.5D campus map: pitched camera, extruded buildings, locked to campus. Shared by players and admins. */
-function CampusMap({ buildings, highlighted, className, interactiveLayerIds, onClick, children }: Props) {
+function CampusMap({ buildings, highlighted, highlightColors, className, interactiveLayerIds, onClick, children }: Props) {
   const bounds = useMemo(() => (buildings.length ? campusBounds(buildings) : null), [buildings])
   const [minZoom, setMinZoom] = useState(12)
-  const extruded = useMemo<FeatureCollection>(() => ({ type: 'FeatureCollection', features: withHeights(buildings) }), [buildings])
+  const extruded = useMemo<FeatureCollection>(() => {
+    const features = withHeights(buildings).map((feature) => {
+      const num = feature.properties.num
+      if (!highlighted.has(num)) return feature
+      return {
+        ...feature,
+        properties: { ...feature.properties, accent: highlightColors?.get(num) ?? DROP_ACCENT },
+      }
+    })
+    return { type: 'FeatureCollection', features }
+  }, [buildings, highlighted, highlightColors])
   const landmarks = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
@@ -85,14 +97,14 @@ function CampusMap({ buildings, highlighted, className, interactiveLayerIds, onC
             id="buildings-active-glow"
             type="line"
             filter={isActive}
-            paint={{ 'line-color': DROP_ACCENT, 'line-width': 10, 'line-blur': 8, 'line-opacity': 0.6, 'line-opacity-transition': { duration: PULSE_MS } }}
+            paint={{ 'line-color': ['coalesce', ['get', 'accent'], DROP_ACCENT], 'line-width': 10, 'line-blur': 8, 'line-opacity': 0.6, 'line-opacity-transition': { duration: PULSE_MS } }}
           />
           <Layer
             id="buildings-active"
             type="fill-extrusion"
             filter={isActive}
             paint={{
-              'fill-extrusion-color': DROP_ACCENT,
+              'fill-extrusion-color': ['coalesce', ['get', 'accent'], DROP_ACCENT],
               'fill-extrusion-height': ['+', ['get', 'height'], 2],
               'fill-extrusion-opacity': 0.95,
               'fill-extrusion-opacity-transition': { duration: PULSE_MS },

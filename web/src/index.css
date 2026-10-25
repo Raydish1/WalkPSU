@@ -157,8 +157,8 @@ button,
   bottom: max(12px, var(--safe-bottom));
   left: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  width: min(400px, calc(100% - 32px));
+  grid-template-columns: repeat(4, 1fr);
+  width: min(440px, calc(100% - 32px));
   height: var(--nav-h);
   margin: 0 auto;
   padding: 6px;
@@ -175,7 +175,7 @@ button,
   top: 6px;
   bottom: 6px;
   left: 6px;
-  width: calc((100% - 12px) / 3);
+  width: calc((100% - 12px) / 4);
   border-radius: 999px;
   background: var(--accent-tint);
   transform: translateX(calc(var(--tab) * 100%));

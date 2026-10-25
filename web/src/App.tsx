@@ -5,6 +5,7 @@ import BottomNav from './components/BottomNav'
 import DropAlerts from './components/DropAlerts'
 import AdminPage from './pages/AdminPage'
 import BattlePage from './pages/BattlePage'
+import ChallengesPage from './pages/ChallengesPage'
 import ClaimPage from './pages/ClaimPage'
 import GamePage from './pages/GamePage'
 import JoinScreen from './pages/JoinScreen'
@@ -38,6 +39,7 @@ function Screens() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<MapPage />} />
+            <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />

@@ -1,13 +1,13 @@
 // Old Main, Penn State University Park
 export const CAMPUS_CENTER: [number, number] = [40.7982, -77.8599]
 
-/** Highlight for buildings hosting an active drop. */
-export const DROP_ACCENT = '#f97316'
+/** Default highlight for buildings hosting an active drop. */
+export const DROP_ACCENT = '#22d3ee'
 
 export const DROP_TYPES = {
-  minigame: { label: 'Mini-game', color: '#7c3aed' },
-  photo_hunt: { label: 'Photo hunt', color: '#db2777' },
-  checkin: { label: 'Check-in', color: '#0891b2' },
+  minigame: { label: 'Mini-game', color: '#41b6e6' },
+  photo_hunt: { label: 'Photo hunt', color: '#f472b6' },
+  checkin: { label: 'Check-in', color: '#22d3ee' },
 } as const
 
 /** Extra search terms for buildings whose official PASDA names don't match what students call them. */

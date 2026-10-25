@@ -70,3 +70,17 @@ export const CrossIcon = (p: IconProps) => (
     <path d="M6 6l12 12M18 6 6 18" />
   </Icon>
 )
+
+export const StarIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3 14.5 8.5 20.5 9.2 16 13.4 17.2 19.5 12 16.7 6.8 19.5 8 13.4 3.5 9.2 9.5 8.5 12 3Z" />
+  </Icon>
+)
+
+export const TargetIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8" />
+    <circle cx="12" cy="12" r="3.5" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+  </Icon>
+)
