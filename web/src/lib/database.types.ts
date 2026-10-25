@@ -23,6 +23,12 @@ type Drop = {
   points: number
   status: DropStatus
   hint_photo_url: string | null
+  /** Photo hunts: what the player's photo must also show, e.g. "with a thumbs up". */
+  twist: string | null
+  /** Photo hunts: until first_found_at, lat/lng is the center of a circle this big around the hidden spot. */
+  search_radius_m: number | null
+  /** Photo hunts: when the first player found it. From then on, lat/lng is the exact spot. */
+  first_found_at: string | null
   building_num: string | null
   created_by: string | null
   created_at: string
@@ -35,9 +41,15 @@ type Drop = {
   source_id: string | null
 }
 
-type Claim = { id: string; drop_id: string; player_id: string; created_at: string }
+type Claim = { id: string; drop_id: string; player_id: string; points: number; created_at: string }
 
-type DropSecret = { drop_id: string; claim_code: string }
+type DropSecret = {
+  drop_id: string
+  claim_code: string
+  hunt_lat: number | null
+  hunt_lng: number | null
+  hunt_building_num: string | null
+}
 
 export type Side = 'blue' | 'white'
 
@@ -91,6 +103,24 @@ export type Database = {
     Functions: {
       claim_drop: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: Claim }
       claim_radius_m: { Args: Record<string, never>; Returns: number }
+      create_photo_hunt: {
+        Args: {
+          p_title: string
+          p_lat: number
+          p_lng: number
+          p_hint_photo_url: string
+          p_twist: string
+          p_points?: number
+          p_building_num?: string | null
+          p_expires_at?: string | null
+        }
+        Returns: Drop
+      }
+      current_player_id: { Args: Record<string, never>; Returns: string | null }
+      /** Service role only. */
+      photo_hunt_check: { Args: { p_drop_id: string; p_player_id: string; p_lat: number; p_lng: number }; Returns: Drop }
+      /** Service role only. */
+      claim_photo_hunt: { Args: { p_drop_id: string; p_player_id: string; p_lat: number; p_lng: number }; Returns: Claim }
       get_game_state: { Args: { p_drop_id: string }; Returns: GameState }
       join_game: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: undefined }
       start_game: { Args: { p_drop_id: string }; Returns: undefined }

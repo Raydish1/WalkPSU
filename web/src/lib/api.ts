@@ -1,5 +1,5 @@
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
-import { supabase } from './supabase'
+import { getAccessToken, supabase } from './supabase'
 import type { Database, DropRow, NewDrop, PlayerRow } from './database.types'
 
 function unwrap<T>(response: PostgrestSingleResponse<T>): T {
@@ -43,6 +43,43 @@ export async function uploadHintPhoto(file: File) {
   const { error } = await supabase.storage.from('drop-hints').upload(path, file)
   if (error) throw new Error(error.message)
   return supabase.storage.from('drop-hints').getPublicUrl(path).data.publicUrl
+}
+
+export type NewPhotoHunt = Pick<NewDrop, 'title' | 'lat' | 'lng' | 'points' | 'building_num' | 'expires_at'> & {
+  hint_photo_url: string
+  twist: string
+}
+
+/** Admin only. The server stores the exact spot privately and publishes only a search circle around it. */
+export async function createPhotoHunt(hunt: NewPhotoHunt) {
+  return unwrap(
+    await supabase.rpc('create_photo_hunt', {
+      p_title: hunt.title,
+      p_lat: hunt.lat,
+      p_lng: hunt.lng,
+      p_hint_photo_url: hunt.hint_photo_url,
+      p_twist: hunt.twist,
+      p_points: hunt.points,
+      p_building_num: hunt.building_num,
+      p_expires_at: hunt.expires_at,
+    }),
+  )
+}
+
+/** Mirrors VerifyPhotoResponse in api/verify-photo.ts. */
+export type PhotoVerdict = { match: true; points: number; reason: string } | { match: false; reason: string }
+
+/** Sends a photo-hunt photo to /api/verify-photo, which checks GPS, asks Gemini, and records the claim on a match. */
+export async function submitHuntPhoto(dropId: string, image: string, position: { lat: number; lng: number }) {
+  const token = await getAccessToken()
+  const response = await fetch('/api/verify-photo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) },
+    body: JSON.stringify({ dropId, image, ...position }),
+  })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(body.error ?? `Photo check failed (${response.status})`)
+  return body as PhotoVerdict
 }
 
 export async function getDrop(id: string) {

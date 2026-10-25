@@ -269,11 +269,17 @@
 
 .range {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   color: var(--muted);
   font-size: 15px;
   font-weight: 500;
+}
+
+/* Sits on the first line when the text wraps (a photo hunt's two-line hint). */
+.range svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .range[data-in] {
@@ -286,6 +292,96 @@
   max-height: 180px;
   border-radius: 14px;
   object-fit: cover;
+  /* Placeholder while the photo loads over slow venue Wi-Fi, instead of a see-through gap. */
+  background: var(--fill);
+}
+
+.hunt-twist {
+  font-size: 15px;
+}
+
+.found-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--safe-top) + 24px) 20px calc(var(--safe-bottom) + 24px);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.found-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 360px);
+  padding: 28px 24px 24px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+  text-align: center;
+}
+
+.found-card h1 {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+.found-points {
+  color: var(--success);
+  font-size: 40px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.found-card .button {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.confetti {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  border-radius: 3px;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .found-card {
+    animation: badge-in 420ms var(--ease-out) both;
+  }
+
+  .confetti span {
+    animation: confetti-burst 1100ms var(--ease-out) both;
+  }
+}
+
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--angle)) translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateY(calc(var(--distance) * -2)) rotate(540deg);
+  }
+}
+
+/* A <label> wrapping a file input can't be :disabled, so it carries aria-disabled instead. */
+.button[aria-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .player-tag {

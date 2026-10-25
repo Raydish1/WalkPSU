@@ -16,6 +16,12 @@ export function setAuth0IdTokenGetter(getter: (() => Promise<string | null>) | n
   getAuth0IdToken = getter
 }
 
+/** The caller's JWT, so our own /api functions can act as them. */
+export async function getAccessToken() {
+  if (auth0Config) return getAuth0IdToken ? getAuth0IdToken() : null
+  return (await supabase.auth.getSession()).data.session?.access_token ?? null
+}
+
 // With Auth0, Supabase verifies the Auth0 ID token (third-party auth) and supabase.auth is disabled.
 // Without it, we use Supabase anonymous sign-ins so RLS still sees an authenticated user.
 export const supabase = auth0Config

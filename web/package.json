@@ -11,9 +11,11 @@
     "fetch-buildings": "node scripts/fetch-buildings.mjs",
     "import-events": "node scripts/import-discover-events.mjs",
     "seed-events": "node scripts/seed-event-drops.mjs",
+    "test-gemini": "node --disable-warning=ExperimentalWarning scripts/test-gemini.ts",
     "test:sql": "node tests/sql/run.mjs",
+    "test:api": "node --disable-warning=ExperimentalWarning tests/api/verify-photo.test.mjs",
     "test:e2e": "node tests/e2e/run.mjs",
-    "test": "npm run test:sql && npm run test:e2e",
+    "test": "npm run test:sql && npm run test:api && npm run test:e2e",
     "mock": "node tests/mock/supabase.mjs"
   },
   "dependencies": {

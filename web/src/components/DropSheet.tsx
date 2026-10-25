@@ -7,6 +7,7 @@ import { claimDrop } from '../lib/api'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { ClockIcon, PinIcon } from './icons'
+import PhotoHuntCard from './PhotoHuntCard'
 
 type Props = {
   drop: DropRow | null
@@ -16,6 +17,8 @@ type Props = {
   position: GeolocationPosition | null
   onClose: () => void
   onClaimed: () => void
+  /** A photo hunt photo was accepted; `points` is what the server awarded. */
+  onFound: (points: number, reason: string) => void
 }
 
 /** A drop's details in a bottom sheet the player can drag away. Non-modal, so the map stays live behind it. */
@@ -38,7 +41,12 @@ function DropSheet({ drop, open, onClose, ...card }: Props) {
           onInteractOutside={(e) => e.preventDefault()}
         >
           <Drawer.Handle className="drop-sheet-handle" />
-          {drop && <DropCard drop={drop} {...card} />}
+          {drop &&
+            (drop.type === 'photo_hunt' ? (
+              <PhotoHuntCard drop={drop} position={card.position} onFound={card.onFound} />
+            ) : (
+              <DropCard drop={drop} {...card} />
+            ))}
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

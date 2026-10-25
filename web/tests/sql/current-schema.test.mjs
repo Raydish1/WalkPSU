@@ -75,7 +75,7 @@ r = await as('nobody', {}, `select * from claim_drop($1, $2, $3)`, [await mkDrop
 check('claim before joining rejected', /Join the game/.test(r.error ?? ''), r)
 
 // --- QR codes
-const qrDrop = await mkDrop('photo_hunt', { lat: LAT + 0.02 })
+const qrDrop = await mkDrop('checkin', { lat: LAT + 0.02 })
 const code = (await admin(`select claim_code from drop_secrets where drop_id = $1`, [qrDrop])).rows[0]?.claim_code
 check('every drop gets a 32-char claim code', code?.length === 32, code)
 check('players cannot read claim codes', (await as('p2', {}, `select * from drop_secrets`)).rows?.length === 0)

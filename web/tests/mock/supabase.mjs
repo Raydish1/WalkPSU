@@ -1,6 +1,6 @@
 // In-memory stand-in for the Supabase REST/auth/RPC endpoints the app uses, for UI tests without a real project.
 // It mirrors the SQL rules closely enough to drive the screens (60 m claim radius, QR codes, Shake-Off timing and
-// caps) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
+// caps, photo hunts) but it is not the source of truth: tests/sql checks the real functions. No Realtime: the app's refresh() and
 // polling fallbacks keep screens current, exactly as on flaky venue Wi-Fi.
 //
 //   node tests/mock/supabase.mjs            # serves on :54321
@@ -11,7 +11,14 @@ import { pathToFileURL } from 'node:url'
 
 export const MOCK_PORT = 54321
 export const OLD_MAIN_LAWN = { lat: 40.7982, lng: -77.8599 }
+/** The hidden photo hunt's real spot, ~250 m north of the lawn. Its search circle is centered 60 m east of it. */
+export const HUNT_SPOT = { lat: OLD_MAIN_LAWN.lat + 250 / 111_195, lng: OLD_MAIN_LAWN.lng }
+const HUNT_WINDOW_MS = 7 * 60_000
 const RADIUS_M = 60
+/** Stands in for the service_role key: only requests carrying it may call the service-only hunt functions. */
+export const SERVICE_ROLE_KEY = 'mock-service-role'
+/** 1x1 PNG, served as the hunt's reference photo so the card and /api/verify-photo have a real image to load. */
+const HINT_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
 // A shorter countdown than production so tests run fast; the client must take timing from here, not hard-code it.
 const SETTINGS = { game_seconds: 15, auto_start_players: 4, auto_start_delay_seconds: 4, admin_start_delay_seconds: 3, max_shakes_per_second: 8, submit_grace_seconds: 3 }
 const PALETTE = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4']
@@ -27,9 +34,9 @@ function seed() {
   for (const [i, name] of ['Bot Ana', 'Bot Ben', 'Bot Cal'].entries()) {
     players.push({ id: `bot${i}`, auth_id: `bot${i}`, display_name: name, color: PALETTE[i + 1], is_admin: false, created_at: now() })
   }
-  const drop = (id, title, type, lat, lng, points, building_num, event = {}) => ({
+  const drop = (id, title, type, lat, lng, points, building_num, extra = {}) => ({
     id, title, type, lat, lng, points, status: 'active', hint_photo_url: null, building_num, created_by: null, created_at: now(), expires_at: null,
-    subtitle: null, starts_at: null, source_id: null, ...event,
+    subtitle: null, starts_at: null, source_id: null, twist: null, search_radius_m: null, first_found_at: null, ...extra,
   })
   const drops = [
     // Shaped like a drop seeded from a Penn State Discover event, so the card shows its organization and time.
@@ -41,12 +48,19 @@ function seed() {
     }),
     // ~30 m east of the lawn drop, at the HUB (so the map highlights building 0005000).
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
+    // Hidden photo hunt: the public row has only the search circle's center and no building.
+    drop('hunt-drop', 'Mystery spot', 'photo_hunt', HUNT_SPOT.lat, HUNT_SPOT.lng + 60 / (111_195 * Math.cos(rad(HUNT_SPOT.lat))), 20, null, {
+      twist: 'with a thumbs up',
+      search_radius_m: 125,
+      hint_photo_url: `http://localhost:${MOCK_PORT}/__hint.png`,
+    }),
   ]
+  const hunt = { hunt_lat: HUNT_SPOT.lat, hunt_lng: HUNT_SPOT.lng, hunt_building_num: null }
   return {
     players,
     drops,
     claims: [],
-    secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code` })),
+    secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
     games: new Map([['game-drop', { drop_id: 'game-drop', created_at: now(), started_at: null, finished_at: null, winner_side: null }]]),
     gamePlayers: ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: 'game-drop', player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
     log: [],
@@ -96,7 +110,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
         player_id: p.id,
         display_name: p.display_name,
         color: p.color,
-        points: claims.filter((c) => c.player_id === p.id).reduce((sum, c) => sum + drops.find((d) => d.id === c.drop_id).points, 0),
+        points: claims.filter((c) => c.player_id === p.id).reduce((sum, c) => sum + c.points, 0),
         claims: claims.filter((c) => c.player_id === p.id).length,
       }))
       .sort((a, b) => b.points - a.points || a.display_name.localeCompare(b.display_name))
@@ -105,18 +119,62 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       ? json.p_code === secrets.find((s) => s.drop_id === drop.id)?.claim_code
       : json.p_lat != null && distance(json.p_lat, json.p_lng, drop.lat, drop.lng) <= RADIUS_M
 
+  // photo_hunt_check / claim_photo_hunt, in the SQL's order of checks. Return [status, drop or claim or error].
+  const huntCheck = (json) => {
+    const drop = drops.find((d) => d.id === json.p_drop_id && d.type === 'photo_hunt')
+    if (!drop) return [400, { message: 'Photo hunt not found' }]
+    if (drop.status !== 'active' || (drop.expires_at && Date.parse(drop.expires_at) <= Date.now())) return [400, { message: 'This hunt is over' }]
+    if (claims.some((c) => c.drop_id === drop.id && c.player_id === json.p_player_id)) return [400, { message: 'You already found this one' }]
+    if (json.p_lat == null || json.p_lng == null) return [400, { message: 'Turn on location to submit a photo' }]
+    const secret = secrets.find((x) => x.drop_id === drop.id)
+    if (distance(json.p_lat, json.p_lng, secret.hunt_lat ?? drop.lat, secret.hunt_lng ?? drop.lng) > RADIUS_M) {
+      return [400, { message: "This isn't the spot. Keep looking!" }]
+    }
+    return [200, drop]
+  }
+  const huntClaim = (json) => {
+    const [status, drop] = huntCheck(json)
+    if (status !== 200) return [status, drop]
+    const found = claims.filter((c) => c.drop_id === drop.id).length
+    const claim = { id: randomUUID(), drop_id: drop.id, player_id: json.p_player_id, points: Math.max(1, Math.floor(drop.points / 2 ** found)), created_at: now() }
+    claims.push(claim)
+    if (found === 0) {
+      const secret = secrets.find((x) => x.drop_id === drop.id)
+      Object.assign(drop, { lat: secret.hunt_lat, lng: secret.hunt_lng, building_num: secret.hunt_building_num, first_found_at: now() })
+      drop.expires_at = new Date(Math.min(Date.now() + HUNT_WINDOW_MS, drop.expires_at ? Date.parse(drop.expires_at) : Infinity)).toISOString()
+    }
+    return [200, claim]
+  }
+  const serviceOnly = (fn) => (json, me, req) =>
+    req.headers.authorization === `Bearer ${SERVICE_ROLE_KEY}` ? fn(json) : [403, { message: 'permission denied for function' }]
+
   const rpc = {
     claim_radius_m: () => [200, RADIUS_M],
+    current_player_id: (json, me) => [200, me?.id ?? null],
+    photo_hunt_check: serviceOnly(huntCheck),
+    claim_photo_hunt: serviceOnly(huntClaim),
     claim_drop: (json, me) => {
       const drop = drops.find((d) => d.id === json.p_drop_id)
       if (!me) return [400, { message: 'Join the game before claiming drops' }]
       if (drop?.type === 'minigame') return [400, { message: 'This drop is a Shake-Off. Join its lobby to win it' }]
+      if (drop?.type === 'photo_hunt') return [400, { message: 'Photo hunts are claimed by taking the photo' }]
       if (!drop || drop.status !== 'active') return [400, { message: 'This drop is no longer available' }]
       if (!proofOk(json, drop)) return [400, { message: json.p_code != null ? "That QR code doesn't match this drop" : 'Get closer to claim this drop' }]
       drop.status = 'claimed'
-      const claim = { id: randomUUID(), drop_id: drop.id, player_id: me.id, created_at: now() }
+      const claim = { id: randomUUID(), drop_id: drop.id, player_id: me.id, points: drop.points, created_at: now() }
       claims.push(claim)
       return [200, claim]
+    },
+    create_photo_hunt: (json, me) => {
+      if (!me?.is_admin) return [400, { message: 'Only admins can create photo hunts' }]
+      const d = {
+        id: randomUUID(), title: json.p_title, type: 'photo_hunt', lat: json.p_lat + 50 / 111_195, lng: json.p_lng, points: json.p_points ?? 10,
+        status: 'active', hint_photo_url: json.p_hint_photo_url, building_num: null, created_by: me.id, created_at: now(),
+        expires_at: json.p_expires_at ?? null, twist: json.p_twist.trim(), search_radius_m: 125, first_found_at: null,
+      }
+      drops.push(d)
+      secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', ''), hunt_lat: json.p_lat, hunt_lng: json.p_lng, hunt_building_num: json.p_building_num ?? null })
+      return [200, d]
     },
     get_game_state: (json) => [200, gameState(json.p_drop_id)],
     join_game: (json, me) => {
@@ -160,7 +218,8 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
         g.winner_side = avg('blue') >= avg('white') ? 'blue' : 'white'
         g.finished_at = now()
         drops.find((d) => d.id === json.p_drop_id).status = 'claimed'
-        for (const gp of gamePlayers) if (sides.get(gp.player_id) === g.winner_side) claims.push({ id: randomUUID(), drop_id: json.p_drop_id, player_id: gp.player_id, created_at: g.finished_at })
+        const points = drops.find((d) => d.id === json.p_drop_id).points
+        for (const gp of gamePlayers) if (sides.get(gp.player_id) === g.winner_side) claims.push({ id: randomUUID(), drop_id: json.p_drop_id, player_id: gp.player_id, points, created_at: g.finished_at })
         log.push(`finish: blue ${avg('blue')} white ${avg('white')} -> ${g.winner_side}`)
       }
       return [200, gameState(json.p_drop_id)]
@@ -192,6 +251,22 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       return send(200, { access_token: jwt(id), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'mock', user })
     }
     if (url.pathname.startsWith('/auth/v1/')) return send(200, {})
+    if (url.pathname === '/__hint.png') {
+      res.writeHead(200, { 'content-type': 'image/png' })
+      return res.end(HINT_PNG)
+    }
+    // Stands in for web/api/verify-photo.ts in e2e (the test routes the app's request here), with Gemini replaced by
+    // "any photo matches". tests/api runs the real verify-photo.ts against this mock's RPCs instead.
+    if (url.pathname === '/__verify-photo') {
+      const me = players.find((p) => p.auth_id === subFrom(req))
+      if (!me) return send(403, { error: 'Join the game before claiming drops' })
+      const args = { p_drop_id: json.dropId, p_player_id: me.id, p_lat: json.lat, p_lng: json.lng }
+      const [status, checked] = huntCheck(args)
+      if (status !== 200) return send(status, { error: checked.message })
+      if (!json.image) return send(200, { match: false, reason: 'Mock referee: no photo' })
+      const [, claim] = huntClaim(args)
+      return send(200, { match: true, points: claim.points, reason: 'Mock referee: same spot, twist done.' })
+    }
     // supabase-js falls back to HTTP for broadcasts when the socket is down; there is nobody to relay to here.
     if (url.pathname === '/realtime/v1/api/broadcast') return send(202, {})
 
@@ -200,7 +275,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     if (path.startsWith('rpc/')) {
       const fn = rpc[path.slice(4)]
       if (!fn) return send(404, { message: `mock: no rpc ${path}` })
-      const [status, data] = fn(json, me)
+      const [status, data] = fn(json, me, req)
       return send(status, data)
     }
     if (req.method === 'POST' && path === 'players') {
@@ -210,7 +285,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       return reply([p])
     }
     if (req.method === 'POST' && path === 'drops') {
-      const d = { id: randomUUID(), status: 'active', points: 10, hint_photo_url: null, building_num: null, expires_at: null, subtitle: null, starts_at: null, source_id: null, created_at: now(), ...json }
+      const d = { id: randomUUID(), status: 'active', points: 10, hint_photo_url: null, building_num: null, expires_at: null, subtitle: null, starts_at: null, source_id: null, created_at: now(), twist: null, search_radius_m: null, first_found_at: null, ...json }
       drops.push(d)
       secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', '') })
       return reply([d])

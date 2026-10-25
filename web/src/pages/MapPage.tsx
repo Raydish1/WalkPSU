@@ -4,6 +4,7 @@ import { Layer, Popup, Source, type MapLayerMouseEvent } from 'react-map-gl/mapl
 import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
+import FoundOverlay, { type Found } from '../components/FoundOverlay'
 import PlayerSprite from '../components/PlayerSprite'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
@@ -14,9 +15,14 @@ import { usePresence, type LivePlayer } from '../session/presence'
 import { useReadySession } from '../session/session'
 
 const IN_RANGE = '#16a34a'
+/** A photo hunt's pin once someone has found it. */
+const REVEALED = '#dc2626'
 /** How close a tapped drop is framed: about a block across, so its claim circle and building are both visible. */
 const DROP_ZOOM = 17
 
+/** A photo hunt nobody has found yet: its lat/lng is only the center of a search circle, so it gets no pin. */
+const isHiddenHunt = (d: DropRow) => d.type === 'photo_hunt' && !d.first_found_at
+const pinColor = (d: DropRow) => (d.type === 'photo_hunt' ? REVEALED : DROP_TYPES[d.type].color)
 
 function MapPage() {
   const { data: drops, error, refresh: refreshDrops } = useDrops()
@@ -27,6 +33,7 @@ function MapPage() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
   // The sheet keeps its drop while it slides away, so closing never flashes empty content.
   const [sheet, setSheet] = useState<{ drop: DropRow; open: boolean } | null>(null)
+  const [found, setFound] = useState<Found | null>(null)
 
   const here = position?.coords
   const distanceTo = (d: DropRow) => (here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null)
@@ -38,21 +45,32 @@ function MapPage() {
       features:
         radius === null
           ? []
-          : drops.map((d) => {
+          : drops.filter((d) => !isHiddenHunt(d)).map((d) => {
               const distance = here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null
               return {
                 type: 'Feature',
-                properties: { color: DROP_TYPES[d.type].color, inRange: distance !== null && distance <= radius },
+                properties: { color: pinColor(d), inRange: distance !== null && distance <= radius },
                 geometry: circlePolygon(d.lat, d.lng, radius),
               }
             }),
     }),
     [drops, radius, here],
   )
+  const huntAreas = useMemo<FeatureCollection<Polygon>>(
+    () => ({
+      type: 'FeatureCollection',
+      features: drops
+        .filter(isHiddenHunt)
+        .map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: circlePolygon(d.lat, d.lng, d.search_radius_m ?? 125) })),
+    }),
+    [drops],
+  )
   const dropPoints = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
-      features: drops.map((d) => ({ type: 'Feature', properties: { id: d.id, color: DROP_TYPES[d.type].color }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
+      features: drops
+        .filter((d) => !isHiddenHunt(d))
+        .map((d) => ({ type: 'Feature', properties: { id: d.id, color: pinColor(d) }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
     }),
     [drops],
   )
@@ -70,7 +88,8 @@ function MapPage() {
   const onClick = (e: MapLayerMouseEvent) => {
     const hit = e.features?.[0]
     const id = hit?.properties?.id as string | undefined
-    const drop = hit?.layer.id === 'drop-points' ? drops.find((d) => d.id === id) : undefined
+    // An unfound photo hunt is tapped through its search circle; its lat/lng is that circle's center.
+    const drop = hit?.layer.id === 'drop-points' || hit?.layer.id === 'hunt-areas' ? drops.find((d) => d.id === id) : undefined
     if (drop) {
       setSelectedPlayerId(null)
       setSheet({ drop, open: true })
@@ -92,7 +111,11 @@ function MapPage() {
 
   return (
     <div className="map-wrap">
-      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points']} onClick={onClick}>
+      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points', 'hunt-areas']} onClick={onClick}>
+        <Source id="hunt-areas" type="geojson" data={huntAreas}>
+          <Layer id="hunt-areas" type="fill" paint={{ 'fill-color': DROP_TYPES.photo_hunt.color, 'fill-opacity': 0.14 }} />
+          <Layer id="hunt-areas-line" type="line" paint={{ 'line-color': DROP_TYPES.photo_hunt.color, 'line-width': 2.5, 'line-dasharray': [1, 2] }} />
+        </Source>
         <Source id="claim-circles" type="geojson" data={circles}>
           <Layer
             id="claim-circles-fill"
@@ -152,7 +175,15 @@ function MapPage() {
           closeSheet()
           refreshDrops()
         }}
+        onFound={(points, reason) => {
+          if (!sheetDrop) return
+          // Only the first finder gets full points; the map's copy of the drop may be a moment stale.
+          setFound({ title: sheetDrop.title, points, first: points === sheetDrop.points && !sheetDrop.first_found_at, reason })
+          closeSheet()
+          refreshDrops()
+        }}
       />
+      {found && <FoundOverlay found={found} onClose={() => setFound(null)} />}
     </div>
   )
 }
