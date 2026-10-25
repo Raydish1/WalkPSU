@@ -257,6 +257,52 @@ async function photoHuntScenario(browser) {
   await page.context().close()
 }
 
+async function meetupScenario(browser) {
+  console.log('\n# Meetups and clearing drops (runs last: it clears the revealed photo hunt)')
+  const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat - 40 / M_PER_DEG_LAT, lng: OLD_MAIN_LAWN.lng })
+  await mapReady(page)
+  await page.waitForTimeout(1000)
+  await page.click('.meetup-fab')
+  await page.waitForSelector('.meetup-sheet input')
+  check('Pin button waits for text', await page.isDisabled('.meetup-sheet button.primary'))
+  await page.fill('.meetup-sheet input', 'Volleyball on the lawn, come play!')
+  await page.click('.meetup-sheet .segment:has-text("30 min")')
+  await page.screenshot({ path: SHOTS + 'meetup-compose.png' })
+  await page.click('.meetup-sheet button.primary')
+  await page.waitForSelector('.drop-sheet:not(.meetup-sheet) .clear-drop', { timeout: 10_000 })
+  const card = (await page.textContent('.drop-sheet:not(.meetup-sheet)')).replace(/\s+/g, ' ')
+  check('the new meetup opens with who started it, its time, and no points', /Volleyball on the lawn/.test(card) && /Started by Rayhan/.test(card) && /Happening now/.test(card) && !/pts/.test(card), card)
+  await page.screenshot({ path: SHOTS + 'meetup-card.png' })
+  let state = await (await fetch(`${MOCK}/__state`)).json()
+  const meetup = state.drops.find((d) => d.type === 'meetup' && d.status === 'active')
+  check('stored as a 30-minute meetup', meetup && Math.round((Date.parse(meetup.expires_at) - Date.parse(meetup.created_at)) / 60_000) === 30, meetup)
+  await page.waitForFunction((id) => window.__walkpsuMap.queryRenderedFeatures({ layers: ['drop-points'] }).some((f) => f.properties.id === id), meetup.id, { timeout: 10_000 })
+  check('it gets a pin but no claim circle', await page.evaluate(() => window.__walkpsuMap.getSource('claim-circles').serialize().data.features.length) === state.drops.filter((d) => d.status === 'active' && !['meetup'].includes(d.type) && !(d.type === 'photo_hunt' && !d.first_found_at)).length)
+
+  await page.click('.clear-drop')
+  check('ending asks for a second tap', /Tap again/.test(await page.textContent('.clear-drop')))
+  await page.click('.clear-drop')
+  await page.waitForFunction((id) => !window.__walkpsuMap.queryRenderedFeatures({ layers: ['drop-points'] }).some((f) => f.properties.id === id), meetup.id, { timeout: 10_000 })
+  state = await (await fetch(`${MOCK}/__state`)).json()
+  check('my meetup ends and leaves the map', state.drops.find((d) => d.id === meetup.id).status === 'expired')
+
+  // Everyone is an admin in the mock: clear the photo hunt revealed earlier. Center it first, so the tap isn't
+  // caught by the toast at the top of the screen.
+  const hunt = state.drops.find((d) => d.id === 'hunt-drop')
+  await page.evaluate(([lng, lat]) => window.__walkpsuMap.jumpTo({ center: [lng, lat] }), [hunt.lng, hunt.lat])
+  await page.waitForTimeout(800)
+  await tapFeature(page, 'drop-points', 'hunt-drop')
+  await page.waitForSelector('.drop-sheet .clear-drop')
+  check('admins get "Clear from map" on any drop', /Clear from map/.test(await page.textContent('.drop-sheet .clear-drop')))
+  await page.click('.drop-sheet .clear-drop')
+  await page.click('.drop-sheet .clear-drop')
+  await page.waitForFunction(() => !window.__walkpsuMap.queryRenderedFeatures({ layers: ['drop-points'] }).some((f) => f.properties.id === 'hunt-drop'), null, { timeout: 10_000 })
+  state = await (await fetch(`${MOCK}/__state`)).json()
+  check('a cleared drop is expired, and the points it gave stay', state.drops.find((d) => d.id === 'hunt-drop').status === 'expired' && state.claims.some((c) => c.drop_id === 'hunt-drop'))
+  check('no console errors', page.errors.length === 0, page.errors)
+  await page.context().close()
+}
+
 async function shakeOffScenario(browser) {
   console.log('\n# Shake-Off (3 bot players already in the lobby; joining makes 4)')
   const page = await newPhone(browser, { lat: OLD_MAIN_LAWN.lat, lng: OLD_MAIN_LAWN.lng })
@@ -305,6 +351,7 @@ try {
   await mapScenario(browser)
   await photoHuntScenario(browser)
   await shakeOffScenario(browser)
+  await meetupScenario(browser)
 } catch (e) {
   failures++
   console.log(`FAIL scenario crashed :: ${e.message}`)

@@ -129,6 +129,18 @@ export function claimUrl(dropId: string, code: string) {
   return `${window.location.origin}/claim/${dropId}?key=${code}`
 }
 
+/** Any player: pins "volleyball here right now" at my position for `minutes` (15–180). No points. */
+export async function createMeetup(meetup: { text: string; lat: number; lng: number; minutes: number; buildingNum: string | null }) {
+  return unwrap(
+    await supabase.rpc('create_meetup', { p_text: meetup.text, p_lat: meetup.lat, p_lng: meetup.lng, p_minutes: meetup.minutes, p_building_num: meetup.buildingNum }),
+  )
+}
+
+/** Takes a drop off the map: admins any drop, players their own meetup. Points already earned stay. */
+export async function closeDrop(dropId: string) {
+  return unwrap(await supabase.rpc('close_drop', { p_drop_id: dropId }))
+}
+
 /** Hex ids of the areas I've discovered (RLS returns only my own rows). */
 export async function getDiscoveredAreas() {
   return unwrap(await supabase.from('discovered_areas').select('hex_id')).map((row) => row.hex_id)

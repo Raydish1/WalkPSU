@@ -1,7 +1,7 @@
 // Hand-written to match supabase/migrations. Keep in sync with every migration.
 // (Or regenerate: npx supabase gen types typescript --project-id <id> > src/lib/database.types.ts)
 
-export type DropType = 'minigame' | 'photo_hunt' | 'checkin'
+export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'meetup'
 export type DropStatus = 'active' | 'claimed' | 'expired'
 
 type Player = {
@@ -119,6 +119,10 @@ export type Database = {
         Returns: Drop
       }
       current_player_id: { Args: Record<string, never>; Returns: string | null }
+      /** Any player: a social pin at their position (no points). Replaces their previous live meetup. */
+      create_meetup: { Args: { p_text: string; p_lat: number; p_lng: number; p_minutes?: number; p_building_num?: string | null }; Returns: Drop }
+      /** Admins: any drop. Players: a meetup they started. Marks it expired; earned points stay. */
+      close_drop: { Args: { p_drop_id: string }; Returns: undefined }
       /** True if the area is new for the caller, false if already discovered. */
       discover_area: { Args: { p_hex_id: string }; Returns: boolean }
       /** Service role only. */

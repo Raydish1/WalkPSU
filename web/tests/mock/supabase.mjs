@@ -152,6 +152,29 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const rpc = {
     claim_radius_m: () => [200, RADIUS_M],
     current_player_id: (json, me) => [200, me?.id ?? null],
+    create_meetup: (json, me) => {
+      if (!me) return [400, { message: 'Join the game before posting a meetup' }]
+      const text = String(json.p_text ?? '').trim()
+      if (text.length < 3 || text.length > 80) return [400, { message: "Say what's happening in 3 to 80 characters" }]
+      if (json.p_lat == null || json.p_lng == null) return [400, { message: 'Turn on location to post a meetup' }]
+      for (const d of drops) if (d.created_by === me.id && d.type === 'meetup' && d.status === 'active') d.status = 'expired'
+      const minutes = Math.min(Math.max(json.p_minutes ?? 60, 15), 180)
+      const d = {
+        id: randomUUID(), title: text, subtitle: `Started by ${me.display_name}`, type: 'meetup', lat: json.p_lat, lng: json.p_lng, points: 1,
+        status: 'active', hint_photo_url: null, building_num: json.p_building_num ?? null, created_by: me.id, created_at: now(), starts_at: now(),
+        expires_at: new Date(Date.now() + minutes * 60_000).toISOString(), source_id: null, twist: null, search_radius_m: null, first_found_at: null,
+      }
+      drops.push(d)
+      secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', '') })
+      return [200, d]
+    },
+    close_drop: (json, me) => {
+      const drop = drops.find((d) => d.id === json.p_drop_id)
+      if (!drop) return [400, { message: 'Drop not found' }]
+      if (!(me?.is_admin || (drop.type === 'meetup' && drop.created_by === me?.id))) return [400, { message: 'Only admins can clear drops' }]
+      drop.status = 'expired'
+      return [200, null]
+    },
     discover_area: (json, me) => {
       if (!me) return [400, { message: 'Join the game before discovering areas' }]
       if (!/^-?\d{1,4}:-?\d{1,4}$/.test(json.p_hex_id)) return [400, { message: 'violates check constraint' }]
@@ -166,6 +189,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       if (!me) return [400, { message: 'Join the game before claiming drops' }]
       if (drop?.type === 'minigame') return [400, { message: 'This drop is a Shake-Off. Join its lobby to win it' }]
       if (drop?.type === 'photo_hunt') return [400, { message: 'Photo hunts are claimed by taking the photo' }]
+      if (drop?.type === 'meetup') return [400, { message: 'Meetups are for showing up, not for points' }]
       if (!drop || drop.status !== 'active') return [400, { message: 'This drop is no longer available' }]
       if (!proofOk(json, drop)) return [400, { message: json.p_code != null ? "That QR code doesn't match this drop" : 'Get closer to claim this drop' }]
       drop.status = 'claimed'

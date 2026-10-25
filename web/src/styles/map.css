@@ -574,3 +574,82 @@
     transform: scaleY(0.1);
   }
 }
+
+/* Player meetups */
+
+.meetup-fab {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(var(--nav-space) + 3px);
+  left: 50%;
+  border: 0.5px solid var(--material-edge);
+  color: var(--accent);
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: transform 160ms var(--ease-out);
+}
+
+.meetup-fab:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+.sheet-overlay {
+  position: fixed;
+  z-index: 19;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.meetup-sheet {
+  padding-bottom: max(20px, var(--safe-bottom));
+}
+
+.meetup-title {
+  font-size: 22px;
+  letter-spacing: -0.018em;
+}
+
+.char-count {
+  align-self: flex-end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* iOS-style segmented control. */
+.segmented {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--fill);
+}
+
+.segment {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.segment[aria-checked='true'] {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.clear-drop {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.clear-drop[data-armed] {
+  background: var(--danger);
+  color: #ffffff;
+}

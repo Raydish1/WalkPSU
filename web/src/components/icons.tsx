@@ -77,3 +77,9 @@ export const CrossIcon = (p: IconProps) => (
     <path d="M6 6l12 12M18 6 6 18" />
   </Icon>
 )
+
+export const PlusIcon = (p: IconProps) => (
+  <Icon {...p} strokeWidth={2.6}>
+    <path d="M12 5v14M5 12h14" />
+  </Icon>
+)

@@ -4,6 +4,8 @@ import { Layer, Popup, Source, type MapLayerMouseEvent } from 'react-map-gl/mapl
 import Avatar from '../components/Avatar'
 import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
+import { PlusIcon } from '../components/icons'
+import MeetupSheet from '../components/MeetupSheet'
 import FoundOverlay, { type Found } from '../components/FoundOverlay'
 import PlayerSprite from '../components/PlayerSprite'
 import WalkLayers from '../components/WalkLayers'
@@ -24,6 +26,7 @@ const DROP_ZOOM = 17
 
 /** A photo hunt nobody has found yet: its lat/lng is only the center of a search circle, so it gets no pin. */
 const isHiddenHunt = (d: DropRow) => d.type === 'photo_hunt' && !d.first_found_at
+const SHEET_CLOSE_MS = 500
 /** Layers whose features open a drop's sheet. Pins come first so they win over the circle underneath. */
 const TAPPABLE = ['drop-points', 'hunt-centers', 'hunt-areas']
 const pinColor = (d: DropRow) => (d.type === 'photo_hunt' ? REVEALED : DROP_TYPES[d.type].color)
@@ -38,6 +41,7 @@ function MapPage() {
   // The sheet keeps its drop while it slides away, so closing never flashes empty content.
   const [sheet, setSheet] = useState<{ drop: DropRow; open: boolean } | null>(null)
   const [found, setFound] = useState<Found | null>(null)
+  const [composing, setComposing] = useState(false)
 
   const here = position?.coords
   const distanceTo = (d: DropRow) => (here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null)
@@ -49,7 +53,8 @@ function MapPage() {
       features:
         radius === null
           ? []
-          : drops.filter((d) => !isHiddenHunt(d)).map((d) => {
+          : // Meetups aren't claimable, so they get a pin but no claim circle.
+            drops.filter((d) => !isHiddenHunt(d) && d.type !== 'meetup').map((d) => {
               const distance = here ? distanceM(here.latitude, here.longitude, d.lat, d.lng) : null
               return {
                 type: 'Feature',
@@ -191,6 +196,20 @@ function MapPage() {
         </span>
         {error && <div className="map-banner glass error">{error}</div>}
       </div>
+      <button type="button" className="map-pill glass meetup-fab" onClick={() => setComposing(true)}>
+        <PlusIcon size={18} />
+        Meetup
+      </button>
+      <MeetupSheet
+        open={composing}
+        onOpenChange={setComposing}
+        onCreated={(drop) => {
+          setComposing(false)
+          refreshDrops()
+          // Show the new meetup once the composer has slid away (Vaul's close takes 0.5 s), so the sheets don't overlap.
+          setTimeout(() => setSheet({ drop, open: true }), SHEET_CLOSE_MS)
+        }}
+      />
       <DropSheet
         drop={sheetDrop}
         open={sheetOpen}
@@ -199,6 +218,10 @@ function MapPage() {
         position={position}
         onClose={closeSheet}
         onClaimed={() => {
+          closeSheet()
+          refreshDrops()
+        }}
+        onCleared={() => {
           closeSheet()
           refreshDrops()
         }}

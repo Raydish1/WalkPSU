@@ -34,7 +34,7 @@ Every signed-in user can read all players. A player can insert and update only t
 | --- | --- | --- |
 | `id` | uuid | |
 | `title` | text | |
-| `type` | `minigame` \| `photo_hunt` \| `checkin` | |
+| `type` | `minigame` \| `photo_hunt` \| `checkin` \| `meetup` | `meetup` = a player's social pin from `create_meetup` (no points) |
 | `lat`, `lng` | double precision | |
 | `points` | integer | > 0, default 10 |
 | `status` | `active` \| `claimed` \| `expired` | default `active`; becomes `claimed` via `claim_drop` |
@@ -134,6 +134,9 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
   - `photo_hunt_check(drop, player, lat, lng) → drops` and `claim_photo_hunt(...) → claims`. **Service role only**, called by `web/api/verify-photo.ts`. The check raises a user-facing error unless the hunt is open, the player hasn't found it yet, and they're within `claim_radius_m()` of the exact spot. It never says how far off they are. The claim reruns the check under a row lock, then records points: full for the first finder, halved for each earlier finder, at least 1. The first find copies the exact spot and building onto the drop (the map's red pin and building highlight) and sets `expires_at` to 7 minutes later unless it was due sooner. The drop stays `active` until then.
   - `current_player_id() → uuid`. The caller's player id, so `/api` functions can identify the caller from their JWT.
   - `claim_drop` refuses `photo_hunt` drops, by GPS and by QR.
+- **Meetups and clearing:**
+  - `create_meetup(p_text, p_lat, p_lng, p_minutes = 60, p_building_num?) → drops`. Any joined player. Inserts a `meetup` drop titled with the trimmed text (3–80 characters), subtitle "Started by <name>", at the given position (must be within 5 km of Old Main), expiring after `p_minutes` clamped to 15–180. Posting again expires the player's previous live meetup, and a player can post at most 5 an hour. `points` is 1 only to satisfy the column check: `claim_drop` refuses meetups. Client: `createMeetup(...)`.
+  - `close_drop(p_drop_id)`. Admins may clear any drop; a player may end a meetup they started. Sets `status = 'expired'` (and `expires_at` to now), never deletes, so claims and points from the drop stay. Client: `closeDrop(dropId)`.
 - **`discover_area(p_hex_id) → boolean`**. Records an area for the caller; `true` if new, `false` if they already had it (duplicates are ignored). Runs as the caller (`security invoker`), so the insert policy applies. The client calls it from `DiscoveryProvider` only on a GPS fix with accuracy ≤ 20 m inside one of the campus areas. Client: `discoverArea(hexId)`, `getDiscoveredAreas()`.
 - **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
 - **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine on a 6,371 km sphere. `web/src/lib/geo.ts` `distanceM` uses the identical formula, so the client's "in range" matches the server.

@@ -188,7 +188,8 @@ function AdminPage() {
         <label className="field">
           Type
           <select className="input" value={type} onChange={(e) => setType(e.target.value as DropType)}>
-            {Object.entries(DROP_TYPES).map(([value, { label }]) => (
+            {/* Meetups are posted by players from the map, not dropped here. */}
+            {Object.entries(DROP_TYPES).filter(([value]) => value !== 'meetup').map(([value, { label }]) => (
               <option key={value} value={value}>
                 {label}
               </option>

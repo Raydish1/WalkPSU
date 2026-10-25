@@ -2,7 +2,8 @@
 
 HackPSU project: a mobile-first web app that turns the Penn State (University Park) campus map into a live game board.
 
-- **Admins** drop events on the campus map: Shake-Offs (`minigame`), photo hunts, check-ins.
+- **Admins** drop events on the campus map: Shake-Offs (`minigame`), photo hunts, check-ins. They can clear any drop from its sheet (`close_drop`: marks it expired, so earned points stay).
+- **Meetups:** any player can pin "volleyball here right now" at their position for 30 min to 2 h (the map's "+ Meetup" button). A social pin with no points; one live meetup per player, and they can end it themselves.
 - **Players compete as individuals.** There are no permanent teams, and each player gets a server-assigned map color. They race to a drop to claim it: inside the claim radius by GPS, or anywhere by scanning the drop's QR code (indoors, where GPS is unreliable).
 - Claims award points. A drop can sit at a campus building, and the map highlights that building in the accent color while the drop is active. Buildings are never owned or captured.
 - The leaderboard ranks players by points, live. Opted-in players appear live on the map (Realtime Presence).
@@ -53,6 +54,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 6. `20261024050000_event_drops.sql`: `drops.subtitle`, `starts_at`, `source_id` (drops seeded from Penn State Discover events).
 7. `20261024060000_photo_hunt.sql`: hunt columns, hidden spot in `drop_secrets`, `claims.points`, `create_photo_hunt`, service-only `photo_hunt_check`/`claim_photo_hunt`, `current_player_id`.
 8. `20261025000000_discovered_areas.sql`: fog-of-war `discovered_areas (player_id, hex_id)` (own rows only) and `discover_area()`.
+9. `20261025010000_meetups.sql`: `meetup` drop type, `create_meetup()` (any player), `close_drop()` (admins any drop, players their own meetup), `claim_drop` refuses meetups.
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -60,6 +62,7 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 
 - Authorization lives in RLS and `security definer` functions. Clients write only through functions; direct writes to `claims`, `games`, and `game_players` are blocked. The anon key is public.
 - `claim_drop` refuses `minigame` drops. Shake-Off payout happens only in `finish_game`.
+- `claim_drop` also refuses `meetup` drops: anyone can post one, so they must never be worth points. Players post them only through `create_meetup` (drops inserts stay admin-only), and clearing goes through `close_drop`, never a delete (claims cascade on delete and would erase points).
 - `claim_drop` also refuses `photo_hunt` drops. Hunt claims come only from `claim_photo_hunt`, which only the service role (`web/api/verify-photo.ts`, after Gemini) may call. Until the first find, a hunt's `lat`/`lng` is a decoy search-circle center and its `building_num` is null; never expose `drop_secrets.hunt_*` to players.
 - Scores sum `claims.points`, not `drops.points`.
 - The GPS radius exists only in SQL `claim_radius_m()`; the client reads it (`useClaimRadius`). Never hard-code 60. `distanceM` (TS) must stay identical to SQL `distance_m` (same haversine, R = 6,371 km).
@@ -89,14 +92,16 @@ Run `npm test` in `web/` (SQL + API + e2e, about a minute), plus `npm run lint` 
 
 - **`npm run test:sql`:** runs migrations in PGlite (in-process Postgres) and checks behavior through real RLS. `tests/sql/harness.mjs` stubs Supabase (`anon`/`authenticated` roles, `auth.jwt()` from `request.jwt.claims`, storage tables, the `supabase_realtime` publication, and Supabase's default table grants via `alter default privileges`). It also provides `actor(db)(sub, claims, sql)` to act as a user and `superuser(db)` for setup and time travel (move `games.started_at` into the past).
   - `current-schema.test.mjs`: all migrations applied. Joining, RLS, claims, the 59 m/61 m boundary, QR codes, scores, and the full Shake-Off lifecycle.
+  - `meetups.test.mjs`: posting rules (length, on campus, one live meetup, 5/hour, 15–180 min), no points by GPS or QR, and `close_drop` permissions (admins any drop, players only their own meetup; points survive).
   - `discovery.test.mjs`: `discovered_areas` RLS (own rows only, no edits/deletes, anon blocked), duplicate-ignoring `discover_area`, hex id format, cascade on player delete.
   - `photo-hunt.test.mjs`: hidden spot, admin-only creation, service-only claiming, halving points, reveal, 7-minute window.
   - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal; per-claim points). Add a block here for any migration that rewrites data.
   - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.
 - **`npm run test:api`:** runs the real `web/api/verify-photo.ts` against the mock Supabase with Gemini faked at the `fetch` level: auth, cheap checks before any Gemini call, each verdict field, retry on 503, halving points, and that players can't call the service-only hunt functions.
-- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers three scenarios:
+- **`npm run test:e2e`:** starts `tests/mock/supabase.mjs`, makes a **production build** pointed at it (`VITE_E2E=1`, output in `node_modules/.cache/e2e-dist`), serves it with `vite preview` on 5199, and drives headless **Microsoft Edge** through `playwright-core` (`E2E_BROWSER_CHANNEL=chrome` to switch) at 375×812, DPR 2, touch, with granted geolocation. It covers four scenarios:
   - **Map:** camera, layers, highlight, claim in range, bounds, recenter, leaderboard, admin tap-to-place.
   - **Photo hunt:** the search circle hides the spot, the card shows the twist, a photo is "taken" (the mock's `/__verify-photo` stands in for Gemini via `page.route`), and the red pin and countdown appear.
+  - **Meetups (runs last):** posts a meetup from the "+ Meetup" sheet, checks its card (no points, no claim circle), ends it with the two-tap confirm, then clears the revealed photo hunt as an admin.
   - **Shake-Off:** joins as the 4th player with 3 bots and shakes via synthetic `DeviceMotionEvent`s (after deleting `DeviceMotionEvent.requestPermission`, which desktop Chromium answers "denied"), then checks the named winners and MVP.
 
   Screenshots land in `tests/e2e/screenshots/` (gitignored). It also prints frame rate (software WebGL, so a phone GPU will differ).
