@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import Avatar from '../components/Avatar'
 import { TrophyIcon } from '../components/icons'
+import { ACHIEVEMENTS, achievementsFor } from '../lib/achievements'
 import { useLeaderboard } from '../lib/hooks'
 import { useReadySession } from '../session/session'
 
@@ -11,6 +12,9 @@ function LeaderboardPage() {
   return (
     <section className="page stack">
       <h1>Leaderboard</h1>
+      <p className="muted footnote">
+        {ACHIEVEMENTS.map((a) => `${a.emoji} ${a.points.toLocaleString()}`).join(' · ')} points unlock badges
+      </p>
       {error && <p className="error">{error}</p>}
       {scores.length === 0 && !error ? (
         <div className="card empty-state">
@@ -33,6 +37,13 @@ function LeaderboardPage() {
               <span className="player-name">
                 <span>{row.display_name}</span>
                 {row.player_id === player.id && <span className="muted"> (you)</span>}
+              </span>
+              <span className="badges">
+                {achievementsFor(row.points).map((a) => (
+                  <span key={a.name} className="badge" role="img" aria-label={a.name} title={`${a.name}: ${a.blurb}`}>
+                    {a.emoji}
+                  </span>
+                ))}
               </span>
               <span className="score">
                 {row.points}

@@ -82,6 +82,28 @@ export async function submitHuntPhoto(dropId: string, image: string, position: {
   return body as PhotoVerdict
 }
 
+export type SearchEvent = { id: string; title: string; at?: string }
+
+// Same request, same events: reuse the answer instead of spending another Gemini call.
+const searchCache = new Map<string, string[]>()
+
+/** Asks Gemini (via /api/search-drops) which events fit what the player typed. Returns their ids, best match first. */
+export async function searchEvents(query: string, events: SearchEvent[]) {
+  const key = `${query.trim().toLowerCase()}|${events.map((e) => e.id).join(',')}`
+  const cached = searchCache.get(key)
+  if (cached) return cached
+  const token = await getAccessToken()
+  const response = await fetch('/api/search-drops', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) },
+    body: JSON.stringify({ query, events }),
+  })
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(body.error ?? `Search failed (${response.status})`)
+  searchCache.set(key, body.ids)
+  return body.ids as string[]
+}
+
 export async function getDrop(id: string) {
   return unwrap(await supabase.from('drops').select('*').eq('id', id).maybeSingle())
 }
