@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import Avatar from '../components/Avatar'
+import { ChevronIcon } from '../components/icons'
 import { MvpLine, WinnerHeadline } from '../game/Results'
 import TugBar, { SideNames } from '../game/TugBar'
 import { SIDES, type Phase } from '../game/shakeoff'
@@ -59,7 +60,14 @@ function GamePage() {
     }
   }, [phase, me, dropId, points])
 
-  if (!state) return <section className="center-screen">{error ?? 'Loading Shake-Off…'}</section>
+  if (!state) {
+    return (
+      <section className="page stack game-lobby">
+        <BackToMap />
+        <p className="muted">{error ?? 'Loading Shake-Off…'}</p>
+      </section>
+    )
+  }
 
   const title = drop?.title ?? 'Shake-Off'
   const side = me?.side ? SIDES[me.side] : null
@@ -109,6 +117,7 @@ function GamePage() {
   const startsIn = phase.kind === 'lobby' ? phase.startsInMs : null
   return (
     <section className="page stack game-lobby">
+      <BackToMap />
       <p className="game-eyebrow">Shake-Off · {drop?.points ?? '…'} pts to every winner</p>
       <h1>{title}</h1>
       {startsIn !== null ? (
@@ -145,6 +154,16 @@ function GamePage() {
         Open the big-screen view
       </Link>
     </section>
+  )
+}
+
+/** The lobby is full-screen (no tab bar), so it needs its own way out. Leaving keeps your spot in the game. */
+function BackToMap() {
+  return (
+    <Link className="back-link" to="/">
+      <ChevronIcon className="back-link-icon" />
+      Map
+    </Link>
   )
 }
 
@@ -240,6 +259,7 @@ function AdminStart({ dropId, state, startsIn, onStarted }: { dropId: string; st
 function Spectating({ title, phase, players, live }: { title: string; phase: Phase; players: GamePlayer[]; live: ReadonlyMap<string, number> }) {
   return (
     <section className="page stack game-lobby">
+      <BackToMap />
       <p className="game-eyebrow">{title}</p>
       <h1>This Shake-Off already started</h1>
       {phase.kind === 'playing' && (

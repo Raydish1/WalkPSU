@@ -591,3 +591,31 @@ mark.me {
   outline: 6px solid #facc15;
   outline-offset: 4px;
 }
+
+/* "‹ Map" out of the full-screen lobby. */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  margin: -8px 0 -4px -8px;
+  padding: 0 14px 0 6px;
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease;
+}
+
+.back-link:active {
+  background: var(--accent-tint);
+  transform: scale(0.96);
+}
+
+.back-link-icon {
+  width: 22px;
+  height: 22px;
+  transform: scaleX(-1);
+}
