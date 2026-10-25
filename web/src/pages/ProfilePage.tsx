@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 import Avatar from '../components/Avatar'
@@ -38,13 +39,15 @@ function ProfilePage() {
       </div>
 
       <div className="card explore-card">
-        <ProgressRing value={areas.length ? found / areas.length : 0} />
-        <div className="stack-sm">
-          <strong className="explore-count">
-            🧭 {found} / {areas.length || '…'} areas discovered
-          </strong>
-          <span className="muted footnote">Walk into a new part of campus to clear its fog.</span>
+        <div className="explore-head">
+          <strong>Campus explored</strong>
+          <span className="explore-count">
+            {found}
+            <span className="muted"> / {areas.length || '…'}</span>
+          </span>
         </div>
+        {areas.length > 0 && <HexMap areas={areas} discovered={discovered} />}
+        <span className="muted footnote">Walk into a new part of campus to clear its fog.</span>
       </div>
 
       <div className="list">
@@ -89,17 +92,31 @@ function ProfilePage() {
   )
 }
 
-const RING_R = 22
-const RING_C = 2 * Math.PI * RING_R
-
-function ProgressRing({ value }: { value: number }) {
+/** Axial "q:r" ids laid out as unit pointy-top hexes, north up (same layout as hexgrid.ts). */
+function HexMap({ areas, discovered }: { areas: string[]; discovered: ReadonlySet<string> }) {
+  const hexes = useMemo(
+    () =>
+      areas.map((id) => {
+        const [q, r] = id.split(':').map(Number)
+        const cx = Math.sqrt(3) * (q + r / 2)
+        const cy = -1.5 * r
+        const points = Array.from({ length: 6 }, (_, i) => {
+          const a = (Math.PI / 180) * (60 * i - 30)
+          return `${(cx + Math.cos(a)).toFixed(3)},${(cy - Math.sin(a)).toFixed(3)}`
+        }).join(' ')
+        return { id, cx, cy, points }
+      }),
+    [areas],
+  )
+  const xs = hexes.map((h) => h.cx)
+  const ys = hexes.map((h) => h.cy)
+  const [x0, x1, y0, y1] = [Math.min(...xs) - 1, Math.max(...xs) + 1, Math.min(...ys) - 1.2, Math.max(...ys) + 1.2]
+  const found = areas.filter((id) => discovered.has(id)).length
   return (
-    <svg className="progress-ring" viewBox="0 0 56 56" width={56} height={56} role="img" aria-label={`${Math.round(value * 100)}% explored`}>
-      <circle cx="28" cy="28" r={RING_R} className="progress-ring-track" />
-      <circle cx="28" cy="28" r={RING_R} className="progress-ring-fill" strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - value)} />
-      <text x="28" y="28" dominantBaseline="central" textAnchor="middle" className="progress-ring-label">
-        {Math.round(value * 100)}%
-      </text>
+    <svg className="hex-map" viewBox={`${x0} ${y0} ${x1 - x0} ${y1 - y0}`} role="img" aria-label={`${found} of ${areas.length} campus areas explored`}>
+      {hexes.map((h) => (
+        <polygon key={h.id} points={h.points} className={discovered.has(h.id) ? 'found' : undefined} />
+      ))}
     </svg>
   )
 }

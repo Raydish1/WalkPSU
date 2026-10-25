@@ -6,6 +6,19 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "web", "--", "--port", "5173", "--strictPort"],
       "port": 5173
+    },
+    {
+      "name": "mock",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "mock", "--prefix", "web"],
+      "port": 54321
+    },
+    {
+      "name": "web-mock",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "web", "--", "--port", "5175", "--strictPort"],
+      "env": { "VITE_SUPABASE_URL": "http://localhost:54321", "VITE_SUPABASE_ANON_KEY": "mock", "VITE_AUTH0_DOMAIN": "", "VITE_AUTH0_CLIENT_ID": "" },
+      "port": 5175
     }
   ]
 }
