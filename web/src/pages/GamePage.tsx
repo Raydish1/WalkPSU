@@ -150,9 +150,11 @@ function GamePage() {
       )}
       {isAdmin && <AdminStart dropId={dropId} state={state} startsIn={startsIn} onStarted={refresh} />}
       {error && <p className="error">{error}</p>}
-      <Link className="button plain" to={`/battle/${dropId}`}>
-        Open the big-screen view
-      </Link>
+      {isAdmin && (
+        <Link className="button plain" to={`/battle/${dropId}`}>
+          Open the big-screen view
+        </Link>
+      )}
     </section>
   )
 }

@@ -619,3 +619,32 @@ mark.me {
   height: 22px;
   transform: scaleX(-1);
 }
+
+/* Small and quiet so it doesn't distract on the projector, but always reachable. */
+.battle-exit {
+  position: fixed;
+  z-index: 5;
+  top: calc(var(--safe-top) + 12px);
+  left: var(--gutter-l);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 16px 0 8px;
+  border: 0.5px solid var(--material-edge);
+  border-radius: 999px;
+  background: var(--material);
+  backdrop-filter: var(--material-blur);
+  -webkit-backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-float);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  opacity: 0.85;
+  transition: transform 160ms var(--ease-out);
+}
+
+.battle-exit:active {
+  transform: scale(0.96);
+}
