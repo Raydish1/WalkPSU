@@ -2,12 +2,12 @@
 export const CAMPUS_CENTER: [number, number] = [40.7982, -77.8599]
 
 /** Default highlight for buildings hosting an active drop. */
-export const DROP_ACCENT = '#22d3ee'
+export const DROP_ACCENT = '#5ba8e0'
 
 export const DROP_TYPES = {
-  minigame: { label: 'Mini-game', color: '#41b6e6' },
-  photo_hunt: { label: 'Photo hunt', color: '#f472b6' },
-  checkin: { label: 'Check-in', color: '#22d3ee' },
+  minigame: { label: 'Mini-game', color: '#5ba8e0' },
+  photo_hunt: { label: 'Photo hunt', color: '#7eb6e8' },
+  checkin: { label: 'Check-in', color: '#a8d4f0' },
 } as const
 
 /** Extra search terms for buildings whose official PASDA names don't match what students call them. */

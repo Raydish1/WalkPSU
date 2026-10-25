@@ -61,7 +61,7 @@ function App() {
       <Screens />
       <Toaster
         position="top-center"
-        theme="system"
+        theme="light"
         gap={8}
         mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 8px)', left: 12, right: 12 }}
         toastOptions={{ className: 'toast' }}

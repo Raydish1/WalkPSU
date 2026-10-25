@@ -3,29 +3,30 @@
 :root {
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, sans-serif;
 
-  /* One accent. Everything else is neutral; the map keeps its own drop colors. */
-  --accent: #2563eb;
+  /* White + light blue campus palette (locked light). */
+  --accent: #5ba8e0;
   --accent-ink: #ffffff;
-  --accent-tint: rgba(37, 99, 235, 0.12);
+  --accent-tint: rgba(91, 168, 224, 0.16);
   --danger: #dc2626;
   --success: #16a34a;
   --psu-navy: #1e407c;
+  --psu-sky: #a8d4f0;
 
-  --bg: #f2f2f7;
+  --bg: #f4f9fd;
   --surface: #ffffff;
-  --fill: rgba(118, 118, 128, 0.12);
-  --text: #0b0b0f;
-  --muted: rgba(60, 60, 67, 0.64);
-  --separator: rgba(60, 60, 67, 0.16);
+  --fill: rgba(91, 168, 224, 0.12);
+  --text: #14324a;
+  --muted: rgba(30, 64, 124, 0.58);
+  --separator: rgba(91, 168, 224, 0.28);
   --border: var(--separator);
 
   /* Frosted materials for chrome floating over content (tab bar, map controls, toasts). */
-  --material: rgba(255, 255, 255, 0.72);
-  --material-strong: rgba(255, 255, 255, 0.86);
-  --material-edge: rgba(255, 255, 255, 0.7);
+  --material: rgba(255, 255, 255, 0.82);
+  --material-strong: rgba(255, 255, 255, 0.94);
+  --material-edge: rgba(168, 212, 240, 0.7);
   --material-blur: blur(24px) saturate(180%);
-  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.12);
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 1px 2px rgba(30, 64, 124, 0.06), 0 8px 28px rgba(91, 168, 224, 0.18);
+  --shadow-card: 0 1px 2px rgba(30, 64, 124, 0.04), 0 2px 12px rgba(91, 168, 224, 0.1);
 
   --radius-card: 20px;
   --radius-ctl: 14px;
@@ -43,29 +44,32 @@
 
   font-family: var(--font);
   color: var(--text);
-  background: var(--bg);
-  color-scheme: light dark;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(168, 212, 240, 0.55), transparent 55%),
+    var(--bg);
+  color-scheme: light only;
 }
 
+/* Keep white + light blue even when the OS is in dark mode. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --accent: #4d8dff;
-    --accent-tint: rgba(77, 141, 255, 0.18);
-    --danger: #ff5a52;
-    --success: #34c759;
+    --accent: #5ba8e0;
+    --accent-tint: rgba(91, 168, 224, 0.16);
+    --danger: #dc2626;
+    --success: #16a34a;
 
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --fill: rgba(118, 118, 128, 0.24);
-    --text: #f5f5f7;
-    --muted: rgba(235, 235, 245, 0.6);
-    --separator: rgba(84, 84, 88, 0.6);
+    --bg: #f4f9fd;
+    --surface: #ffffff;
+    --fill: rgba(91, 168, 224, 0.12);
+    --text: #14324a;
+    --muted: rgba(30, 64, 124, 0.58);
+    --separator: rgba(91, 168, 224, 0.28);
 
-    --material: rgba(28, 28, 30, 0.72);
-    --material-strong: rgba(36, 36, 38, 0.86);
-    --material-edge: rgba(255, 255, 255, 0.1);
-    --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.45);
-    --shadow-card: none;
+    --material: rgba(255, 255, 255, 0.82);
+    --material-strong: rgba(255, 255, 255, 0.94);
+    --material-edge: rgba(168, 212, 240, 0.7);
+    --shadow-float: 0 1px 2px rgba(30, 64, 124, 0.06), 0 8px 28px rgba(91, 168, 224, 0.18);
+    --shadow-card: 0 1px 2px rgba(30, 64, 124, 0.04), 0 2px 12px rgba(91, 168, 224, 0.1);
   }
 }
 
@@ -649,7 +653,7 @@ a.list-row:active {
   height: 84px;
   margin-bottom: 8px;
   border-radius: 24px;
-  background: linear-gradient(160deg, #3b82f6, var(--psu-navy));
+  background: linear-gradient(160deg, #a8d4f0, #5ba8e0);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 12px 32px -10px rgba(30, 64, 124, 0.6);

@@ -19,8 +19,8 @@ import { circlePolygon } from '../map/geometry'
 import { usePresence } from '../session/presence'
 import { useReadySession } from '../session/session'
 
-const IN_RANGE = '#22d3ee'
-const ME = '#41b6e6'
+const IN_RANGE = '#5ba8e0'
+const ME = '#7eb6e8'
 
 type Selected =
   | { kind: 'drop'; id: string }
