@@ -10,6 +10,7 @@ import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
 import { useBuildings, useClaimRadius, useDrops } from '../lib/hooks'
+import { LABEL_FONT } from '../map/basemap'
 import { circlePolygon } from '../map/geometry'
 import { usePresence, type LivePlayer } from '../session/presence'
 import { useReadySession } from '../session/session'
@@ -22,6 +23,8 @@ const DROP_ZOOM = 17
 
 /** A photo hunt nobody has found yet: its lat/lng is only the center of a search circle, so it gets no pin. */
 const isHiddenHunt = (d: DropRow) => d.type === 'photo_hunt' && !d.first_found_at
+/** Layers whose features open a drop's sheet. Pins come first so they win over the circle underneath. */
+const TAPPABLE = ['drop-points', 'hunt-centers', 'hunt-areas']
 const pinColor = (d: DropRow) => (d.type === 'photo_hunt' ? REVEALED : DROP_TYPES[d.type].color)
 
 function MapPage() {
@@ -65,6 +68,14 @@ function MapPage() {
     }),
     [drops],
   )
+  // A "?" pin at each search circle's center. That point is already the public decoy center, never the real spot.
+  const huntCenters = useMemo<FeatureCollection<Point>>(
+    () => ({
+      type: 'FeatureCollection',
+      features: drops.filter(isHiddenHunt).map((d) => ({ type: 'Feature', properties: { id: d.id }, geometry: { type: 'Point', coordinates: [d.lng, d.lat] } })),
+    }),
+    [drops],
+  )
   const dropPoints = useMemo<FeatureCollection<Point>>(
     () => ({
       type: 'FeatureCollection',
@@ -88,8 +99,8 @@ function MapPage() {
   const onClick = (e: MapLayerMouseEvent) => {
     const hit = e.features?.[0]
     const id = hit?.properties?.id as string | undefined
-    // An unfound photo hunt is tapped through its search circle; its lat/lng is that circle's center.
-    const drop = hit?.layer.id === 'drop-points' || hit?.layer.id === 'hunt-areas' ? drops.find((d) => d.id === id) : undefined
+    // An unfound photo hunt is tapped through its "?" pin or its search circle; its lat/lng is that circle's center.
+    const drop = hit && TAPPABLE.includes(hit.layer.id) ? drops.find((d) => d.id === id) : undefined
     if (drop) {
       setSelectedPlayerId(null)
       setSheet({ drop, open: true })
@@ -111,7 +122,7 @@ function MapPage() {
 
   return (
     <div className="map-wrap">
-      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={['drop-points', 'hunt-areas']} onClick={onClick}>
+      <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={TAPPABLE} onClick={onClick}>
         <Source id="hunt-areas" type="geojson" data={huntAreas}>
           <Layer id="hunt-areas" type="fill" paint={{ 'fill-color': DROP_TYPES.photo_hunt.color, 'fill-opacity': 0.14 }} />
           <Layer id="hunt-areas-line" type="line" paint={{ 'line-color': DROP_TYPES.photo_hunt.color, 'line-width': 2.5, 'line-dasharray': [1, 2] }} />
@@ -130,6 +141,19 @@ function MapPage() {
             id="drop-points"
             type="circle"
             paint={{ 'circle-radius': 11, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 }}
+          />
+        </Source>
+        <Source id="hunt-centers" type="geojson" data={huntCenters}>
+          <Layer
+            id="hunt-centers"
+            type="circle"
+            paint={{ 'circle-radius': 11, 'circle-color': DROP_TYPES.photo_hunt.color, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 }}
+          />
+          <Layer
+            id="hunt-centers-mark"
+            type="symbol"
+            layout={{ 'text-field': '?', 'text-font': LABEL_FONT, 'text-size': 14, 'text-allow-overlap': true, 'text-ignore-placement': true }}
+            paint={{ 'text-color': '#ffffff' }}
           />
         </Source>
         {sprites.map((p) => (

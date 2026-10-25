@@ -37,7 +37,8 @@ export function tuneBasemap(map: MapLibreMap) {
   set('background', 'background-color', '#f5f5f2')
   set('water', 'fill-color', '#cfe3f2')
   for (const id of ['highway_minor', 'highway_path', 'highway_major_inner', 'highway_major_subtle']) set(id, 'line-color', '#e4e4e7')
+  // Quiet the basemap's own street and place labels only; our layers (landmarks, the hunt "?") keep their colors.
   for (const layer of map.getStyle().layers ?? []) {
-    if (layer.type === 'symbol' && layer.id !== 'landmarks') set(layer.id, 'text-color', '#9ca3af')
+    if (layer.type === 'symbol' && layer.source === 'openmaptiles') set(layer.id, 'text-color', '#9ca3af')
   }
 }
