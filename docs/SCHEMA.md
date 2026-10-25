@@ -102,6 +102,15 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
 
 `player_id, display_name, color, points, claims` for every player. `points` is the sum of their claims' `points`. Runs with the caller's permissions. The leaderboard orders by points, then name.
 
+### `discovered_areas` (fog of war)
+
+| column | type | notes |
+| --- | --- | --- |
+| `player_id` | uuid | references `players`, cascade delete |
+| `hex_id` | text | an area of the client's hex grid (`web/src/map/hexgrid.ts`): axial `"q:r"` from Old Main, 120 m edges. Checked against `^-?[0-9]{1,4}:-?[0-9]{1,4}$` |
+
+Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**, so it can't reconstruct where or when anyone walked. RLS: a player reads and inserts only their own rows (`player_id = current_player_id()`). No update or delete for anyone. Not in the Realtime publication.
+
 ## Functions
 
 - **`claim_drop(p_drop_id, p_lat?, p_lng?, p_code?) → claims`**. Claims a drop for the caller. It locks the drop row, so if two players tap at once exactly one wins. Proof is either the drop's QR `p_code` (any distance) or a GPS position within `claim_radius_m()`. It raises an error with a user-facing message when:
@@ -125,6 +134,7 @@ Both are read-only for clients and in the Realtime publication. Sides aren't sto
   - `photo_hunt_check(drop, player, lat, lng) → drops` and `claim_photo_hunt(...) → claims`. **Service role only**, called by `web/api/verify-photo.ts`. The check raises a user-facing error unless the hunt is open, the player hasn't found it yet, and they're within `claim_radius_m()` of the exact spot. It never says how far off they are. The claim reruns the check under a row lock, then records points: full for the first finder, halved for each earlier finder, at least 1. The first find copies the exact spot and building onto the drop (the map's red pin and building highlight) and sets `expires_at` to 7 minutes later unless it was due sooner. The drop stays `active` until then.
   - `current_player_id() → uuid`. The caller's player id, so `/api` functions can identify the caller from their JWT.
   - `claim_drop` refuses `photo_hunt` drops, by GPS and by QR.
+- **`discover_area(p_hex_id) → boolean`**. Records an area for the caller; `true` if new, `false` if they already had it (duplicates are ignored). Runs as the caller (`security invoker`), so the insert policy applies. The client calls it from `DiscoveryProvider` only on a GPS fix with accuracy ≤ 20 m inside one of the campus areas. Client: `discoverArea(hexId)`, `getDiscoveredAreas()`.
 - **`claim_radius_m() → meters`** (currently 60). This is the one place the GPS claim radius is defined. `claim_drop` uses it, and the client fetches it (`getClaimRadius()` / `useClaimRadius()`) to draw each drop's radius circle and to enable the Claim button. Change it here and both follow.
 - **`distance_m(lat1, lng1, lat2, lng2) → meters`**. Haversine on a 6,371 km sphere. `web/src/lib/geo.ts` `distanceM` uses the identical formula, so the client's "in range" matches the server.
 - **`next_player_color() → text`**. Default for `players.color`.
@@ -156,6 +166,8 @@ Live locations use the Realtime **Presence** channel `campus`, keyed by player i
 ```
 
 It sends at most every 5 s, only while the app is open and visible. It untracks when the tab is hidden or the toggle is turned off. See `web/src/session/PresenceProvider.tsx`.
+
+Trails are client-only too. My trail is kept in `localStorage` for today (per device and player) and never sent anywhere. Other players' tails are the last 2 minutes of Presence updates seen this session, in memory only. See `web/src/session/TrailProvider.tsx`.
 
 ## Storage
 

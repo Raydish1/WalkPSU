@@ -6,6 +6,7 @@ HackPSU project: a mobile-first web app that turns the Penn State (University Pa
 - **Players compete as individuals.** There are no permanent teams, and each player gets a server-assigned map color. They race to a drop to claim it: inside the claim radius by GPS, or anywhere by scanning the drop's QR code (indoors, where GPS is unreliable).
 - Claims award points. A drop can sit at a campus building, and the map highlights that building in the accent color while the drop is active. Buildings are never owned or captured.
 - The leaderboard ranks players by points, live. Opted-in players appear live on the map (Realtime Presence).
+- **Walking:** my trail (today, `localStorage` only) fades behind my sprite; others get a faint 2-minute tail from Presence. **Fog of war** covers 150 campus hexes (120 m edges, `map/hexgrid.ts`); walking into one with a good GPS fix discovers it (`discovered_areas`). Profile shows distance walked today, the fog toggle, and areas discovered.
 - **Photo hunt:** the admin posts a reference photo of a spot plus a twist ("with a thumbs up"). Players see only a 250 m search circle, find the spot, and take a photo there; Gemini (`web/api/verify-photo.ts`) judges it. The first finder gets full points and reveals a red pin; the hunt then stays open 7 minutes, each later finder getting half the points of the one before.
 - **Shake-Off:** players join a lobby at the drop (in range or by QR). At 4 joins (or an admin's Start) they're dealt into Blue vs White **for that game only** and shake their phones for 15 s. The side with more shakes per player wins, and every winner gets the drop's points. Phones show a named tug-of-war, and `/battle/:dropId` is the projector view.
 
@@ -33,9 +34,10 @@ web/
                        Game (/game/:dropId), Battle (/battle/:dropId)
     game/              Shake-Off: shakeoff.ts (phase model, side math, names), useGame, useShakes,
                        useShakeBroadcast, TugBar, Results (winner headline + MVP)
-    session/           SessionProvider (Auth0 or anonymous) + PresenceProvider (the only GPS watcher)
-    components/        CampusMap (MapLibre wrapper), DropSheet, PlayerSprite, BuildingPicker, DropQrList, BottomNav
-    map/               basemap.ts (declutter + landmarks), geometry.ts (geodesic circles, heights), worker.ts
+    session/           SessionProvider (Auth0 or anonymous), PresenceProvider (the only GPS watcher; `subscribe` for every fix),
+                       TrailProvider (my trail + others' tails), DiscoveryProvider (fog-of-war areas)
+    components/        CampusMap (MapLibre wrapper), DropSheet, PlayerSprite, WalkLayers (fog + trails), BuildingPicker, DropQrList, BottomNav
+    map/               basemap.ts (declutter + landmarks), geometry.ts (geodesic circles, heights), hexgrid.ts (fog areas), worker.ts
     lib/               supabase.ts, api.ts (all DB calls), hooks.ts, geo.ts, buildings.ts, database.types.ts
 supabase/migrations/   SQL, applied in filename order
 docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Supabase/Auth0/Vercel steps)
@@ -50,6 +52,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 5. `20261024040000_remove_building_capture.sql`: drops `building_control` and the capture logic.
 6. `20261024050000_event_drops.sql`: `drops.subtitle`, `starts_at`, `source_id` (drops seeded from Penn State Discover events).
 7. `20261024060000_photo_hunt.sql`: hunt columns, hidden spot in `drop_secrets`, `claims.points`, `create_photo_hunt`, service-only `photo_hunt_check`/`claim_photo_hunt`, `current_player_id`.
+8. `20261025000000_discovered_areas.sql`: fog-of-war `discovered_areas (player_id, hex_id)` (own rows only) and `discover_area()`.
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -62,7 +65,7 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 - The GPS radius exists only in SQL `claim_radius_m()`; the client reads it (`useClaimRadius`). Never hard-code 60. `distanceM` (TS) must stay identical to SQL `distance_m` (same haversine, R = 6,371 km).
 - Shake-Off timing and caps come from `get_game_state().settings` plus `server_now` (clock-skew offset). Never hard-code 15 s or 8 shakes/s. Broadcast counts are cosmetic; only capped `submit_shakes` totals decide winners.
 - Claim codes live only in `drop_secrets` (admin-read). Never put them in `drops`.
-- Live locations go only over the Presence channel `campus`; never store them. Read position from `usePresence()` and never start a second geolocation watcher.
+- Live locations go only over the Presence channel `campus`; never store them. Read position from `usePresence()` and never start a second geolocation watcher. Code that must see every fix (trails, discovery) uses `usePresence().subscribe`. My trail stays in `localStorage`; `discovered_areas` holds only (player, hex), never times or coordinates.
 - Components call Supabase only through `lib/api.ts`. Live data uses `useLiveQuery`; call `refresh()` after your own writes (venue Wi-Fi drops Realtime). `useGame` also polls every 2 s.
 - Player names are user input. React escapes them; anything put into raw HTML must be escaped.
 - Phones first: `100dvh`, safe-area insets, 48 px touch targets.
@@ -73,6 +76,7 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 - After installing or removing deps while `npm run dev` runs, Vite's dep cache can go stale (504 "Outdated Optimize Dep", or imports of deleted packages) and the page goes blank. Stop the server, `rm -rf web/node_modules/.vite`, and restart.
 - **Vaul 1.1.2 + controlled `open`:** Vaul doesn't pass `modal={false}` to Radix, so opening the sheet from code leaves `pointer-events: none` on `<body>` (map untappable). `DropSheet` resets it; keep that effect.
 - **Sprites:** `PlayerSprite` FLIPs from the old screen position in a `useLayoutEffect` (react-map-gl moves the marker during render). Don't put CSS `filter`s on the breathing element; a drop-shadow there cost ~25% fps.
+- **Fog layer order:** `WalkLayers` adds the fog with `beforeId: 'buildings-active-glow'` so it sits under the glow, claim circles, drops, trails, and sprites. Layers mount in JSX order, so keep `<WalkLayers />` first among `MapPage`'s map children, and don't mount map sources conditionally (a late mount lands on top). Hex ids come only from the constants in `hexgrid.ts`; changing the edge or origin orphans every stored discovery.
 - `map.loaded()` stays false forever because the highlight pulse keeps a paint transition running. Use `isStyleLoaded()` plus rendered features instead.
 - react-map-gl's `Map` takes no `className`; `CampusMap` wraps it in a sized `div`. `maxBounds` must be a flat `[w, s, e, n]`.
 - `campusBounds` deliberately ignores far-off PASDA property (Ag Progress Days, the airport) by keeping buildings within 2.5 km of the median building, then pads by 1.6 km.
@@ -85,6 +89,7 @@ Run `npm test` in `web/` (SQL + API + e2e, about a minute), plus `npm run lint` 
 
 - **`npm run test:sql`:** runs migrations in PGlite (in-process Postgres) and checks behavior through real RLS. `tests/sql/harness.mjs` stubs Supabase (`anon`/`authenticated` roles, `auth.jwt()` from `request.jwt.claims`, storage tables, the `supabase_realtime` publication, and Supabase's default table grants via `alter default privileges`). It also provides `actor(db)(sub, claims, sql)` to act as a user and `superuser(db)` for setup and time travel (move `games.started_at` into the past).
   - `current-schema.test.mjs`: all migrations applied. Joining, RLS, claims, the 59 m/61 m boundary, QR codes, scores, and the full Shake-Off lifecycle.
+  - `discovery.test.mjs`: `discovered_areas` RLS (own rows only, no edits/deletes, anon blocked), duplicate-ignoring `discover_area`, hex id format, cascade on player delete.
   - `photo-hunt.test.mjs`: hidden spot, admin-only creation, service-only claiming, halving points, reveal, 7-minute window.
   - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal; per-claim points). Add a block here for any migration that rewrites data.
   - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.

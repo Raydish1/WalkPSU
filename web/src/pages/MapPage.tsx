@@ -6,6 +6,7 @@ import CampusMap from '../components/CampusMap'
 import DropSheet from '../components/DropSheet'
 import FoundOverlay, { type Found } from '../components/FoundOverlay'
 import PlayerSprite from '../components/PlayerSprite'
+import WalkLayers from '../components/WalkLayers'
 import { DROP_TYPES } from '../lib/campus'
 import type { DropRow } from '../lib/database.types'
 import { distanceM } from '../lib/geo'
@@ -123,6 +124,8 @@ function MapPage() {
   return (
     <div className="map-wrap">
       <CampusMap buildings={buildings} highlighted={highlighted} className="map" interactiveLayerIds={TAPPABLE} onClick={onClick}>
+        {/* First, so trails draw under drops and claim circles; the fog places itself under the building glow. */}
+        <WalkLayers />
         <Source id="hunt-areas" type="geojson" data={huntAreas}>
           <Layer id="hunt-areas" type="fill" paint={{ 'fill-color': DROP_TYPES.photo_hunt.color, 'fill-opacity': 0.14 }} />
           <Layer id="hunt-areas-line" type="line" paint={{ 'line-color': DROP_TYPES.photo_hunt.color, 'line-width': 2.5, 'line-dasharray': [1, 2] }} />

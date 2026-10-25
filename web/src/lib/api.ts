@@ -129,6 +129,16 @@ export function claimUrl(dropId: string, code: string) {
   return `${window.location.origin}/claim/${dropId}?key=${code}`
 }
 
+/** Hex ids of the areas I've discovered (RLS returns only my own rows). */
+export async function getDiscoveredAreas() {
+  return unwrap(await supabase.from('discovered_areas').select('hex_id')).map((row) => row.hex_id)
+}
+
+/** Records that I walked into an area. True if it was new; duplicates are ignored server-side. */
+export async function discoverArea(hexId: string) {
+  return unwrap(await supabase.rpc('discover_area', { p_hex_id: hexId }))
+}
+
 export async function getLeaderboard() {
   return unwrap(
     await supabase

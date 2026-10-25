@@ -60,6 +60,7 @@ function seed() {
     players,
     drops,
     claims: [],
+    discovered: [],
     secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
     games: new Map([['game-drop', { drop_id: 'game-drop', created_at: now(), started_at: null, finished_at: null, winner_side: null }]]),
     gamePlayers: ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: 'game-drop', player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
@@ -83,7 +84,7 @@ const filterRows = (rows, params) =>
 
 export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const db = seed()
-  const { players, drops, claims, secrets, games, gamePlayers, log } = db
+  const { players, drops, claims, discovered, secrets, games, gamePlayers, log } = db
 
   const sidesOf = (dropId) => {
     if (!games.get(dropId)?.started_at) return new Map()
@@ -151,6 +152,13 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const rpc = {
     claim_radius_m: () => [200, RADIUS_M],
     current_player_id: (json, me) => [200, me?.id ?? null],
+    discover_area: (json, me) => {
+      if (!me) return [400, { message: 'Join the game before discovering areas' }]
+      if (!/^-?\d{1,4}:-?\d{1,4}$/.test(json.p_hex_id)) return [400, { message: 'violates check constraint' }]
+      if (discovered.some((d) => d.player_id === me.id && d.hex_id === json.p_hex_id)) return [200, false]
+      discovered.push({ player_id: me.id, hex_id: json.p_hex_id })
+      return [200, true]
+    },
     photo_hunt_check: serviceOnly(huntCheck),
     claim_photo_hunt: serviceOnly(huntClaim),
     claim_drop: (json, me) => {
@@ -244,7 +252,7 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     const reply = (rows) => (single ? (rows.length === 1 ? send(200, rows[0]) : send(406, { message: 'expected one row' })) : send(200, rows))
 
     // Test-only introspection, e.g. to read claims or a drop's QR code.
-    if (url.pathname === '/__state') return send(200, { log, players, drops, claims, secrets, gamePlayers, games: [...games.values()] })
+    if (url.pathname === '/__state') return send(200, { log, players, drops, claims, discovered, secrets, gamePlayers, games: [...games.values()] })
     if (url.pathname === '/auth/v1/signup') {
       const id = randomUUID()
       const user = { id, aud: 'authenticated', role: 'authenticated', is_anonymous: true, app_metadata: {}, user_metadata: {}, created_at: now() }
@@ -290,7 +298,8 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       secrets.push({ drop_id: d.id, claim_code: randomUUID().replaceAll('-', '') })
       return reply([d])
     }
-    const tables = { players, drops, drop_secrets: secrets, player_scores: scores() }
+    // discovered_areas mirrors its RLS: each player reads only their own rows.
+    const tables = { players, drops, drop_secrets: secrets, player_scores: scores(), discovered_areas: discovered.filter((d) => d.player_id === me?.id) }
     if (tables[path]) return reply(filterRows(tables[path], url.searchParams))
     send(404, { message: `mock: no route ${req.method} ${url.pathname}` })
   })

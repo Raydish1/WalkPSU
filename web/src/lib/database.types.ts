@@ -96,6 +96,8 @@ export type Database = {
       drop_secrets: { Row: DropSecret; Insert: never; Update: never; Relationships: [] }
       games: { Row: Game & { seed: string }; Insert: never; Update: never; Relationships: [] }
       game_players: { Row: GamePlayerRow; Insert: never; Update: never; Relationships: [] }
+      /** Fog-of-war: hexes (web/src/map/hexgrid.ts ids, "q:r") a player has walked into. Own rows only. */
+      discovered_areas: { Row: { player_id: string; hex_id: string }; Insert: { player_id: string; hex_id: string }; Update: never; Relationships: [] }
     }
     Views: {
       player_scores: { Row: PlayerScore; Relationships: [] }
@@ -117,6 +119,8 @@ export type Database = {
         Returns: Drop
       }
       current_player_id: { Args: Record<string, never>; Returns: string | null }
+      /** True if the area is new for the caller, false if already discovered. */
+      discover_area: { Args: { p_hex_id: string }; Returns: boolean }
       /** Service role only. */
       photo_hunt_check: { Args: { p_drop_id: string; p_player_id: string; p_lat: number; p_lng: number }; Returns: Drop }
       /** Service role only. */

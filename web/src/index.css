@@ -889,3 +889,58 @@ a.list-row:active {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Profile: exploration */
+
+.explore-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.explore-count {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-ring {
+  flex-shrink: 0;
+  /* Start the arc at 12 o'clock. */
+  transform: rotate(-90deg);
+}
+
+.progress-ring-track,
+.progress-ring-fill {
+  fill: none;
+  stroke-width: 6;
+}
+
+.progress-ring-track {
+  stroke: var(--fill);
+}
+
+.progress-ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 600ms var(--ease-out);
+}
+
+.progress-ring-label {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  /* Undo the ring's rotation for the text. */
+  transform: rotate(90deg);
+  transform-origin: 28px 28px;
+}
+
+.stat-value {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.list-row:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

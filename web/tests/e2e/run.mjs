@@ -113,6 +113,7 @@ async function mapScenario(browser) {
       active: [...new Set(q(['buildings-active']).map((f) => f.properties.num))],
       heights: q(['buildings-base']).map((f) => f.properties.height),
       inRange: q(['claim-circles-in']).length,
+      fogBelowGlow: map.getStyle().layers.findIndex((l) => l.id === 'fog') < map.getStyle().layers.findIndex((l) => l.id === 'buildings-active-glow'),
       // Player sprites are DOM markers (they breathe, blink and hop), so count them in the DOM, not the map's layers.
       me: document.querySelectorAll('.sprite.is-me').length,
     }
@@ -123,6 +124,9 @@ async function mapScenario(browser) {
   check('building hosting the Shake-Off drop is highlighted', JSON.stringify(s.active) === '["0005000"]', s.active)
   check('extrusions are 10-15 m', s.heights.length > 0 && Math.min(...s.heights) >= 10 && Math.max(...s.heights) <= 15, [Math.min(...s.heights), Math.max(...s.heights)])
   check('in-range claim circle and my sprite render', s.inRange > 0 && s.me === 1, s)
+  check('fog of war sits below the building glow (and everything drawn above it)', s.fogBelowGlow, s)
+  const discovered = (await (await fetch(`${MOCK}/__state`)).json()).discovered.map((d) => d.hex_id)
+  check('standing at Old Main discovers its area', discovered.includes('0:0'), discovered)
 
   await tapFeature(page, 'drop-points', 'game-drop')
   await page.waitForSelector('.map-card')

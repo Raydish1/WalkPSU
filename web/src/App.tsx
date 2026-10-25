@@ -11,7 +11,9 @@ import JoinScreen from './pages/JoinScreen'
 import LeaderboardPage from './pages/LeaderboardPage'
 import MapPage from './pages/MapPage'
 import ProfilePage from './pages/ProfilePage'
+import { DiscoveryProvider } from './session/DiscoveryProvider'
 import { PresenceProvider } from './session/PresenceProvider'
+import { TrailProvider } from './session/TrailProvider'
 import { useSession } from './session/session'
 import { SessionProvider } from './session/SessionProvider'
 
@@ -34,21 +36,25 @@ function Screens() {
 
   return (
     <PresenceProvider>
-      <div className="app" data-chrome={fullScreen ? 'none' : 'tabs'}>
-        <main className="app-main">
-          <Routes>
-            <Route path="/" element={<MapPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/claim/:dropId" element={<ClaimPage />} />
-            <Route path="/game/:dropId" element={<GamePage />} />
-            <Route path="/battle/:dropId" element={<BattlePage />} />
-          </Routes>
-        </main>
-        {!fullScreen && <BottomNav />}
-        {!fullScreen && <DropAlerts />}
-      </div>
+      <TrailProvider>
+        <DiscoveryProvider>
+          <div className="app" data-chrome={fullScreen ? 'none' : 'tabs'}>
+            <main className="app-main">
+              <Routes>
+                <Route path="/" element={<MapPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/claim/:dropId" element={<ClaimPage />} />
+                <Route path="/game/:dropId" element={<GamePage />} />
+                <Route path="/battle/:dropId" element={<BattlePage />} />
+              </Routes>
+            </main>
+            {!fullScreen && <BottomNav />}
+            {!fullScreen && <DropAlerts />}
+          </div>
+        </DiscoveryProvider>
+      </TrailProvider>
     </PresenceProvider>
   )
 }
