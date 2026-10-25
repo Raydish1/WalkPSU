@@ -124,6 +124,7 @@ const sides = s.players.map((p) => p.side)
 const blues = sides.filter((x) => x === 'blue').length
 check('5 players split 3/2', blues + sides.filter((x) => x === 'white').length === 5 && Math.abs(blues - (5 - blues)) === 1, sides)
 check('every caller sees the same sides', JSON.stringify((await state('p4')).players.map((p) => p.side)) === JSON.stringify(sides))
+await su(`update games set started_at = now() - interval '6 seconds' where drop_id = $1`, [game])
 r = await as('p1', {}, `select submit_shakes($1, 1000) as n`, [game])
 check('faked count capped to 8/s x 6 s = 48', r.rows?.[0]?.n === 48, r)
 check('a lower report never lowers the count', (await as('p1', {}, `select submit_shakes($1, 5) as n`, [game])).rows?.[0]?.n === 48)

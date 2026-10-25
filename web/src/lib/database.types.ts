@@ -4,7 +4,7 @@
 export type DropType = 'minigame' | 'photo_hunt' | 'checkin' | 'meetup'
 export type DropStatus = 'active' | 'claimed' | 'expired'
 /** Which mini-game a 'minigame' drop runs. */
-export type MinigameKind = 'shake_off' | 'quick_draw'
+export type MinigameKind = 'shake_off' | 'quick_draw' | 'needle_rain'
 
 type Player = {
   id: string
@@ -57,9 +57,24 @@ type DropSecret = {
 
 export type Side = 'blue' | 'white'
 
-type Game = { drop_id: string; created_at: string; started_at: string | null; finished_at: string | null; winner_side: Side | null }
+type Game = {
+  drop_id: string
+  created_at: string
+  started_at: string | null
+  finished_at: string | null
+  winner_side: Side | null
+  /** Needle Rain: the one player who is paid. Null for side-based games. */
+  winner_id: string | null
+  /** Public once the round is scheduled. Null in the lobby, so a practice run can't see the real storm. */
+  round_seed: string | null
+  /** Practice-run pattern. Never the live round seed. */
+  ghost_seed: string
+  ghost_dodges: number | null
+  ghost_player_id: string | null
+  ghost_name: string | null
+}
 
-type GamePlayerRow = { drop_id: string; player_id: string; joined_at: string; shakes: number }
+type GamePlayerRow = { drop_id: string; player_id: string; joined_at: string; shakes: number; dodges: number; eliminated: boolean }
 
 /** Mirrors SQL shake_off_settings(); the server is the only source of these numbers. */
 export type ShakeOffSettings = {
@@ -82,8 +97,11 @@ export type TimedSettings = {
   clock_tolerance_ms: number
 }
 
+/** Needle Rain's own numbers, merged onto the shared lobby settings by minigame_settings('needle_rain'). */
+export type NeedleRainSettings = ShakeOffSettings & { max_dodges_per_second: number }
+
 /** Mirrors SQL minigame_settings(kind): the shared lobby settings plus the kind's own (game_seconds per kind). */
-export type MinigameSettings = ShakeOffSettings & Partial<TimedSettings>
+export type MinigameSettings = ShakeOffSettings & Partial<TimedSettings> & Partial<Pick<NeedleRainSettings, 'max_dodges_per_second'>>
 
 /** One round of a timed game. Quick Draw: `signal_at` is when every phone shows "DRAW!". */
 export type GameRound = { round: number; starts_at: string; signal_at: string }
@@ -93,7 +111,16 @@ export type RoundResult = { player_id: string; round: number; value: number | nu
 
 type GameResultRow = RoundResult & { drop_id: string; created_at: string }
 
-export type GamePlayer = { player_id: string; display_name: string; color: string; side: Side | null; shakes: number; joined_at: string }
+export type GamePlayer = {
+  player_id: string
+  display_name: string
+  color: string
+  side: Side | null
+  shakes: number
+  dodges: number
+  eliminated: boolean
+  joined_at: string
+}
 
 /** Returned by get_game_state() and finish_game(). `game` is null until someone joins. */
 export type GameState = {
@@ -169,6 +196,10 @@ export type Database = {
       join_game: { Args: { p_drop_id: string; p_lat?: number; p_lng?: number; p_code?: string }; Returns: undefined }
       start_game: { Args: { p_drop_id: string }; Returns: undefined }
       submit_shakes: { Args: { p_drop_id: string; p_count: number }; Returns: number }
+      /** Needle Rain. The server caps the count and freezes it once p_eliminated is true. */
+      submit_dodges: { Args: { p_drop_id: string; p_count: number; p_eliminated?: boolean }; Returns: number }
+      /** Solo practice. Stores a capped dodge count, pays nothing, and does not finish the drop. */
+      submit_ghost: { Args: { p_drop_id: string; p_count: number }; Returns: number }
       /** Quick Draw. p_reaction_ms omitted = flicked before the signal. */
       submit_reaction: { Args: { p_drop_id: string; p_round: number; p_reaction_ms?: number }; Returns: GameResultRow }
       finish_game: { Args: { p_drop_id: string }; Returns: GameState }

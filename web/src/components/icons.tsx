@@ -98,3 +98,12 @@ export const BoltIcon = (p: IconProps) => (
     <path d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12z" />
   </Icon>
 )
+
+/** Needle Rain: a needle falling through rain. */
+export const NeedleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 2v9" />
+    <path d="m9 13 3 9 3-9" />
+    <path d="M6 7.5 7.2 11M18 7.5 16.8 11" />
+  </Icon>
+)

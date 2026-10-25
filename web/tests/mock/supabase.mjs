@@ -26,7 +26,10 @@ const QUICK_DRAW = {
   ...SETTINGS, game_seconds: 15, rounds: 3, round_seconds: 5, min_signal_delay_ms: 1500, max_signal_delay_ms: 2500,
   min_reaction_ms: 100, max_reaction_ms: 1500, clock_tolerance_ms: 1000,
 }
-const settingsOf = (kind) => (kind === 'quick_draw' ? QUICK_DRAW : SETTINGS)
+// Needle Rain, shortened so a headless round can finish. Real values come from needle_rain_settings().
+const NEEDLE = { ...SETTINGS, game_seconds: 8, auto_start_players: 2, auto_start_delay_seconds: 2, admin_start_delay_seconds: 2, max_dodges_per_second: 4, submit_grace_seconds: 2 }
+const settingsOf = (kind) => (kind === 'quick_draw' ? QUICK_DRAW : kind === 'needle_rain' ? NEEDLE : SETTINGS)
+export const NEEDLE_SPOT = { lat: OLD_MAIN_LAWN.lat + 500 / 111_195, lng: OLD_MAIN_LAWN.lng }
 /** Bots' Quick Draw times per round: valid but slow, so the e2e player wins however fast the test machine is. */
 const BOT_TIMES = { bot0: [1300, 1350, 1320], bot1: [1200, 1250, 1180], bot2: [1400, 1380, 1420] }
 const PALETTE = ['#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4']
@@ -59,6 +62,8 @@ function seed() {
     drop('game-drop', 'HUB Shake-Off', 'minigame', OLD_MAIN_LAWN.lat, OLD_MAIN_LAWN.lng + 30 / (111_195 * Math.cos(rad(OLD_MAIN_LAWN.lat))), 30, '0005000'),
     // ~30 m south of the lawn drop, in the open.
     drop('draw-drop', 'Lawn Quick Draw', 'minigame', OLD_MAIN_LAWN.lat - 30 / 111_195, OLD_MAIN_LAWN.lng, 25, null, { game: 'quick_draw' }),
+    // Open ground, ~500 m north, so it never highlights a building. One bot is already in, so joining starts it.
+    drop('needle-drop', 'Open Needle Rain', 'minigame', NEEDLE_SPOT.lat, NEEDLE_SPOT.lng, 40, null, { game: 'needle_rain' }),
     // Hidden photo hunt: the public row has only the search circle's center and no building.
     drop('hunt-drop', 'Mystery spot', 'photo_hunt', HUNT_SPOT.lat, HUNT_SPOT.lng + 60 / (111_195 * Math.cos(rad(HUNT_SPOT.lat))), 20, null, {
       twist: 'with a thumbs up',
@@ -73,11 +78,18 @@ function seed() {
     claims: [],
     discovered: [],
     secrets: drops.map((d) => ({ drop_id: d.id, claim_code: `${d.id}-code`, ...(d.type === 'photo_hunt' ? hunt : {}) })),
-    games: new Map(['game-drop', 'draw-drop'].map((id) => [id, newGame(id)])),
-    // Three bots wait in each lobby, so joining makes 4 and starts the countdown.
+    games: (() => {
+      const games = new Map(['game-drop', 'draw-drop', 'needle-drop'].map((id) => [id, newGame(id)]))
+      const ghost = games.get('needle-drop')
+      ghost.ghost_dodges = 12
+      ghost.ghost_player_id = 'bot0'
+      ghost.ghost_name = 'Bot Ana'
+      return games
+    })(),
+    // Three bots wait in the Shake-Off and Quick Draw lobbies, so joining makes 4. Needle Rain has one, so joining makes 2.
     gamePlayers: ['game-drop', 'draw-drop'].flatMap((dropId) =>
-      ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: dropId, player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0 })),
-    ),
+      ['bot0', 'bot1', 'bot2'].map((id, i) => ({ drop_id: dropId, player_id: id, joined_at: new Date(Date.now() - 60_000 + i).toISOString(), shakes: 0, dodges: 0, eliminated: false })),
+    ).concat([{ drop_id: 'needle-drop', player_id: 'bot0', joined_at: new Date(Date.now() - 60_000).toISOString(), shakes: 0, dodges: 0, eliminated: false }]),
     results: [],
     log: [],
   }
@@ -86,7 +98,10 @@ function seed() {
 /** A games row. `delays` stands in for the SQL seed: each Quick Draw round's hidden signal delay. */
 function newGame(dropId) {
   const delays = [0, 1, 2].map(() => QUICK_DRAW.min_signal_delay_ms + Math.floor(Math.random() * (QUICK_DRAW.max_signal_delay_ms - QUICK_DRAW.min_signal_delay_ms + 1)))
-  return { drop_id: dropId, created_at: now(), started_at: null, finished_at: null, winner_side: null, delays }
+  return {
+    drop_id: dropId, created_at: now(), started_at: null, finished_at: null, winner_side: null, winner_id: null, delays,
+    round_seed: null, ghost_seed: randomUUID().replaceAll('-', ''), ghost_dodges: null, ghost_player_id: null, ghost_name: null,
+  }
 }
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
@@ -126,19 +141,19 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
   const gameState = (dropId) => {
     const sides = sidesOf(dropId)
     // The delays stand in for the SQL seed, which get_game_state() never returns.
-    const { delays: _seed, ...game } = games.get(dropId) ?? {}
+    const { delays: _seed, round_seed, ...game } = games.get(dropId) ?? {}
     return {
       server_now: now(),
       kind: kindOf(dropId),
       settings: settingsOf(kindOf(dropId)),
-      game: game.drop_id ? game : null,
+      game: game.drop_id ? { ...game, round_seed: game.started_at ? round_seed : null } : null,
       rounds: roundsOf(dropId),
       results: results.filter((r) => r.drop_id === dropId).map(({ player_id, round, value, false_start }) => ({ player_id, round, value, false_start })),
       players: gamePlayers
         .filter((gp) => gp.drop_id === dropId)
         .map((gp) => {
           const p = players.find((x) => x.id === gp.player_id)
-          return { player_id: p.id, display_name: p.display_name, color: p.color, side: sides.get(p.id) ?? null, shakes: gp.shakes, joined_at: gp.joined_at }
+          return { player_id: p.id, display_name: p.display_name, color: p.color, side: sides.get(p.id) ?? null, shakes: gp.shakes, dodges: gp.dodges ?? 0, eliminated: gp.eliminated ?? false, joined_at: gp.joined_at }
         }),
     }
   }
@@ -224,7 +239,10 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
     claim_drop: (json, me) => {
       const drop = drops.find((d) => d.id === json.p_drop_id)
       if (!me) return [400, { message: 'Join the game before claiming drops' }]
-      if (drop?.type === 'minigame') return [400, { message: 'This drop is a Shake-Off. Join its lobby to win it' }]
+      if (drop?.type === 'minigame') {
+        const label = drop.game === 'needle_rain' ? 'Needle Rain' : 'Shake-Off'
+        return [400, { message: `This drop is a ${label}. Join its lobby to win it` }]
+      }
       if (drop?.type === 'photo_hunt') return [400, { message: 'Photo hunts are claimed by taking the photo' }]
       if (drop?.type === 'meetup') return [400, { message: 'Meetups are for showing up, not for points' }]
       if (!drop || drop.status !== 'active') return [400, { message: 'This drop is no longer available' }]
@@ -252,17 +270,21 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       if (gamePlayers.some((gp) => gp.drop_id === json.p_drop_id && gp.player_id === me.id)) return [200, null]
       if (g.started_at && Date.parse(g.started_at) <= Date.now()) return [400, { message: 'This Shake-Off already started' }]
       if (!proofOk(json, drops.find((d) => d.id === json.p_drop_id))) return [400, { message: 'Get closer to this drop' }]
-      gamePlayers.push({ drop_id: json.p_drop_id, player_id: me.id, joined_at: now(), shakes: 0 })
-      if (!g.started_at && gamePlayers.filter((gp) => gp.drop_id === json.p_drop_id).length >= SETTINGS.auto_start_players) {
-        g.started_at = new Date(Date.now() + SETTINGS.auto_start_delay_seconds * 1000).toISOString()
+      gamePlayers.push({ drop_id: json.p_drop_id, player_id: me.id, joined_at: now(), shakes: 0, dodges: 0, eliminated: false })
+      const settings = settingsOf(kindOf(json.p_drop_id))
+      if (!g.started_at && gamePlayers.filter((gp) => gp.drop_id === json.p_drop_id).length >= settings.auto_start_players) {
+        g.started_at = new Date(Date.now() + settings.auto_start_delay_seconds * 1000).toISOString()
+        if (kindOf(json.p_drop_id) === 'needle_rain') g.round_seed = g.round_seed ?? randomUUID().replaceAll('-', '')
       }
       return [200, null]
     },
     start_game: (json, me) => {
       const g = games.get(json.p_drop_id)
       if (!me?.is_admin) return [400, { message: 'Only admins can start a Shake-Off' }]
-      const start = Date.now() + SETTINGS.admin_start_delay_seconds * 1000
+      const settings = settingsOf(kindOf(json.p_drop_id))
+      const start = Date.now() + settings.admin_start_delay_seconds * 1000
       if (!g.started_at || Date.parse(g.started_at) > start) g.started_at = new Date(start).toISOString()
+      if (kindOf(json.p_drop_id) === 'needle_rain') g.round_seed = g.round_seed ?? randomUUID().replaceAll('-', '')
       return [200, null]
     },
     submit_reaction: (json, me) => {
@@ -297,6 +319,34 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       log.push(`submit ${json.p_count} -> stored ${gp.shakes} at ${elapsed.toFixed(1)}s`)
       return [200, gp.shakes]
     },
+    submit_dodges: (json, me) => {
+      if (kindOf(json.p_drop_id) !== 'needle_rain') return [400, { message: "This drop isn't a Needle Rain" }]
+      const g = games.get(json.p_drop_id)
+      const started = Date.parse(g?.started_at ?? '')
+      if (!started || Date.now() < started) return [400, { message: "This Needle Rain hasn't started" }]
+      if (Date.now() > started + (NEEDLE.game_seconds + NEEDLE.submit_grace_seconds) * 1000) return [400, { message: 'This Needle Rain is over' }]
+      const gp = gamePlayers.find((x) => x.drop_id === json.p_drop_id && x.player_id === me?.id)
+      if (!gp) return [400, { message: "You're not in this Needle Rain" }]
+      if (gp.eliminated) return [200, gp.dodges]
+      const elapsed = Math.min((Date.now() - started) / 1000, NEEDLE.game_seconds)
+      gp.dodges = Math.max(gp.dodges, Math.min(Math.max(json.p_count, 0), Math.floor(elapsed * NEEDLE.max_dodges_per_second)))
+      if (json.p_eliminated) gp.eliminated = true
+      return [200, gp.dodges]
+    },
+    submit_ghost: (json, me) => {
+      if (kindOf(json.p_drop_id) !== 'needle_rain') return [400, { message: "This drop isn't a Needle Rain" }]
+      const g = games.get(json.p_drop_id)
+      if (!gamePlayers.some((gp) => gp.drop_id === json.p_drop_id && gp.player_id === me?.id)) return [400, { message: "You're not in this Needle Rain" }]
+      if (g.finished_at || (g.started_at && Date.parse(g.started_at) <= Date.now())) return [400, { message: 'The round already started' }]
+      const cap = NEEDLE.game_seconds * NEEDLE.max_dodges_per_second
+      const count = Math.min(Math.max(json.p_count, 0), cap)
+      if ((g.ghost_dodges ?? -1) < count) {
+        g.ghost_dodges = count
+        g.ghost_player_id = me.id
+        g.ghost_name = me.display_name
+      }
+      return [200, count]
+    },
     finish_game: (json) => {
       const g = games.get(json.p_drop_id)
       const kind = kindOf(json.p_drop_id)
@@ -304,6 +354,17 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       if (!g.finished_at) {
         if (Date.now() < Date.parse(g.started_at) + (settings.game_seconds + settings.submit_grace_seconds) * 1000) return [400, { message: "This Shake-Off isn't over yet" }]
         const roster = gamePlayers.filter((gp) => gp.drop_id === json.p_drop_id)
+        const drop = drops.find((d) => d.id === json.p_drop_id)
+        if (kind === 'needle_rain') {
+          for (const gp of roster) if (gp.player_id.startsWith('bot') && gp.dodges === 0 && !gp.eliminated) gp.dodges = 3
+          const alive = roster.filter((gp) => !gp.eliminated)
+          const pool = (alive.length ? alive : roster).slice().sort((a, b) => b.dodges - a.dodges || a.joined_at.localeCompare(b.joined_at))
+          g.winner_id = pool[0].player_id
+          g.finished_at = now()
+          drop.status = 'claimed'
+          claims.push({ id: randomUUID(), drop_id: json.p_drop_id, player_id: g.winner_id, points: drop.points, created_at: g.finished_at })
+          return [200, gameState(json.p_drop_id)]
+        }
         for (const gp of roster) if (gp.player_id.startsWith('bot')) gp.shakes = BOT_SHAKES
         if (kind === 'quick_draw') {
           for (const gp of roster.filter((x) => x.player_id.startsWith('bot'))) {

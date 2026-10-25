@@ -114,6 +114,16 @@ export async function submitShakes(dropId: string, count: number) {
   return unwrap(await supabase.rpc('submit_shakes', { p_drop_id: dropId, p_count: count }))
 }
 
+/** Reports a running dodge total. The server caps it, and a hit freezes it. */
+export async function submitDodges(dropId: string, count: number, eliminated = false) {
+  return unwrap(await supabase.rpc('submit_dodges', { p_drop_id: dropId, p_count: count, p_eliminated: eliminated }))
+}
+
+/** Records a solo practice dodge count. Pays nothing and leaves the drop open. */
+export async function submitGhost(dropId: string, count: number) {
+  return unwrap(await supabase.rpc('submit_ghost', { p_drop_id: dropId, p_count: count }))
+}
+
 /** Quick Draw: a round's reaction time measured on this phone, or null for a flick before the signal. */
 export async function submitReaction(dropId: string, round: number, reactionMs: number | null) {
   return unwrap(await supabase.rpc('submit_reaction', { p_drop_id: dropId, p_round: round, ...(reactionMs !== null && { p_reaction_ms: reactionMs }) }))

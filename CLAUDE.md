@@ -10,9 +10,10 @@ HackPSU project: a mobile-first web app that turns the Penn State (University Pa
 - **Walking:** my trail (today, `localStorage` only) fades behind my sprite; others get a faint 2-minute tail from Presence. **Fog of war** covers 150 campus hexes (120 m edges, `map/hexgrid.ts`); walking into one with a good GPS fix discovers it (`discovered_areas`). Profile shows distance walked today, the fog toggle, and areas discovered.
 - **Photo hunt:** the admin posts a reference photo of a spot plus a twist ("with a thumbs up"). Players see only a 250 m search circle, find the spot, and take a photo there; Gemini (`web/api/verify-photo.ts`) judges it. The first finder gets full points and reveals a red pin; the hunt then stays open 7 minutes, each later finder getting half the points of the one before.
 - **Shake-Off:** players join a lobby at the drop (in range or by QR). At 4 joins (or an admin's Start) they're dealt into Blue vs White **for that game only** and shake their phones for 15 s. The side with more shakes per player wins, and every winner gets the drop's points. Phones show a named tug-of-war, and `/battle/:dropId` is the projector view.
-- **Mini-game kinds:** a `minigame` drop's `game` picks what its lobby plays (admin picker; default Shake-Off). **Quick Draw:** 3 rounds; every phone flashes "DRAW!" at the same seeded server moment, phones time the flick themselves, and the side with the lower average best time wins (MVP: fastest draw). All kinds share the lobby, sides, `finish_game`, and `/battle`.
+- **Needle Rain:** the same join rules and the same `/game` and `/battle` routes, chosen with `drops.game = needle_rain` (existing minigame rows stay Shake-Offs). At 2 joins the round starts after a short countdown. Every phone simulates one storm from the public `round_seed` and `started_at` (no per-device `Math.random()`). Tilt dodges; a joystick and arrow keys / WASD are the fallback. A hit freezes that player's dodge count; last one standing wins, and a timer tie goes to the higher count (an exact tie uses the seeded coin flip). The winner gets one claim worth the drop's points. The loser gets nothing. A solo practice run uses `ghost_seed`, pays 0, and leaves the drop open. No rematch.
+- **Mini-game kinds:** a `minigame` drop's `game` picks what its lobby plays (admin picker; default Shake-Off). **Quick Draw:** 3 rounds; every phone flashes "DRAW!" at the same seeded server moment, phones time the flick themselves, and the side with the lower average best time wins (MVP: fastest draw). Shake-Off and Quick Draw share sides and pay every winner. Needle Rain does not use sides.
 
-Judging requirements: rivalry, phone motion, and the game working for **4+ players in total**. Never enforce a minimum group size. Never add permanent teams; Shake-Off sides are derived per game (`game_sides()`), never stored.
+Judging requirements: rivalry, phone motion, and the game working for **4+ players in total**. Never enforce a minimum group size. Never add permanent teams; Shake-Off sides are derived per game (`game_sides()`), never stored. Never pay a campus point per needle, never store live locations, and never bring back building capture.
 
 ## Stack
 
@@ -37,7 +38,8 @@ web/
     game/              Mini-games: kinds.ts + GameIcon (names, blurbs, icons), shakeoff.ts (phase model, side math, names),
                        useGame (state + clock offset), motion.ts (shared DeviceMotion permission), useShakes,
                        useShakeBroadcast, TugBar, Results (winner headline + MVP), quickdraw.ts (scoring),
-                       useQuickDraw (signal scheduling, on-phone timing), QuickDrawScreens
+                       useQuickDraw (signal scheduling, on-phone timing), QuickDrawScreens,
+                       needleRain.ts (shared storm), useSteer, useNeedleBroadcast, NeedleField, NeedleRainGame, NeedleBattle
     session/           SessionProvider (Auth0 or anonymous), PresenceProvider (the only GPS watcher; `subscribe` for every fix),
                        TrailProvider (my trail + others' tails), DiscoveryProvider (fog-of-war areas)
     components/        CampusMap (MapLibre wrapper), DropSheet, PlayerSprite, WalkLayers (fog + trails), BuildingPicker, DropQrList, BottomNav
@@ -59,6 +61,7 @@ docs/                  SCHEMA.md (tables/functions, keep current), SETUP.md (Sup
 8. `20261025000000_discovered_areas.sql`: fog-of-war `discovered_areas (player_id, hex_id)` (own rows only) and `discover_area()`.
 9. `20261025010000_meetups.sql`: `meetup` drop type, `create_meetup()` (any player), `close_drop()` (admins any drop, players their own meetup), `claim_drop` refuses meetups.
 10. `20261025020000_quick_draw.sql`: `drops.game` (mini-game kind), `game_results`, `minigame_settings()`, `submit_reaction`, per-kind `finish_game` (`side_scores`).
+11. `20261025030000_needle_rain.sql`: `drops.game` includes `needle_rain`, dodge and ghost columns, `submit_dodges`, `submit_ghost`, one-winner `finish_game`.
 
 Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib/database.types.ts` (hand-written) in the same commit.
 
@@ -70,7 +73,7 @@ Every schema change is a new migration. Update `docs/SCHEMA.md` and `web/src/lib
 - `claim_drop` also refuses `photo_hunt` drops. Hunt claims come only from `claim_photo_hunt`, which only the service role (`web/api/verify-photo.ts`, after Gemini) may call. Until the first find, a hunt's `lat`/`lng` is a decoy search-circle center and its `building_num` is null; never expose `drop_secrets.hunt_*` to players.
 - Scores sum `claims.points`, not `drops.points`.
 - The GPS radius exists only in SQL `claim_radius_m()`; the client reads it (`useClaimRadius`). Never hard-code 60. `distanceM` (TS) must stay identical to SQL `distance_m` (same haversine, R = 6,371 km).
-- Mini-game timing and caps come from `get_game_state().settings` plus `server_now` (clock-skew offset, from the lowest-latency sample). Never hard-code 15 s, 8 shakes/s, or Quick Draw's rounds and delays. Broadcast counts are cosmetic; only capped `submit_shakes` totals and `game_results` decide winners.
+- Mini-game timing and caps come from `get_game_state().settings` plus `server_now` (clock-skew offset, from the lowest-latency sample). Never hard-code 15 s, 8 shakes/s, Quick Draw's rounds and delays, or Needle Rain's 40 s and dodge cap. Broadcast counts are cosmetic; only capped `submit_shakes` totals, `game_results`, and capped `submit_dodges` decide winners. Needle Rain's private `games.seed` stays hidden and only breaks ties; the public `round_seed` is what every phone simulates.
 - Quick Draw signal moments are derived from `games.seed` and `started_at` (`quick_draw_signal_at`), never stored or timed by a server process. Reaction times are measured on the phone; the server only bounds them.
 - Claim codes live only in `drop_secrets` (admin-read). Never put them in `drops`.
 - Live locations go only over the Presence channel `campus`; never store them. Read position from `usePresence()` and never start a second geolocation watcher. Code that must see every fix (trails, discovery) uses `usePresence().subscribe`. My trail stays in `localStorage`; `discovered_areas` holds only (player, hex), never times or coordinates.
@@ -100,6 +103,7 @@ Run `npm test` in `web/` (SQL + API + e2e, about a minute), plus `npm run lint` 
   - `meetups.test.mjs`: posting rules (length, on campus, one live meetup, 5/hour, 15–180 min), no points by GPS or QR, and `close_drop` permissions (admins any drop, players only their own meetup; points survive).
   - `discovery.test.mjs`: `discovered_areas` RLS (own rows only, no edits/deletes, anon blocked), duplicate-ignoring `discover_area`, hex id format, cascade on player delete.
   - `quick-draw.test.mjs`: `drops.game` defaults, the seeded round schedule, every `submit_reaction` refusal, first-result-final, best-time scoring with a false starter.
+  - `needle-rain.test.mjs`: `claim_drop` refuses a Needle Rain, a solo ghost pays 0 and leaves the drop active, a two-player finish pays the winner once and caps an inflated dodge count, and an old Shake-Off still finishes by shakes.
   - `photo-hunt.test.mjs`: hidden spot, admin-only creation, service-only claiming, halving points, reveal, 7-minute window.
   - `migration-paths.test.mjs`: builds data under an older schema, upgrades, and checks nothing is lost (teams to individuals; capture removal; per-claim points). Add a block here for any migration that rewrites data.
   - `distance-parity.test.mjs`: TS `distanceM` against SQL `distance_m` near the radius.
@@ -110,6 +114,7 @@ Run `npm test` in `web/` (SQL + API + e2e, about a minute), plus `npm run lint` 
   - **Meetups (runs last):** posts a meetup from the "+ Meetup" sheet, checks its card (no points, no claim circle), ends it with the two-tap confirm, then clears the revealed photo hunt as an admin.
   - **Shake-Off:** joins as the 4th player with 3 bots and shakes via synthetic `DeviceMotionEvent`s (after deleting `DeviceMotionEvent.requestPermission`, which desktop Chromium answers "denied"), then checks the named winners and MVP.
   - **Quick Draw:** joins `draw-drop` as the 4th player, flicks after each "DRAW!" (and once too early), checks the false start, that the server stored the phone's times, the projector's live ranking, and the winners and MVP. The mock's bots are deliberately slow (1.2–1.4 s) so the result doesn't depend on machine speed.
+  - **Needle Rain:** joins `needle-drop` (one bot already in, open ground so no building highlight), dodges with the arrow key, and checks a single claim for the drop's points. It does not assert who won. The mock shortens the round; the client reads that duration from settings.
 
   Screenshots land in `tests/e2e/screenshots/` (gitignored). It also prints frame rate (software WebGL, so a phone GPU will differ).
 - **`npm run mock`:** runs the mock alone on :54321 for manual testing with `VITE_SUPABASE_URL=http://localhost:54321 VITE_SUPABASE_ANON_KEY=mock npm run dev`. The mock mirrors the SQL rules (radius, QR, Shake-Off timing with a 4 s countdown, caps, 3 bots) but isn't authoritative; `tests/sql` is. It has **no Realtime**, which is why the app's `refresh()`/poll fallbacks matter. `GET /__state` dumps its data.
