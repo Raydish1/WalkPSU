@@ -179,9 +179,11 @@ Primary key `(player_id, hex_id)`. Deliberately **no timestamps or coordinates**
 `POST /api/search-events { query }` (Vercel function, `web/api/search-events.ts`) searches the Penn State Discover snapshot bundled with it (`web/scripts/data/discover-events.json`, refreshed by `npm run import-events`):
 
 1. The caller must be a signed-in player (`current_player_id()` under their JWT). The query is 2–200 characters.
-2. `use_search_quota() → boolean` takes one search from the caller's allowance (10 per 10 minutes) and refuses with 429 past it. Runs as the caller; `search_quota (player_id, window_start, used)` has RLS with no policies, so only the function touches it. It stores a counter only: **queries are never stored or logged**.
+2. `use_search_quota() → boolean` takes one search from the caller's allowance (10 per 10 minutes) and refuses with 429 past it. If the function doesn't exist yet (migration not run, `PGRST202`), the server counts the same allowance in memory per instance and logs a reminder once, so search keeps working. Runs as the caller; `search_quota (player_id, window_start, used)` has RLS with no policies, so only the function touches it. It stores a counter only: **queries are never stored or logged**.
 3. Gemini gets the upcoming events (the soonest 300: id, title, organization, theme and categories, start time, location), the live drops the client sent (`drops: [{ id, title, at? }]`, up to 150; titles and building names only, never coordinates), and the query, wrapped as data. It returns up to 6 event `{ id, reason }` and the `drop_ids` that fit.
 4. Ids are checked against the snapshot and the sent drops (unknown, ended, and duplicate ids are dropped). The response is `{ results: [{ id, title, organization, theme, starts_at, ends_at, location, building | null, reason }], dropIds: string[] }`; `building` is null for online or vaguely located events.
+
+5. If Gemini can't answer (402 out of credits, 429/5xx after retries, or a garbled answer), `api/_keywordSearch.ts` ranks events and drops by keywords, synonym groups (food, music, sports, tech, ...), emoji, and time words in State College time, with reasons like "Mentions “pizza”". The response's `mode` is `"ai"` or `"keyword"`, and the sheet labels keyword results.
 
 The app links a result to a seeded drop by `drops.source_id = 'discover:<event id>'`.
 

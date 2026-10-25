@@ -522,6 +522,8 @@ export function startMockSupabase({ port = MOCK_PORT } = {}) {
       const dropIds = query.includes('food') ? sent.filter((d) => /picnic/i.test(d.title)).map((d) => d.id) : []
       return send(200, {
         dropIds,
+        // "offline" in the query plays a Gemini outage: the server answered with its keyword search.
+        mode: query.includes('offline') ? 'keyword' : 'ai',
         results: [
           // Pattee, not the HUB: the HUB already glows for the Shake-Off drop, so the test couldn't see the search light it.
           { id: 'e2e-pattee', title: 'Late Night Pancakes', organization: 'Library Programming', theme: 'Social', starts_at: at(1), ends_at: at(3), location: 'Pattee 103',

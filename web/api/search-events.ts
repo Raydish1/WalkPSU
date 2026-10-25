@@ -1,10 +1,13 @@
 import snapshot from '../scripts/data/discover-events.json' with { type: 'json' }
-import { HttpError, askGeminiJson, respond, signedInPlayer } from './_shared.ts'
+import { keywordSearch } from './_keywordSearch.ts'
+import { GeminiError, HttpError, askGeminiJson, respond, signedInPlayer } from './_shared.ts'
 
 // POST /api/search-events: natural-language search over the Penn State Discover snapshot (npm run import-events)
 // and, in the same Gemini call, over the drops live on the map (the client sends their titles and building names,
 // never coordinates). The ids Gemini returns are checked against the snapshot and the sent drops before use.
-// Queries are never stored or logged, and each player gets a few searches per window (use_search_quota).
+// When Gemini can't answer (out of credits, overloaded, garbled), the built-in keyword search (_keywordSearch.ts)
+// answers instead, so search never dead-ends. Queries are never stored or logged, and each player gets a few
+// searches per window (use_search_quota).
 
 const MAX_QUERY = 200
 const MAX_RESULTS = 6
@@ -46,16 +49,40 @@ export function POST(request: Request) {
   return respond(() => search(request))
 }
 
-async function search(request: Request): Promise<{ results: EventResult[]; dropIds: string[] }> {
+// Stand-in for use_search_quota() until its migration (20261025040000_event_search.sql) is run: the same allowance,
+// counted per server instance instead of in the database. Holds only counters, like the table.
+const QUOTA = { searches: 10, windowMs: 10 * 60_000 }
+const localQuota = new Map<string, { windowStart: number; used: number }>()
+let warnedNoQuota = false
+
+function takeLocalQuota(playerId: string) {
+  const now = Date.now()
+  const q = localQuota.get(playerId)
+  const next = !q || now - q.windowStart > QUOTA.windowMs ? { windowStart: now, used: 1 } : { ...q, used: q.used + 1 }
+  localQuota.set(playerId, next)
+  return next.used <= QUOTA.searches
+}
+
+/** "ai": Gemini ranked these. "keyword": Gemini couldn't answer, so the built-in keyword search did. */
+type SearchMode = 'ai' | 'keyword'
+
+async function search(request: Request): Promise<{ results: EventResult[]; dropIds: string[]; mode: SearchMode }> {
   if (!request.headers.get('authorization')) throw new HttpError(401, 'Sign in to search events')
   const body = (await request.json().catch(() => null)) as { query?: unknown; drops?: unknown } | null
   const query = typeof body?.query === 'string' ? body.query.trim() : ''
   if (query.length < 2) throw new HttpError(400, 'Type what you’re in the mood for')
   if (query.length > MAX_QUERY) throw new HttpError(400, `Keep it under ${MAX_QUERY} characters`)
 
-  const { asPlayer } = await signedInPlayer(request, 'search events')
-  const { data: allowed, error } = await asPlayer.rpc('use_search_quota')
-  if (error) throw new HttpError(400, error.message)
+  const { playerId, asPlayer } = await signedInPlayer(request, 'search events')
+  const { data, error } = await asPlayer.rpc('use_search_quota')
+  let allowed = data
+  if (error) {
+    // PGRST202: the function isn't in the database yet (migration not run). Don't break search over it.
+    if (error.code !== 'PGRST202') throw new HttpError(400, error.message)
+    if (!warnedNoQuota) console.error('use_search_quota() is missing: run supabase/migrations/20261025040000_event_search.sql')
+    warnedNoQuota = true
+    allowed = takeLocalQuota(playerId)
+  }
   if (!allowed) throw new HttpError(429, 'That’s a lot of searches. Try again in a few minutes')
 
   const drops = (Array.isArray(body?.drops) ? (body.drops as LiveDrop[]) : [])
@@ -65,7 +92,7 @@ async function search(request: Request): Promise<{ results: EventResult[]; dropI
 
   const now = Date.now()
   const list = upcoming(now)
-  if (list.length === 0 && drops.length === 0) return { results: [], dropIds: [] }
+  if (list.length === 0 && drops.length === 0) return { results: [], dropIds: [], mode: 'ai' }
   const byId = new Map(list.map((e) => [e.id, e]))
 
   const lines = list.map((e) =>
@@ -98,7 +125,17 @@ ${drops.map((d) => `${d.id} | ${oneLine(d.title)}${typeof d.at === 'string' ? ` 
     },
     required: ['matches', 'drop_ids'],
   }
-  const answer = await askGeminiJson<{ matches?: { id?: unknown; reason?: unknown }[]; drop_ids?: unknown }>([{ text: prompt }], schema, 'The event finder')
+  type Answer = { matches?: { id?: unknown; reason?: unknown }[]; drop_ids?: unknown }
+  let answer: Answer
+  let mode: SearchMode = 'ai'
+  try {
+    answer = await askGeminiJson<Answer>([{ text: prompt }], schema, 'The event finder')
+  } catch (e) {
+    // Out of credits, overloaded, or a garbled answer: search still works, by keywords.
+    if (!(e instanceof GeminiError)) throw e
+    answer = keywordSearch(query, list, drops, now)
+    mode = 'keyword'
+  }
 
   // Only ids that are really in the snapshot (and upcoming), each once.
   const seen = new Set<string>()
@@ -123,5 +160,5 @@ ${drops.map((d) => `${d.id} | ${oneLine(d.title)}${typeof d.at === 'string' ? ` 
   }
   // Only drops the client actually sent, each once.
   const matchedDrops = (Array.isArray(answer.drop_ids) ? answer.drop_ids : []).filter((id): id is string => typeof id === 'string' && dropIds.has(id))
-  return { results, dropIds: [...new Set(matchedDrops)] }
+  return { results, dropIds: [...new Set(matchedDrops)], mode }
 }

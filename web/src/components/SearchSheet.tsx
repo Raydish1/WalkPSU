@@ -130,6 +130,9 @@ function SearchSheet({ open, onOpenChange, drops, dropById, dropFor, onMatched, 
               </div>
             ) : (
               <div className="search-results">
+                {status.mode === 'keyword' && (
+                  <p className="muted footnote search-mode-note">AI search is unavailable right now, so these are keyword matches.</p>
+                )}
                 {live.length > 0 && (
                   <section className="stack-sm">
                     <h4 className="search-section">Live on the map</h4>

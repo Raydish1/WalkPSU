@@ -819,3 +819,7 @@
   background: color-mix(in srgb, var(--success) 14%, transparent);
   color: var(--success);
 }
+
+.search-mode-note {
+  margin: 0 4px;
+}

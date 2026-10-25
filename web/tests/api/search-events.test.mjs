@@ -25,11 +25,17 @@ const check = (label, ok, detail) => {
 // Gemini stand-in: answers from a queue (a { matches } object, raw text, or an HTTP status) and records each call.
 const realFetch = globalThis.fetch
 const gemini = { queue: [], calls: [] }
+// Set to act like a database where the event-search migration hasn't been run yet.
+let quotaMissing = false
 globalThis.fetch = async (input, init) => {
   const url = String(input instanceof Request ? input.url : input)
+  if (quotaMissing && url.includes('/rest/v1/rpc/use_search_quota')) {
+    return Response.json({ code: 'PGRST202', message: 'Could not find the function public.use_search_quota without parameters' }, { status: 404 })
+  }
   if (!url.startsWith('https://generativelanguage.googleapis.com/')) return realFetch(input, init)
   gemini.calls.push({ key: new Headers(init?.headers).get('x-goog-api-key'), prompt: JSON.parse(init.body).contents[0].parts[0].text })
   const next = gemini.queue.shift() ?? 500
+  if (next === 402) return Response.json({ error: { code: 402, status: 'RESOURCE_EXHAUSTED', message: 'Your prepayment credits are depleted.' } }, { status: 402 })
   if (typeof next === 'number') return new Response('{"error":"busy"}', { status: next })
   const text = typeof next === 'string' ? next : JSON.stringify(next)
   return Response.json({ candidates: [{ content: { parts: [{ text }] } }] })
@@ -126,23 +132,51 @@ try {
   r = await search('underwater basket weaving for cats')
   check('nothing matched: an empty list, not an error', r.status === 200 && r.body.results.length === 0, r)
 
+  // When Gemini can't answer, the keyword search does, so search never dead-ends.
+  const wordInTitle = upcomingIds.map((id) => events.find((e) => e.id === id)).find((e) => /\b[a-z]{6,}\b/i.test(e.title))
+  const titleWord = wordInTitle.title.match(/\b([a-z]{6,})\b/i)[1].toLowerCase()
   gemini.queue.push('this is not json')
-  r = await search('music tonight')
-  check('garbled Gemini answer: 502 with a retry hint', r.status === 502 && /Try again/.test(r.body.error), r)
+  r = await search(titleWord)
+  check('garbled Gemini answer: keyword results instead of an error', r.status === 200 && r.body.mode === 'keyword' && r.body.results.some((x) => x.title === wordInTitle.title), { status: r.status, mode: r.body.mode, word: titleWord })
+  check('keyword results explain themselves', r.body.results?.every((x) => /Mentions|Related to/.test(x.reason)), r.body.results?.map((x) => x.reason))
+
+  gemini.calls.length = 0
+  gemini.queue.push(402)
+  r = await search('free food')
+  check('out of Gemini credits (402): one call, then keyword results', r.status === 200 && r.body.mode === 'keyword' && gemini.calls.length === 1, { status: r.status, mode: r.body.mode, calls: gemini.calls.length })
 
   gemini.queue.push(503, 503, 503, 503)
-  r = await search('secret hobby search')
-  check('Gemini busy on every model: 503 "busy"', r.status === 503 && /busy/.test(r.body.error), r)
+  r = await search('secret hobby search', 'ana', [{ id: 'd-hoops', title: '🏀 Pickup hoops' }])
+  check('Gemini busy on every model: keyword results, not an error', r.status === 200 && r.body.mode === 'keyword', r)
+  gemini.queue.push(402)
+  r = await search('basketball', 'ana', [{ id: 'd-hoops', title: '🏀 Pickup hoops' }, { id: 'd-chess', title: 'Chess club' }])
+  check('keyword search matches drops by emoji and synonyms (🏀 → basketball)', JSON.stringify(r.body.dropIds) === '["d-hoops"]', r.body)
+  check('Gemini failures are logged by status only', logged.some((line) => /Gemini error 402 RESOURCE_EXHAUSTED/.test(line)), logged)
   check('nothing logged contains a query', !logged.some((line) => /secret hobby|free food|music tonight|basket weaving/.test(line)), logged)
 
-  // 6 searches so far reached the quota (the blank and too-long ones were refused before it). 10 per window.
+  // 8 searches so far reached the quota (the blank and too-long ones were refused before it). 10 per window.
   gemini.calls.length = 0
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 2; i++) {
     gemini.queue.push({ matches: [] })
     await search('more searches')
   }
   r = await search('one too many')
-  check('the 11th search in 10 minutes is refused (429), before any Gemini call', r.status === 429 && gemini.calls.length === 4, { r, calls: gemini.calls.length })
+  check('the 11th search in 10 minutes is refused (429), before any Gemini call', r.status === 429 && gemini.calls.length === 2, { r, calls: gemini.calls.length })
+
+  // A database without the event-search migration (use_search_quota missing): search still works, with the same
+  // allowance counted on the server instead.
+  quotaMissing = true
+  await joinAs('ben', 'Ben')
+  const benStatuses = []
+  for (let i = 0; i < 10; i++) {
+    gemini.queue.push({ matches: [] })
+    benStatuses.push((await search('more searches', 'ben')).status)
+  }
+  check('missing use_search_quota(): searches still run', benStatuses.every((s) => s === 200), benStatuses)
+  r = await search('one too many', 'ben')
+  check('and the 11th is still refused', r.status === 429, r)
+  check('the missing migration is logged once, by name', logged.filter((line) => /20261025040000_event_search\.sql/.test(line)).length === 1, logged)
+  quotaMissing = false
 } catch (e) {
   failures++
   console.log(`FAIL crashed :: ${e.stack}`)

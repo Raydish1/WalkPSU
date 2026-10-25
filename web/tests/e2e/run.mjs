@@ -339,18 +339,42 @@ async function searchScenario(browser) {
   text = await sheetText()
   check('a busy Gemini shows a friendly error and a retry', /busy/.test(text) && /Try again/.test(text), text)
 
-  // The "zzz" search left the map narrowed to nothing; the ✕ in the status pill brings every drop back.
+  // Gemini unavailable: the server's keyword search answers, and the sheet says so.
+  await page.fill('.search-sheet input', 'offline free food')
+  await page.press('.search-sheet input', 'Enter')
+  await page.waitForSelector('.search-sheet .search-mode-note')
+  check('keyword fallback results are labeled', /AI search is unavailable right now, so these are keyword matches/.test(await sheetText()))
+
+  const mapState = () =>
+    page.evaluate(() => ({
+      pill: document.querySelector('.map-top [role="status"]').textContent,
+      pins: window.__walkpsuMap.getSource('drops').serialize().data.features.length,
+      clear: !!document.querySelector('.pill-clear'),
+    }))
+  const live = (await (await fetch(`${MOCK}/__state`)).json()).drops.filter((d) => d.status === 'active' && !(d.type === 'photo_hunt' && !d.first_found_at)).length
+
+  // A search with no matching drops ("zzz") leaves every drop on the map instead of emptying it.
+  await page.fill('.search-sheet input', 'zzz')
+  await page.press('.search-sheet input', 'Enter')
+  await page.waitForSelector('.search-sheet :text("Nothing matched")')
   await page.keyboard.press('Escape')
   await page.waitForTimeout(700)
-  check('a search with no live matches says so in the pill', /No drops match “zzz”/.test(await page.textContent('.map-top [role="status"]')))
+  let map = await mapState()
+  check('a search that matched no live drops leaves every drop on the map', /live drops?$/.test(map.pill) && map.pins === live && !map.clear, { map, live })
+
+  // A narrowing search, then the ✕ in the status pill brings every drop back.
+  await page.click('.search-pill')
+  await page.waitForSelector('.search-sheet input')
+  await page.fill('.search-sheet input', 'free food')
+  await page.press('.search-sheet input', 'Enter')
+  await page.waitForSelector('.search-sheet .search-result')
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(700)
+  check('the pill shows the narrowed map', /Showing 1 of/.test((await mapState()).pill))
   await page.click('.pill-clear')
   await page.waitForTimeout(300)
-  const restored = await page.evaluate(() => ({
-    pill: document.querySelector('.map-top [role="status"]').textContent,
-    pins: window.__walkpsuMap.getSource('drops').serialize().data.features.length,
-  }))
-  const live = (await (await fetch(`${MOCK}/__state`)).json()).drops.filter((d) => d.status === 'active' && !(d.type === 'photo_hunt' && !d.first_found_at)).length
-  check('clearing the search shows every drop again', /live drops?$/.test(restored.pill) && restored.pins === live, { restored, live })
+  map = await mapState()
+  check('clearing the search shows every drop again', /live drops?$/.test(map.pill) && map.pins === live, { map, live })
   // The 503 from the stand-in is expected; anything else isn't.
   check('no console errors', page.errors.filter((e) => !/503 POST .*api\/search-events/.test(e)).length === 0, page.errors)
   await page.context().close()

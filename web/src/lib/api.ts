@@ -99,7 +99,8 @@ export type EventResult = {
 
 /** A live drop as search sees it: only what the map already shows, never its coordinates. */
 export type SearchableDrop = { id: string; title: string; at?: string }
-export type SearchAnswer = { results: EventResult[]; dropIds: string[] }
+/** `mode` is "keyword" when Gemini couldn't answer and the server's keyword search did instead. */
+export type SearchAnswer = { results: EventResult[]; dropIds: string[]; mode: 'ai' | 'keyword' }
 
 // Same request over the same drops: reuse the answer instead of spending another Gemini call (and search quota).
 const searchCache = new Map<string, SearchAnswer>()
@@ -120,9 +121,11 @@ export async function searchEvents(query: string, drops: SearchableDrop[]) {
   }).catch(() => null)
   if (!response) throw new Error('Couldn’t reach the event finder. Check your connection')
   const body = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(body.error ?? `Search failed (${response.status})`)
-  const answer: SearchAnswer = { results: body.results ?? [], dropIds: body.dropIds ?? [] }
-  searchCache.set(key, answer)
+  // No JSON error from our function means the platform gave up on it (a timeout or a crash).
+  if (!response.ok) throw new Error(body.error ?? (response.status >= 500 ? 'The event finder took too long. Try again' : `Search failed (${response.status})`))
+  const answer: SearchAnswer = { results: body.results ?? [], dropIds: body.dropIds ?? [], mode: body.mode === 'keyword' ? 'keyword' : 'ai' }
+  // Keyword answers aren't kept, so the next try gets Gemini again once it's back.
+  if (answer.mode === 'ai') searchCache.set(key, answer)
   return answer
 }
 

@@ -292,8 +292,9 @@ function MapPage() {
         dropFor={dropForEvent}
         onMatched={(query, ids) => {
           closeSheet()
-          // Narrow the map only when there are drops to narrow; a search with no live drops shows events alone.
-          setFilter(drops.length > 0 ? { query, ids: new Set(ids) } : null)
+          // Narrow the map only when some live drop fits. A search that only found campus events (or nothing) leaves
+          // every drop on the map, instead of emptying it.
+          setFilter(ids.length > 0 ? { query, ids: new Set(ids) } : null)
         }}
         onPick={pickEvent}
         onPickDrop={pickDrop}
