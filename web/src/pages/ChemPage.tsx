@@ -61,6 +61,11 @@ function ChemPage() {
     setDone(false)
   }
 
+  function giveUp() {
+    toast.message('Challenge skipped', { description: 'No points this time — try again whenever you’re ready.' })
+    navigate('/challenges')
+  }
+
   const problem = problems[index]
   const distance =
     drop && position && !practice ? distanceM(position.coords.latitude, position.coords.longitude, drop.lat, drop.lng) : null
@@ -226,6 +231,9 @@ function ChemPage() {
           </label>
           <button className="button primary" disabled={busy || !guess.trim()}>
             Check
+          </button>
+          <button type="button" className="button" disabled={busy} onClick={giveUp}>
+            Give up
           </button>
           <p className="muted footnote">
             {practice
